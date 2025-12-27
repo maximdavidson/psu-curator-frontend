@@ -1,0 +1,115 @@
+@import "../../../../styles/variables.module.scss";
+
+.formWrapper {
+  width: 637px;
+  padding: $spacing-xxl $spacing-xl;
+  background: $color-background;
+
+  border-radius: $radius-large;
+
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.title {
+  margin-bottom: $spacing-xxl;
+
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  text-align: center;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.label {
+  font-size: $font-size-xs;
+  color: $color-text;
+}
+
+.forgotPassword {
+  font-size: $font-size-xs;
+  color: $color-text;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.input {
+  height: 44px;
+  padding: 0 $spacing-sm;
+
+  font-size: $font-size-sm;
+
+  border-radius: $radius-small;
+  border: 1px solid $color-border;
+
+  outline: none;
+
+  &:focus {
+    border-color: $color-primary;
+  }
+}
+
+.submitButton {
+  margin-top: $spacing-lg;
+  height: 44px;
+
+  border: none;
+  border-radius: $radius-medium;
+
+  background: $color-primary;
+  color: #fff;
+
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.9;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.footer {
+  margin-top: $spacing-sm;
+
+  display: flex;
+  justify-content: center;
+  gap: $spacing-xs;
+
+  font-size: $font-size-xs;
+}
+
+.link {
+  background: none;
+  border: none;
+
+  color: $color-primary;
+  padding: 0;
+
+  font-size: $font-size-xs;
+}
+
+.error {
+  color: $color-error;
+  font-size: $font-size-xxs;
+  min-height: 12px;
+  transition: opacity 0.2s ease-in-out;
+  opacity: 1;
+}
