@@ -1,27 +1,18 @@
-import { useEffect, useState } from "react";
 import "./App.css";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { RegistrationPage } from "./pages/registration";
+import { LoginationPage } from "./pages/registration";
 
 function App() {
-  const [data, setData] = useState();
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const resp = await fetch("http://localhost:8080/WeatherForecast");
-        const newData = await resp.json();
-
-        setData(newData);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    fetchData();
-  });
   return (
     <>
-      <p>hello</p>
-      {data}
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Navigate to="/register" />} />
+          <Route path="/login" element={<LoginationPage />} />
+          <Route path="/register" element={<RegistrationPage />} />
+        </Routes>
+      </BrowserRouter>
     </>
   );
 }
