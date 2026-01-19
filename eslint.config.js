@@ -11,7 +11,9 @@ export default defineConfig([
   globalIgnores(["dist"]),
   {
     files: ["**/*.{ts,tsx}"],
-    plugins: { prettier },
+    plugins: {
+      prettier
+    },
     extends: [
       js.configs.recommended,
       tseslint.configs.recommended,
@@ -20,7 +22,7 @@ export default defineConfig([
       prettierConfig
     ],
     rules: {
-      "prettier/prettier": ["warn", { endOfLine: "auto" }]
+      "prettier/prettier": "error"
     },
     languageOptions: {
       ecmaVersion: 2020,
