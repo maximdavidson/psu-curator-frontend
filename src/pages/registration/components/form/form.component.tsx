@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState, type ChangeEvent } from "react";
-import styles from "./styles.module.scss";
+import styles from "../../../../component/styles.module.scss";
 import { registrationSchema } from "../../../../validation/formValidation";
 import { ValidationError } from "yup";
 

@@ -1,6 +1,6 @@
-import { FormComponent } from "./components/form/form.component";
-import { LoginComponent } from "./components/form/login.componet";
-import styles from "./styles.module.scss";
+import { FormComponent } from "../pages/registration/components/form/form.component";
+import { LoginComponent } from "../pages/login/components/form/login.component";
+import styles from "./bg.styles.module.scss";
 
 export const RegistrationPage = () => {
   return (
