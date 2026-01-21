@@ -1,10 +1,10 @@
 import "./App.css";
-import { RegistrationPage } from "./pages/registration";
+import AppRouter from "./AppRoutes";
 
 function App() {
   return (
     <>
-      <RegistrationPage />
+      <AppRouter />
     </>
   );
 }

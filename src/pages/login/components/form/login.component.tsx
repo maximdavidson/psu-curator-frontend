@@ -4,7 +4,7 @@ import styles from "../../../../component/styles.module.scss";
 import { registrationSchema } from "../../../../validation/formValidation";
 import { ValidationError } from "yup";
 
-export const FormComponent = () => {
+export const LoginComponent = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,7 +42,6 @@ export const FormComponent = () => {
     setIsSubmitting(true);
     try {
       console.log("Отправка данных:", { email, password });
-      // ToDo
     } finally {
       setIsSubmitting(false);
     }
@@ -52,7 +51,7 @@ export const FormComponent = () => {
 
   return (
     <div className={styles.formWrapper}>
-      <h1 className={styles.title}>Зарегистрироваться</h1>
+      <h1 className={styles.title}>Войти</h1>
 
       <form className={styles.form}>
         <div className={styles.field}>
@@ -84,19 +83,19 @@ export const FormComponent = () => {
           className={styles.submitButton}
           disabled={isDisabled}
         >
-          {isSubmitting ? "Отправка..." : "Зарегистрироваться"}
+          {isSubmitting ? "Отправка..." : "Войти"}
         </button>
       </form>
 
       <div className={styles.footer}>
-        <span>У вас есть аккаунт?</span>
+        <span>Нет аккаунта ?</span>
         <button
           type="button"
           onClick={handleLoginRedirect}
           className={styles.link}
         >
-          <Link className={styles.linker} to="/login">
-            Войти
+          <Link className={styles.linker} to="/register">
+            Зарегистрироваться
           </Link>
         </button>
       </div>
