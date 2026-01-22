@@ -5,10 +5,6 @@
   @include auth-form-footer-layout;
 }
 
-.link {
-  @include auth-form-link-button;
-}
-
 .linker {
   @include auth-form-link-style;
 }
