@@ -5,6 +5,6 @@ interface IProps {
   children: ReactNode;
 }
 
-export const AuthLayout = ({ children }: IProps) => {
+export const AuthPageLayout = ({ children }: IProps) => {
   return <div className={styles.authLayout}>{children}</div>;
 };

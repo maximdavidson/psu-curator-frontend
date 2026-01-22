@@ -1,10 +1,10 @@
-import { AuthLayout } from "@/component/AuthLayout";
+import { AuthPageLayout } from "@/component/AuthPageLayout";
 import { RegistrationForm } from "./form/registration-form.component";
 
 export const RegistrationPage = () => {
   return (
-    <AuthLayout>
+    <AuthPageLayout>
       <RegistrationForm />
-    </AuthLayout>
+    </AuthPageLayout>
   );
 };
