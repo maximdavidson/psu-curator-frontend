@@ -1,13 +1,14 @@
 @use "../../styles/variables.module.scss" as *;
 
 .formWrapper {
-  width: 637px;
-  padding: $spacing-xxl $spacing-xl;
+  width: 100%;
+  max-width: 637px;
   background: $color-background;
   border-radius: $radius-large;
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  padding-bottom: $spacing-xxl;
 }
 
 .title {
@@ -21,6 +22,7 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-md;
+  padding: $spacing-xxl $spacing-xl;
 }
 
 .footer {
@@ -31,16 +33,6 @@
   font-size: $font-size-xs;
 }
 
-.link {
-  background: none;
-  border: none;
-
-  color: $color-primary;
-  padding: 0;
-
-  font-size: $font-size-xs;
-}
-
 .linker {
   color: $color-primary;
   padding: 0;
@@ -48,5 +40,12 @@
   text-decoration: none;
   &:hover {
     text-decoration: underline;
+  }
+}
+
+@min-width (730px) {
+  .formWrapper {
+    background: red;
+    /* padding: $spacing-xs; */
   }
 }
