@@ -1,0 +1,22 @@
+@use "./variables.module.scss" as *;
+
+@mixin auth-form-footer-layout {
+  margin-top: $spacing-sm;
+  display: flex;
+  justify-content: center;
+  gap: $spacing-xs;
+  font-size: $font-size-xs;
+}
+
+@mixin auth-form-link-style {
+  font-size: $font-size-xs;
+  cursor: pointer;
+  color: $color-primary;
+  padding: 0;
+  font-size: $font-size-xs;
+  text-decoration: none;
+  font-weight: $font-weight-medium;
+  &:hover {
+    text-decoration: underline;
+  }
+}

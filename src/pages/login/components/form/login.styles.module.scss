@@ -1,0 +1,23 @@
+@use "@/styles/mixins.module.scss" as *;
+@use "@/styles/variables.module.scss" as *;
+
+.footer {
+  @include auth-form-footer-layout;
+}
+
+.link {
+  @include auth-form-link-button;
+}
+
+.linker {
+  @include auth-form-link-style;
+}
+
+.forgotPassword {
+  font-size: $font-size-xs;
+  color: $color-text;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
