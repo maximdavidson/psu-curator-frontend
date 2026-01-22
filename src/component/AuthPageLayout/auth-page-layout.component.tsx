@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import styles from "./auth-layout.styles.module.scss";
+import styles from "./auth-page-layout.styles.module.scss";
 
 interface IProps {
   children: ReactNode;
