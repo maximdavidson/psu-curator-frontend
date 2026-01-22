@@ -6,5 +6,5 @@ interface IProps {
 }
 
 export const AuthPageLayout = ({ children }: IProps) => {
-  return <div className={styles.authLayout}>{children}</div>;
+  return <div className={styles.authPageLayout}>{children}</div>;
 };
