@@ -8,7 +8,7 @@ import { useRegister } from "../../api/query";
 export const RegistrationForm = () => {
   const { register, handleSubmit, errors } = useAuthForm();
 
-  const { onSubmit, isPending, isError } = useRegister();
+  const { onSubmit, isPending } = useRegister();
 
   return (
     <AuthFormLayout
@@ -28,7 +28,7 @@ export const RegistrationForm = () => {
         register={register}
         error={errors.password?.message || ""}
       />
-      <AuthButton isPending={isPending} isError={isError} />
+      <AuthButton isPending={isPending} />
     </AuthFormLayout>
   );
 };

@@ -9,7 +9,7 @@ import { ForgetPasswordLink } from "./forget-password-link";
 export const LoginForm = () => {
   const { register, handleSubmit, errors } = useAuthForm();
 
-  const { onSubmit, isError, isPending } = useLogin();
+  const { onSubmit, isPending } = useLogin();
 
   return (
     <AuthFormLayout
@@ -30,7 +30,7 @@ export const LoginForm = () => {
         register={register}
         error={errors.password?.message || ""}
       />
-      <AuthButton isPending={isPending} isError={isError} />
+      <AuthButton isPending={isPending} />
     </AuthFormLayout>
   );
 };
