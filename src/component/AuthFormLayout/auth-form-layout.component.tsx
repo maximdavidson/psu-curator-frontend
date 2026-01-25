@@ -1,7 +1,7 @@
 import type { BaseSyntheticEvent, ReactNode } from "react";
 import styles from "./auth-form-layout.module.scss";
 
-interface IProps {
+interface IAuthFormLayoutProps {
   title: string;
   children: ReactNode;
   footer: ReactNode;
@@ -13,7 +13,7 @@ export const AuthFormLayout = ({
   children,
   footer,
   onSubmit
-}: IProps) => {
+}: IAuthFormLayoutProps) => {
   return (
     <div className={styles.formWrapper}>
       <h1 className={styles.title}>{title}</h1>

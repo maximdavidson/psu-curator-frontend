@@ -3,7 +3,7 @@ import type { UseFormRegister } from "react-hook-form";
 import styles from "./auth-field.styles.module.scss";
 import type { ReactNode } from "react";
 
-interface IProps {
+interface IAuthFieldProps {
   label: string;
   name: keyof TAuthDto;
   register: UseFormRegister<TAuthDto>;
@@ -19,7 +19,7 @@ export const AuthField = ({
   label,
   additionalLink,
   placeholder
-}: IProps) => {
+}: IAuthFieldProps) => {
   return (
     <div className={styles.field}>
       <label className={styles.label}>{label}</label>
