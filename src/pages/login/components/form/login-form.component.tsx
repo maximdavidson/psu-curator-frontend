@@ -22,13 +22,15 @@ export const LoginForm = () => {
         name={"email"}
         register={register}
         error={errors.email?.message || ""}
+        placeholder={"email"}
       />
       <AuthField
-        AdditionalLink={<ForgetPasswordLink />}
+        additionalLink={<ForgetPasswordLink />}
         label={"Пароль"}
         name={"password"}
         register={register}
         error={errors.password?.message || ""}
+        placeholder={"пароль"}
       />
       <AuthButton isPending={isPending} />
     </AuthFormLayout>
