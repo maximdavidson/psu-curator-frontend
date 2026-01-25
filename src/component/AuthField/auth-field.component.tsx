@@ -8,7 +8,8 @@ interface IProps {
   name: keyof TAuthDto;
   register: UseFormRegister<TAuthDto>;
   error: string;
-  AdditionalLink?: ReactNode;
+  additionalLink?: ReactNode;
+  placeholder: string;
 }
 
 export const AuthField = ({
@@ -16,17 +17,19 @@ export const AuthField = ({
   register,
   error,
   label,
-  AdditionalLink
+  additionalLink,
+  placeholder
 }: IProps) => {
   return (
     <div className={styles.field}>
       <label className={styles.label}>{label}</label>
       <input
+        placeholder={placeholder}
         {...register(name)}
         type={name === "email" ? "email" : "text"}
         className={styles.input}
       />
-      {AdditionalLink}
+      {additionalLink}
       {error && <div className={styles.error}>{error}</div>}
     </div>
   );
