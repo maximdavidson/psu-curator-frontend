@@ -1,0 +1,32 @@
+@use "../../styles/variables.module.scss" as *;
+
+.field {
+  display: flex;
+  flex-direction: column;
+  width: $width-full;
+  gap: $spacing-xs;
+}
+
+.label {
+  font-size: $font-size-xs;
+  color: $color-text;
+}
+
+.input {
+  padding: $spacing-sm $spacing-sm;
+  font-size: $font-size-sm;
+  border-radius: $radius-small;
+  border: 1px solid $color-border;
+  outline: none;
+  &:focus {
+    border-color: $color-primary;
+  }
+}
+
+.error {
+  color: $color-error;
+  font-size: $font-size-xxs;
+  min-height: 12px;
+  transition: opacity 0.2s ease-in-out;
+  opacity: 1;
+}

@@ -1,0 +1,9 @@
+@use "@/styles/mixins.module.scss" as *;
+
+.footer {
+  @include auth-form-footer-layout;
+}
+
+.linker {
+  @include auth-form-link-style;
+}

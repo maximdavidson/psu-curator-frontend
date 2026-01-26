@@ -1,0 +1,21 @@
+@use "../../styles/variables.module.scss" as *;
+
+.submitButton {
+  margin-top: $spacing-lg;
+  padding: $spacing-sm 0;
+  border: none;
+  border-radius: $radius-medium;
+  background: $color-primary;
+  color: #fff;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+
+  &:hover {
+    opacity: $opacity-hover;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: $opacity-disabled;
+  }
+}
