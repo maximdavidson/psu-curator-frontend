@@ -5,7 +5,7 @@ interface IAuthFormLayoutProps {
   title: string;
   children: ReactNode;
   footer: ReactNode;
-  onSubmit: (e?: BaseSyntheticEvent<object> | undefined) => Promise<void>;
+  onSubmit: (e?: BaseSyntheticEvent<object>) => Promise<void>;
 }
 
 export const AuthFormLayout = ({
