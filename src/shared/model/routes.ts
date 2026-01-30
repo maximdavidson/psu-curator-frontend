@@ -9,7 +9,6 @@ export const PAGE_ROUTES = {
   PROTECTED: {
     GROUPS: "/groups",
     PROFILE: "/profile",
-    SETTINGS: "/settings",
-    LOGOUT: "/logout"
+    SETTINGS: "/settings"
   }
 } as const;

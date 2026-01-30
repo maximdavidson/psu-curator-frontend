@@ -2,7 +2,7 @@ export interface IUser {
   id: string;
   email: string;
   name: string;
-  role: TRole;
+  role: TRoles;
 }
 
-export type TRole = "admin" | "user"; // in the future, we will add more roles
+export type TRoles = "admin" | "user"; // in the future, we will add more roles

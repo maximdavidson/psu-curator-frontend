@@ -1,10 +1,10 @@
-import { useGetUser, type TRole } from "@/shared";
+import { useGetUser, type TRoles } from "@/shared";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Outlet } from "react-router-dom";
 
 interface IProtectedRoutesProps {
-  roles: TRole[];
+  roles: TRoles[];
 }
 
 export const ProtectedRoutes = ({ roles }: IProtectedRoutesProps) => {
