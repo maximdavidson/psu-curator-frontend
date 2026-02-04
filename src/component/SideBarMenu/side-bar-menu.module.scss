@@ -1,3 +1,30 @@
+@use "@/styles/variables.module.scss" as *;
+
 .sidebar-menu {
   grid-area: sidebar-menu;
+}
+
+.sidebar-menu__item {
+  margin-bottom: 25px;
+  width: 333px;
+  a {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: $color-text;
+    font-size: $font-size-md;
+    padding: 13px 0px 11px 14px;
+    line-height: 100%;
+  }
+  img {
+    height: 28px;
+    width: 28px;
+  }
+}
+
+.sidebar-menu__item--active {
+  background-color: rgba($color: #55657259, $alpha: 0.35);
+  border-bottom-right-radius: 25px;
+  border-top-right-radius: 25px;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
 }
