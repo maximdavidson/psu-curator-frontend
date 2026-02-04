@@ -1,11 +1,16 @@
 import { Link } from "react-router-dom";
-import type { IMenuItem } from "./menu.types";
+import type { IMenuItem } from "./navigation.types";
 import styles from "./side-bar-menu.module.scss";
-type TMenuItemProps = IMenuItem & {
+type TNavigationItemProps = IMenuItem & {
   isActive: boolean;
 };
 
-export const MenuItem = ({ to, icon, label, isActive }: TMenuItemProps) => {
+export const NavigationItem = ({
+  to,
+  icon,
+  label,
+  isActive
+}: TNavigationItemProps) => {
   return (
     <li
       className={`${styles["sidebar-menu__item"]} ${isActive ? styles["sidebar-menu__item--active"] : ""}`} // TODO:  add clsx

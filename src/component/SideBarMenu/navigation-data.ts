@@ -1,4 +1,4 @@
-import type { IMenuItem } from "./menu.types";
+import type { IMenuItem } from "./navigation.types";
 import CalendarIcon from "../../assets/calendar.svg";
 import HomeIcon from "../../assets/groups-icon.svg";
 import TeachesrIcon from "../../assets/teachers-icon.svg";
