@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "path";
+
 export default defineConfig({
   resolve: {
     alias: {
@@ -9,7 +10,9 @@ export default defineConfig({
     }
   },
   plugins: [
-    react(),
+    react({
+      include: ["**/*.tsx", "**/*.ts", "**/*.jsx", "**/*.js", "**/*.svg"]
+    }),
     VitePWA({
       registerType: "autoUpdate",
       manifest: {
