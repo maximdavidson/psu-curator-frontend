@@ -1,0 +1,11 @@
+@use "../../styles/variables.module.scss" as *;
+
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  justify-content: center;
+  color: $color-error;
+  height: 100vh;
+  background-color: $color-background;
+}
