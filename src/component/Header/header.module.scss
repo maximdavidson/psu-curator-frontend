@@ -1,7 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
 
 .header {
-  width: 100vw;
+  grid-area: header;
+  max-width: 1920px;
+  width: 100%;
   box-sizing: border-box;
   display: flex;
   justify-content: space-between;
@@ -40,18 +42,20 @@
 .search {
   position: relative;
   display: flex;
+  box-sizing: border-box;
+  max-width: 685px;
+  width: 100%;
 }
 
 .search_input {
-  box-sizing: border-box;
   display: flex;
   align-items: center;
   background: #f2f2f2;
-  width: 685px;
   height: 50px;
+  width: 100%;
   border-radius: 10px;
   border: none;
-  padding-left: 76px;
+  padding-left: clamp(30px, 15vw, 76px);
   font-size: 20px;
 }
 
