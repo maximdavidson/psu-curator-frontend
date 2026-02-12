@@ -1,13 +1,13 @@
 import { Outlet } from "react-router-dom";
 import { Header } from "../Header";
-import { SideMenuBar } from "../SideBarMenu";
 import styles from "./base-layout.module.scss";
+import { SideBarMenu } from "../SideBarMenu";
 
 export const BaseLayout = () => {
   return (
     <div className={styles["base-layout"]}>
       <Header />
-      <SideMenuBar />
+      <SideBarMenu />
       <main className={styles["main"]}>
         <Outlet />
       </main>
