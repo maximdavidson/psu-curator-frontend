@@ -5,6 +5,7 @@ import { RegistrationPage } from "@/pages/registration";
 import { GroupsPage } from "@/pages/groups";
 import { ProtectedRoutes } from "./ProtectedRoutes";
 import { BaseLayout } from "@/component/BaseLayout";
+import { DynamicPlaceholder } from "@/component/Placeholder/DynamicPlayceholder";
 
 export const router = createBrowserRouter([
   {
@@ -35,6 +36,10 @@ export const router = createBrowserRouter([
             ]
           }
         ]
+      },
+      {
+        path: "*",
+        element: <DynamicPlaceholder />
       }
     ]
   }
