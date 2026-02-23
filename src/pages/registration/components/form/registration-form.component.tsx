@@ -1,12 +1,20 @@
-import { useAuthForm } from "@/hooks/use-auth-form";
 import { AuthField } from "@/component/AuthField/";
 import { AuthFormLayout } from "@/component/AuthFormLayout/";
 import { AuthButton } from "@/component/AuthButton/auth-button.component";
 import { RegistrationFooter } from "./registration-footer.component";
 import { useRegister } from "../../api/query";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { signupFormSchema, type TSignupFormDto } from "@/shared";
+import { useForm } from "react-hook-form";
 
 export const RegistrationForm = () => {
-  const { register, handleSubmit, errors } = useAuthForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors }
+  } = useForm<TSignupFormDto>({
+    resolver: yupResolver(signupFormSchema)
+  });
 
   const { onSubmit, isPending } = useRegister();
 
@@ -16,14 +24,14 @@ export const RegistrationForm = () => {
       footer={<RegistrationFooter />}
       title={"Регистрация"}
     >
-      <AuthField
+      <AuthField<TSignupFormDto>
         label={"Почта"}
         name={"email"}
         register={register}
         error={errors.email?.message || ""}
         placeholder={"email"}
       />
-      <AuthField
+      <AuthField<TSignupFormDto>
         label={"Пароль"}
         name={"password"}
         register={register}

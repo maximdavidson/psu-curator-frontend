@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import { APIProvider } from "./APIProvider";
+import { APIProvider } from "./StoreProvider";
 
 export const CommonProvider = () => {
   return (

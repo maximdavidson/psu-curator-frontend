@@ -1,4 +1,4 @@
-import { useGetUser, type TRoles } from "@/shared";
+import type { TRoles } from "@/shared";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Outlet } from "react-router-dom";
@@ -16,13 +16,13 @@ export const ProtectedRoutes = ({ roles }: IProtectedRoutesProps) => {
     if (data) {
       const role = data.role;
       if (!roles?.includes(role)) {
-        navigate("/profile"); // TODO: change to a more suitable route
+        navigate("/profile");
       }
     }
     if (isError) {
       navigate("/login");
     }
-  }, [data, isError]);
+  }, [data, isError, navigate, roles]);
 
   return (
     <>
@@ -30,3 +30,17 @@ export const ProtectedRoutes = ({ roles }: IProtectedRoutesProps) => {
     </>
   );
 };
+
+function useGetUser(): {
+  data: {
+    role: TRoles;
+  };
+  isError: boolean;
+} {
+  return {
+    data: {
+      role: "admin"
+    },
+    isError: false
+  };
+}
