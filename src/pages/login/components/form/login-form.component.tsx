@@ -32,7 +32,7 @@ export const LoginForm = () => {
         error={errors.password?.message || ""}
         placeholder={"пароль"}
       />
-      <AuthButton isPending={isPending} isLogin={true} />
+      <AuthButton isLoading={isPending}>Войти</AuthButton>
     </AuthFormLayout>
   );
 };

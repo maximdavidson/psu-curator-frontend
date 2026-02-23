@@ -6,8 +6,6 @@ export const Header = () => {
 
   const search = (value: string) => {
     setText(value);
-
-    //
   };
 
   return (

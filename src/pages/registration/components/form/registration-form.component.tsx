@@ -30,7 +30,7 @@ export const RegistrationForm = () => {
         error={errors.password?.message || ""}
         placeholder={"пароль"}
       />
-      <AuthButton isPending={isPending} isLogin={false} />
+      <AuthButton isLoading={isPending}>Зарегистрироваться</AuthButton>
     </AuthFormLayout>
   );
 };
