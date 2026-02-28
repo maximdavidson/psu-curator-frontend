@@ -1,0 +1,230 @@
+.SkipToMainComponent-module__skipToMainContentLink__ehL6w {
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  position: absolute;
+  opacity: 0;
+  color: #004578;
+  border-style: none;
+  margin: -1px;
+  padding: 0;
+  background: #deecf9;
+}
+.SkipToMainComponent-module__skipToMainContentLink__ehL6w:focus {
+  opacity: unset;
+  height: unset;
+  width: unset;
+  position: fixed;
+  top: 50px;
+  z-index: 100000;
+  margin: 10px;
+  padding: 6px 10px;
+  border: 1px solid #0078d7;
+  border-radius: 2px;
+}
+[dir="ltr"] .SkipToMainComponent-module__skipToMainContentLink__ehL6w:focus {
+  left: 0;
+  text-align: left;
+}
+[dir="rtl"] .SkipToMainComponent-module__skipToMainContentLink__ehL6w:focus {
+  right: 0;
+  text-align: right;
+}
+.file-suggestion-icon-fix {
+  width: 28px !important;
+  height: 28px !important;
+}
+.serp-search-suggestion-text {
+  text-align: center;
+}
+.serp-search-suggestion-text a > div {
+  color: #464feb;
+  font-weight: 500 !important;
+}
+.serp-app-icon {
+  display: flex;
+  width: 32px;
+  height: 32px;
+}
+.serp-app-icon:before {
+  width: 100%;
+}
+.ms-searchux [class^="consumerTemplateLabel"] {
+  font-family: unset;
+  color: unset;
+}
+.ms-searchux [class^="consumerTemplatePremiumIcon"] {
+  font-family: ShellFabricMDL2Icons, FabricMDL2Icons;
+  color: #323130;
+}
+.SearchSuggestionButton-module__search-icon__fFnFE {
+  align-self: center;
+  line-height: 20px;
+  flex: 0 0 44px;
+  text-align: center;
+}
+.SearchSuggestionButton-module__search-icon__container__xOAsW {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+[dir="ltr"] .SearchSuggestionButton-module__search-icon__container__xOAsW {
+  margin-left: 10px;
+  margin-right: 6px;
+}
+[dir="rtl"] .SearchSuggestionButton-module__search-icon__container__xOAsW {
+  margin-right: 10px;
+  margin-left: 6px;
+}
+.SearchSuggestionButton-module__search-icon__container__offScreen__WQQVI {
+  clip: rect(1px, 1px, 1px, 1px);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  width: 1px;
+  white-space: nowrap;
+}
+.SearchSuggestionButton-module__search-icon--image__b4vuc {
+  line-height: 0 !important;
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+.SearchSuggestionButton-module__search-icon--image__b4vuc:before {
+  width: 100%;
+}
+.SearchSuggestionButton-module__search-icon--image--darkMode__fvNFU {
+  color: #edebe9;
+  line-height: 0 !important;
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+.SearchSuggestionButton-module__search-icon--image--darkMode__fvNFU:before {
+  width: 100%;
+}
+.SearchSuggestionButton-module__search-button-container__HFMq7 {
+  min-width: 100%;
+  display: flex;
+  border-spacing: 0;
+  align-items: center;
+  margin: 0;
+}
+.SearchSuggestionButton-module__search-button-container__HFMq7:hover {
+  background-color: #f3f2f1;
+}
+.SearchSuggestionButton-module__search-button-container__link__nVQ2Q {
+  color: #323130;
+  height: 36px;
+  align-items: center;
+  min-width: 0;
+  display: flex;
+  flex-grow: 1;
+  flex-shrink: 1;
+  overflow: hidden;
+  text-decoration: none;
+  margin: 0;
+  cursor: default;
+}
+.SearchSuggestionButton-module__search-button-container__link__nVQ2Q:focus,
+.SearchSuggestionButton-module__search-button-container__link__nVQ2Q:link,
+.SearchSuggestionButton-module__search-button-container__link__nVQ2Q:visited {
+  text-decoration: none;
+}
+.SearchSuggestionButton-module__search-button-container__link__nVQ2Q:hover {
+  cursor: pointer;
+}
+.SearchSuggestionButton-module__search-button-container__text__iGWxm {
+  margin: 0;
+  padding: 0;
+}
+.SearchSuggestionButton-module__search-button-container__text--darkMode__Gh2YQ,
+.SearchSuggestionButton-module__search-button-container__text__iGWxm {
+  max-width: 100%;
+  font-size: 14px;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  flex-direction: column;
+  overflow: hidden;
+  flex: 1 1 auto;
+  line-height: 20px;
+  width: calc(100% - 28px);
+  display: block;
+  pointer-events: none;
+}
+.SearchSuggestionButton-module__search-button-container__text--darkMode__Gh2YQ {
+  color: #edebe9;
+  margin: 0;
+  padding: 0;
+}
+.SearchSuggestionButton-module__search-compound-button-container__Hin41 {
+  min-width: 100%;
+  display: flex;
+  border-spacing: 0;
+  align-items: center;
+  margin: 0;
+}
+.SearchSuggestionButton-module__search-compound-button-container--see-more__ESMxV {
+  border-top: 1px solid #edebe9;
+}
+.SearchSuggestionButton-module__search-compound-button-container--see-more--darkMode__BYeTT {
+  border-top: 1px solid #323130;
+}
+.SearchSuggestionButton-module__search-compound-button-container__link__x8U5c {
+  color: #323130;
+  height: 50px;
+  align-items: center;
+  min-width: 0;
+  display: flex;
+  flex-grow: 1;
+  flex-shrink: 1;
+  text-decoration: none;
+  margin: 0;
+  cursor: default;
+}
+.SearchSuggestionButton-module__search-compound-button-container__link__x8U5c:focus,
+.SearchSuggestionButton-module__search-compound-button-container__link__x8U5c:link,
+.SearchSuggestionButton-module__search-compound-button-container__link__x8U5c:visited {
+  text-decoration: none;
+}
+.SearchSuggestionButton-module__search-compound-button-container__link__x8U5c:hover {
+  background-color: #f3f2f1;
+  cursor: pointer;
+}
+.SearchSuggestionButton-module__search-compound-button-container__text__vx4sq {
+  margin: 0;
+  padding: 0;
+}
+.SearchSuggestionButton-module__search-compound-button-container__text--darkMode__f7tXn,
+.SearchSuggestionButton-module__search-compound-button-container__text__vx4sq {
+  max-width: 100%;
+  font-size: 14px;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  flex-direction: column;
+  overflow: hidden;
+  flex: 1 1 auto;
+  line-height: 20px;
+  width: calc(100% - 28px);
+  display: block;
+  pointer-events: none;
+}
+.SearchSuggestionButton-module__search-compound-button-container__text--darkMode__f7tXn {
+  color: #edebe9;
+  margin: 0;
+  padding: 0;
+}
+.SearchSuggestionButton-module__search-compound-button-container__text__description__hIviM {
+  font-size: 12px;
+  color: #767676;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: block;
+  width: 100%;
+}
+.SearchSuggestionButton-module__search-button-title__ULZG7 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
