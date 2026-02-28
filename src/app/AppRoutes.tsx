@@ -6,6 +6,7 @@ import { GroupsPage } from "@/pages/groups";
 import { ProtectedRoutes } from "./ProtectedRoutes";
 import { DynamicPlaceholder } from "@/component/Placeholder/DynamicPlayceholder";
 import { AppLayout } from "./AppLoyout";
+import { SurveysPage } from "@/pages/surveys/surveys.component";
 
 export const router = createBrowserRouter([
   {
@@ -32,6 +33,10 @@ export const router = createBrowserRouter([
               {
                 path: "/groups",
                 element: <GroupsPage />
+              },
+              {
+                path: "/surveys",
+                element: <SurveysPage />
               }
             ]
           },
