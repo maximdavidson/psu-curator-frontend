@@ -1,16 +1,24 @@
-import { type ReactNode } from "react";
 import styles from "./auth-button.styles.module.scss";
+import { getButtonContent } from "./helper";
 
-interface IAuthButtonProps {
-  children: ReactNode;
-  isError?: boolean;
+export interface IAuthButtonProps {
+  children: React.ReactNode;
+  error?: string | null;
   isLoading: boolean;
 }
 
-export const AuthButton = ({ children, isLoading }: IAuthButtonProps) => {
+export const AuthButton = ({
+  children,
+  isLoading,
+  error
+}: IAuthButtonProps) => {
   return (
-    <button type="submit" className={styles.submitButton}>
-      {isLoading ? "Loading..." : children}
+    <button
+      type="submit"
+      className={`${styles.submitButton}`}
+      disabled={!!error}
+    >
+      {getButtonContent({ isLoading, error, children })}
     </button>
   );
 };

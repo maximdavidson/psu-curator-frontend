@@ -5,34 +5,52 @@ import { LoginFooter } from "./login-footer.component";
 import { ForgetPasswordLink } from "./forget-password-link";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { signinSchema, type TSigninFormDto } from "@/shared";
 import { useLoginMutation } from "@/services/auth.api";
+import { authSchema, type TAuthFormDto } from "@/shared";
+import { useState } from "react";
 
 export const LoginForm = () => {
+  const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
     formState: { errors }
-  } = useForm<TSigninFormDto>({
-    resolver: yupResolver(signinSchema)
+  } = useForm<TAuthFormDto>({
+    resolver: yupResolver(authSchema)
   });
 
-  const [mutate, { isLoading }] = useLoginMutation();
+  const [mutate, { isLoading, data: responseData }] = useLoginMutation();
+
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const onHandleSubmit = async (data: TAuthFormDto) => {
+    try {
+      await mutate(data).unwrap();
+      navigate("/groups");
+    } catch (e) {
+      if (responseData) {
+        console.log(e);
+        setErrorMessage(responseData?.error);
+        setTimeout(() => setErrorMessage(null), 3000);
+      }
+    }
+  };
 
   return (
     <AuthFormLayout
-      onSubmit={handleSubmit(mutate)}
+      onSubmit={handleSubmit(onHandleSubmit)}
       footer={<LoginFooter />}
       title={"Вход"}
     >
-      <AuthField<TSigninFormDto>
+      <AuthField<TAuthFormDto>
         label={"Почта"}
         name={"email"}
         register={register}
         error={errors.email?.message || ""}
         placeholder={"email"}
       />
-      <AuthField<TSigninFormDto>
+      <AuthField<TAuthFormDto>
         additionalLink={<ForgetPasswordLink />}
         label={"Пароль"}
         name={"password"}
@@ -40,7 +58,9 @@ export const LoginForm = () => {
         error={errors.password?.message || ""}
         placeholder={"пароль"}
       />
-      <AuthButton isLoading={isLoading}>Войти</AuthButton>
+      <AuthButton isLoading={isLoading} error={errorMessage}>
+        Войти
+      </AuthButton>
     </AuthFormLayout>
   );
 };

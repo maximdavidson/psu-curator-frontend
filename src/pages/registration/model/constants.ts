@@ -1,25 +1,18 @@
-import type { TSigninFormDto, TSignupFormDto } from "@/shared";
+import type { TAuthFormDto } from "@/shared/model/types/auth.types";
 
-type TFieldsKey = keyof TSigninFormDto | keyof TSignupFormDto;
+type TFieldsKey = keyof TAuthFormDto;
 
 export const FIELDS_LABELS = {
-  lastName: "Фамилия",
-  firstName: "Имя",
   email: "Email",
-  password: "Пароль",
-  faculty: "Факультет",
-  surname: "Отчество",
-  numberPhone: "Номер телефона"
+  password: "Пароль"
 } as Record<TFieldsKey, string>;
 
+// в прошлой дто на регистрацию было больше полей и тогда это было полезно
+// в принципе можно оставить для лучших времен
+
 export const FIELDS_PLACEHOLDERS = {
-  lastName: "Фамилия",
-  firstName: "Имя",
   email: "Email",
-  password: "Пароль",
-  faculty: "Факультет",
-  surname: "Отчество",
-  numberPhone: "Номер телефона"
+  password: "Пароль"
 } as Record<TFieldsKey, string>;
 
 export const FIELDS_KEYS = Object.keys(FIELDS_LABELS) as TFieldsKey[];

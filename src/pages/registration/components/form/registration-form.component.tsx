@@ -3,7 +3,6 @@ import { AuthFormLayout } from "@/component/AuthFormLayout/";
 import { AuthButton } from "@/component/AuthButton/auth-button.component";
 import { RegistrationFooter } from "./registration-footer.component";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { signupFormSchema, type TSignupFormDto } from "@/shared";
 import { useForm } from "react-hook-form";
 import { useRegisterMutation } from "@/services/auth.api";
 import {
@@ -11,35 +10,46 @@ import {
   FIELDS_LABELS,
   FIELDS_PLACEHOLDERS
 } from "../../model/constants";
-import { useEffect } from "react";
+import { authSchema, type TAuthFormDto } from "@/shared";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 export const RegistrationForm = () => {
+  const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
     formState: { errors }
-  } = useForm<TSignupFormDto>({
-    resolver: yupResolver(signupFormSchema)
+  } = useForm<TAuthFormDto>({
+    resolver: yupResolver(authSchema)
   });
 
-  const [mutate, { isLoading, error }] = useRegisterMutation();
+  const [mutate, { isLoading, data: responseData }] = useRegisterMutation();
 
-  const onSubmit = (dto: TSignupFormDto) => {
-    mutate({ ...dto, role: 1 });
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const onHandleSubmit = async (data: TAuthFormDto) => {
+    try {
+      await mutate(data).unwrap();
+      navigate("/groups");
+    } catch (e) {
+      if (responseData) {
+        console.log(e);
+        setErrorMessage(responseData?.error);
+        setTimeout(() => setErrorMessage(null), 3000);
+      }
+    }
   };
-
-  useEffect(() => {
-    console.log(error);
-  }, [error]);
 
   return (
     <AuthFormLayout
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(onHandleSubmit)}
       footer={<RegistrationFooter />}
       title={"Регистрация"}
     >
       {FIELDS_KEYS.map((key) => (
-        <AuthField<TSignupFormDto>
+        <AuthField<TAuthFormDto>
           key={key}
           label={FIELDS_LABELS[key]}
           name={key}
@@ -48,7 +58,9 @@ export const RegistrationForm = () => {
           placeholder={FIELDS_PLACEHOLDERS[key]}
         />
       ))}
-      <AuthButton isLoading={isLoading}>Зарегистрироваться</AuthButton>
+      <AuthButton isLoading={isLoading} error={errorMessage}>
+        {"Зарегистрироваться"}
+      </AuthButton>
     </AuthFormLayout>
   );
 };
