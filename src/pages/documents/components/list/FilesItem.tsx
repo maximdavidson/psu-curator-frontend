@@ -13,30 +13,27 @@ export const FilesItem = ({
   ...file
 }: TProps) => {
   return (
-    <li>
-      <li key={file.id} className={styles.item}>
-        <div className={styles.info}>
-          <span className={styles.name}>{file.name}</span>
-          <span className={styles.meta}>
-            {formatSize(file.size)} •{" "}
-            {new Date(file.createdAt).toLocaleString()}
-          </span>
-        </div>
-        <div className={styles.actions}>
-          <button
-            className={styles.btnDownload}
-            onClick={() => handleDownload(file)}
-          >
-            Скачать
-          </button>
-          <button
-            className={styles.btnDelete}
-            onClick={() => handleDelete(file.id)}
-          >
-            Удалить
-          </button>
-        </div>
-      </li>
+    <li key={file.id} className={styles.item}>
+      <div className={styles.info}>
+        <span className={styles.name}>{file.name}</span>
+        <span className={styles.meta}>
+          {formatSize(file.size)} • {new Date(file.createdAt).toLocaleString()}
+        </span>
+      </div>
+      <div className={styles.actions}>
+        <button
+          className={styles.btnDownload}
+          onClick={() => handleDownload(file)}
+        >
+          Скачать
+        </button>
+        <button
+          className={styles.btnDelete}
+          onClick={() => handleDelete(file.id)}
+        >
+          Удалить
+        </button>
+      </div>
     </li>
   );
 };

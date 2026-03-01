@@ -4,7 +4,6 @@ $danger-color: #ff4d4f;
 @use "@/styles/mixins.module.scss" as *;
 
 .container {
-  max-width: 600px;
   margin: 20px auto;
   font-family: sans-serif;
 }
@@ -20,6 +19,7 @@ $danger-color: #ff4d4f;
   border: 1px solid $border-color;
   border-radius: 8px;
   overflow: hidden;
+  max-width: 1000px;
 }
 
 .item {
