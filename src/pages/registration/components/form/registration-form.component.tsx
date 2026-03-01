@@ -2,10 +2,16 @@ import { AuthField } from "@/component/AuthField/";
 import { AuthFormLayout } from "@/component/AuthFormLayout/";
 import { AuthButton } from "@/component/AuthButton/auth-button.component";
 import { RegistrationFooter } from "./registration-footer.component";
-import { useRegister } from "../../api/query";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { signupFormSchema, type TSignupFormDto } from "@/shared";
 import { useForm } from "react-hook-form";
+import { useRegisterMutation } from "@/services/auth.api";
+import {
+  FIELDS_KEYS,
+  FIELDS_LABELS,
+  FIELDS_PLACEHOLDERS
+} from "../../model/constants";
+import { useEffect } from "react";
 
 export const RegistrationForm = () => {
   const {
@@ -16,7 +22,15 @@ export const RegistrationForm = () => {
     resolver: yupResolver(signupFormSchema)
   });
 
-  const { onSubmit, isPending } = useRegister();
+  const [mutate, { isLoading, error }] = useRegisterMutation();
+
+  const onSubmit = (dto: TSignupFormDto) => {
+    mutate({ ...dto, role: 1 });
+  };
+
+  useEffect(() => {
+    console.log(error);
+  }, [error]);
 
   return (
     <AuthFormLayout
@@ -24,21 +38,17 @@ export const RegistrationForm = () => {
       footer={<RegistrationFooter />}
       title={"Регистрация"}
     >
-      <AuthField<TSignupFormDto>
-        label={"Почта"}
-        name={"email"}
-        register={register}
-        error={errors.email?.message || ""}
-        placeholder={"email"}
-      />
-      <AuthField<TSignupFormDto>
-        label={"Пароль"}
-        name={"password"}
-        register={register}
-        error={errors.password?.message || ""}
-        placeholder={"пароль"}
-      />
-      <AuthButton isLoading={isPending}>Зарегистрироваться</AuthButton>
+      {FIELDS_KEYS.map((key) => (
+        <AuthField<TSignupFormDto>
+          key={key}
+          label={FIELDS_LABELS[key]}
+          name={key}
+          register={register}
+          error={errors[key]?.message || ""}
+          placeholder={FIELDS_PLACEHOLDERS[key]}
+        />
+      ))}
+      <AuthButton isLoading={isLoading}>Зарегистрироваться</AuthButton>
     </AuthFormLayout>
   );
 };

@@ -3,7 +3,7 @@ import {
   type TSigninFormDto,
   type TSignupFormDto
 } from "@/shared";
-import { createApi } from "@reduxjs/toolkit/query";
+import { createApi } from "@reduxjs/toolkit/query/react";
 
 export const authApi = createApi({
   reducerPath: "authApi",
@@ -17,10 +17,11 @@ export const authApi = createApi({
       })
     }),
     register: builder.mutation({
+      // в прод такое лучше не допускать но для мвп простительно
       query: (credentials: TSignupFormDto) => ({
         url: "/Auth/users",
         method: "POST",
-        body: credentials
+        body: { ...credentials, role: 1 }
       })
     })
     // logout: builder.mutation({
@@ -31,3 +32,5 @@ export const authApi = createApi({
     // }) TODO
   })
 });
+
+export const { useLoginMutation, useRegisterMutation } = authApi;

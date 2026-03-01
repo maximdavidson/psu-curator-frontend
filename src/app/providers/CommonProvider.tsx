@@ -1,10 +1,10 @@
 import { Outlet } from "react-router-dom";
-import { APIProvider } from "./StoreProvider";
+import { StoreProvider } from "./StoreProvider";
 
 export const CommonProvider = () => {
   return (
-    <APIProvider>
+    <StoreProvider>
       <Outlet />
-    </APIProvider>
+    </StoreProvider>
   );
 };

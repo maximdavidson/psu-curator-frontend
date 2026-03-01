@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 import styles from "./auth-button.styles.module.scss";
 
 interface IAuthButtonProps {
@@ -9,7 +9,7 @@ interface IAuthButtonProps {
 
 export const AuthButton = ({ children, isLoading }: IAuthButtonProps) => {
   return (
-    <button className={styles.submitButton}>
+    <button type="submit" className={styles.submitButton}>
       {isLoading ? "Loading..." : children}
     </button>
   );

@@ -1,30 +1,38 @@
 import { AuthFormLayout } from "@/component/AuthFormLayout";
 import { AuthField } from "@/component/AuthField";
-import { useAuthForm } from "@/hooks/use-auth-form";
 import { AuthButton } from "@/component/AuthButton";
 import { LoginFooter } from "./login-footer.component";
-import { useLogin } from "../../api/query";
 import { ForgetPasswordLink } from "./forget-password-link";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { signinSchema, type TSigninFormDto } from "@/shared";
+import { useLoginMutation } from "@/services/auth.api";
 
 export const LoginForm = () => {
-  const { register, handleSubmit, errors } = useAuthForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors }
+  } = useForm<TSigninFormDto>({
+    resolver: yupResolver(signinSchema)
+  });
 
-  const { onSubmit, isPending } = useLogin();
+  const [mutate, { isLoading }] = useLoginMutation();
 
   return (
     <AuthFormLayout
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(mutate)}
       footer={<LoginFooter />}
       title={"Вход"}
     >
-      <AuthField
+      <AuthField<TSigninFormDto>
         label={"Почта"}
         name={"email"}
         register={register}
         error={errors.email?.message || ""}
         placeholder={"email"}
       />
-      <AuthField
+      <AuthField<TSigninFormDto>
         additionalLink={<ForgetPasswordLink />}
         label={"Пароль"}
         name={"password"}
@@ -32,7 +40,7 @@ export const LoginForm = () => {
         error={errors.password?.message || ""}
         placeholder={"пароль"}
       />
-      <AuthButton isLoading={isPending}>Войти</AuthButton>
+      <AuthButton isLoading={isLoading}>Войти</AuthButton>
     </AuthFormLayout>
   );
 };
