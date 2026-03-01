@@ -4,7 +4,17 @@ import HatIcon from "../../assets/hat-icon.svg";
 import BellIcon from "../../assets/notification-card-icon.svg";
 import MoreIcon from "../../assets/more-icon.svg";
 
-export const GroupCard = () => {
+interface GroupCardProps {
+  curator: string;
+  groupName: string;
+  numberStudents: number;
+}
+
+export const GroupCard = ({
+  curator,
+  groupName,
+  numberStudents
+}: GroupCardProps) => {
   return (
     <div className={styles.wrapper}>
       <div className={styles.card}>
@@ -23,15 +33,15 @@ export const GroupCard = () => {
         </div>
 
         <div className={styles.info}>
-          <div className={styles.groupName}>22-ИТ-1</div>
+          <div className={styles.groupName}>{groupName}</div>
 
           <div>
             <p className={styles.curator}>
-              Куратор: <b>Коноплева Галина Филипповна</b>
+              Куратор: <b>{curator}</b>
             </p>
 
             <p className={styles.count}>
-              Количество студентов: <b>22</b>
+              Количество студентов: <b>{numberStudents}</b>
             </p>
           </div>
         </div>
