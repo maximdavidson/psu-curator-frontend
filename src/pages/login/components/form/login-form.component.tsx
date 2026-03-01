@@ -8,6 +8,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useLoginMutation } from "@/services/auth.api";
 import { authSchema, type TAuthFormDto } from "@/shared";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const LoginForm = () => {
   const navigate = useNavigate();
