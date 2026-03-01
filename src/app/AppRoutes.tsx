@@ -13,20 +13,20 @@ export const router = createBrowserRouter([
     element: <CommonProvider />,
     children: [
       {
+        path: "/login",
+        element: <LoginationPage />
+      },
+      {
+        path: "/register",
+        element: <RegistrationPage />
+      },
+      {
+        path: "/",
+        element: <Navigate to="/register" />
+      },
+      {
         element: <AppLayout />,
         children: [
-          {
-            path: "/",
-            element: <Navigate to="/register" />
-          },
-          {
-            path: "/login",
-            element: <LoginationPage />
-          },
-          {
-            path: "/register",
-            element: <RegistrationPage />
-          },
           {
             element: <ProtectedRoutes roles={["admin"]} />,
             children: [
