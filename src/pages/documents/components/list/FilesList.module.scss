@@ -1,6 +1,7 @@
 $text-secondary: #666;
 $border-color: #eee;
 $danger-color: #ff4d4f;
+@use "@/styles/mixins.module.scss" as *;
 
 .container {
   max-width: 600px;
