@@ -15,7 +15,7 @@ export const authApi = createApi({
         method: "POST",
         body: credentials
       }),
-      async onQueryStarted(arg, { queryFulfilled }) {
+      async onQueryStarted(_, { queryFulfilled }) {
         const { data } = await queryFulfilled;
         if (data.accessToken) {
           localStorage.setItem("accessToken", data.accessToken);
@@ -29,7 +29,7 @@ export const authApi = createApi({
         method: "POST",
         body: { ...credentials, role: 1 }
       }),
-      async onQueryStarted(arg, { queryFulfilled }) {
+      async onQueryStarted(_, { queryFulfilled }) {
         const { data } = await queryFulfilled;
         if (data.accessToken) {
           localStorage.setItem("token", data.accessToken);
