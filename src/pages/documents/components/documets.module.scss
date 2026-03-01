@@ -1,0 +1,15 @@
+@use "../../../styles/variables.module.scss" as *;
+
+.page {
+  padding: 10px;
+}
+
+.upload-file-button {
+  padding: 15px 25px;
+  border: none;
+  font-size: $font-size-md;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  border-radius: $radius-medium;
+}
