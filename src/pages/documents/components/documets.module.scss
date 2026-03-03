@@ -1,0 +1,10 @@
+@use "@/styles/variables.module.scss" as *;
+@use "@/styles/mixins.module.scss" as *;
+
+.page {
+  padding: 10px;
+}
+
+.upload-file-button {
+  @include create-button;
+}
