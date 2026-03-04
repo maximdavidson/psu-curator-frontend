@@ -8,8 +8,9 @@ import { useRegisterMutation } from "@/services/auth.api";
 import {
   FIELDS_KEYS,
   FIELDS_LABELS,
-  FIELDS_PLACEHOLDERS
-} from "../../model/constants";
+  FIELDS_PLACEHOLDERS,
+  FIELDS_TYPES
+} from "@/shared/";
 import { authSchema, type TAuthFormDto } from "@/shared";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -33,9 +34,8 @@ export const RegistrationForm = () => {
     try {
       await mutate(data).unwrap();
       navigate("/groups");
-    } catch (e) {
+    } catch {
       if (responseData) {
-        console.log(e);
         setErrorMessage(responseData?.error);
         setTimeout(() => setErrorMessage(null), 3000);
       }
@@ -56,6 +56,7 @@ export const RegistrationForm = () => {
           register={register}
           error={errors[key]?.message || ""}
           placeholder={FIELDS_PLACEHOLDERS[key]}
+          type={FIELDS_TYPES[key]}
         />
       ))}
       <AuthButton isLoading={isLoading} error={errorMessage}>

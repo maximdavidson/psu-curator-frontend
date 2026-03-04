@@ -50,6 +50,7 @@ export const LoginForm = () => {
         register={register}
         error={errors.email?.message || ""}
         placeholder={"email"}
+        type={"email"}
       />
       <AuthField<TAuthFormDto>
         additionalLink={<ForgetPasswordLink />}
@@ -58,6 +59,7 @@ export const LoginForm = () => {
         register={register}
         error={errors.password?.message || ""}
         placeholder={"пароль"}
+        type={"password"}
       />
       <AuthButton isLoading={isLoading} error={errorMessage}>
         Войти

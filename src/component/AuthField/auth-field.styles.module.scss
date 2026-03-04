@@ -1,10 +1,7 @@
 @use "../../styles/variables.module.scss" as *;
 
-.field {
-  display: flex;
-  flex-direction: column;
-  width: $width-full;
-  gap: $spacing-xs;
+.field__inner {
+  position: relative;
 }
 
 .label {
@@ -13,6 +10,7 @@
 }
 
 .input {
+  width: 100%;
   padding: $spacing-sm $spacing-sm;
   font-size: $font-size-sm;
   border-radius: $radius-small;
@@ -29,4 +27,12 @@
   min-height: 12px;
   transition: opacity 0.2s ease-in-out;
   opacity: 1;
+}
+
+.button__eyes {
+  z-index: 10;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: $spacing-sm;
 }
