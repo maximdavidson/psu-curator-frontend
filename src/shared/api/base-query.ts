@@ -1,3 +1,4 @@
+import { removeToken } from "@/stores/auth.store";
 import type { BaseQueryApi, FetchArgs } from "@reduxjs/toolkit/query";
 import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
@@ -20,9 +21,7 @@ export const baseQueryWithReauth = async (
   const result = await baseQuery(args, api, extraOptions);
 
   if (result.error && result.error.status === 401) {
-    console.warn("401.");
-    localStorage.removeItem("token");
-    // api.dispatch();
+    api.dispatch(removeToken());
   }
 
   return result;
