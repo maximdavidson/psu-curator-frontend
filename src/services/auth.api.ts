@@ -14,27 +14,14 @@ export const authApi = createApi({
         url: "/Auth/session",
         method: "POST",
         body: credentials
-      }),
-      async onQueryStarted(_, { queryFulfilled }) {
-        const { data } = await queryFulfilled;
-        if (data.accessToken) {
-          localStorage.setItem("accessToken", data.accessToken);
-        }
-      }
+      })
     }),
     register: builder.mutation<TAuthResponseDto, TAuthFormDto>({
-      // в прод такое лучше не допускать но для мвп простительно
       query: (credentials) => ({
         url: "/Auth/users",
         method: "POST",
         body: { ...credentials, role: 1 }
-      }),
-      async onQueryStarted(_, { queryFulfilled }) {
-        const { data } = await queryFulfilled;
-        if (data.accessToken) {
-          localStorage.setItem("token", data.accessToken);
-        }
-      }
+      })
     })
     // logout: builder.mutation({
     //   query: () => ({

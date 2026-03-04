@@ -4,7 +4,6 @@ import { AuthButton } from "@/component/AuthButton/auth-button.component";
 import { RegistrationFooter } from "./registration-footer.component";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
-import { useRegisterMutation } from "@/services/auth.api";
 import {
   FIELDS_KEYS,
   FIELDS_LABELS,
@@ -12,12 +11,9 @@ import {
   FIELDS_TYPES
 } from "@/shared/";
 import { authSchema, type TAuthFormDto } from "@/shared";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useRegister } from "../../model/use-register";
 
 export const RegistrationForm = () => {
-  const navigate = useNavigate();
-
   const {
     register,
     handleSubmit,
@@ -26,21 +22,7 @@ export const RegistrationForm = () => {
     resolver: yupResolver(authSchema)
   });
 
-  const [mutate, { isLoading, data: responseData }] = useRegisterMutation();
-
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const onHandleSubmit = async (data: TAuthFormDto) => {
-    try {
-      await mutate(data).unwrap();
-      navigate("/groups");
-    } catch {
-      if (responseData) {
-        setErrorMessage(responseData?.error);
-        setTimeout(() => setErrorMessage(null), 3000);
-      }
-    }
-  };
+  const { onHandleSubmit, isLoading, errorMessage } = useRegister();
 
   return (
     <AuthFormLayout

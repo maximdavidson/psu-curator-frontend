@@ -2,7 +2,7 @@ import type { BaseQueryApi, FetchArgs } from "@reduxjs/toolkit/query";
 import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: "http://localhost:5000/api",
+  baseUrl: import.meta.env.VITE_API_URL,
   prepareHeaders: (headers) => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -21,6 +21,8 @@ export const baseQueryWithReauth = async (
 
   if (result.error && result.error.status === 401) {
     console.warn("401.");
+    localStorage.removeItem("token");
+    // api.dispatch();
   }
 
   return result;

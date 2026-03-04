@@ -16,7 +16,7 @@ export const AuthButton = ({
     <button
       type="submit"
       className={`${styles.submitButton}`}
-      disabled={!!error}
+      disabled={Boolean(error)}
     >
       {getButtonContent({ isLoading, error, children })}
     </button>

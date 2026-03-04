@@ -5,14 +5,10 @@ import { LoginFooter } from "./login-footer.component";
 import { ForgetPasswordLink } from "./forget-password-link";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useLoginMutation } from "@/services/auth.api";
 import { authSchema, type TAuthFormDto } from "@/shared";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLogin } from "../../model/use-login";
 
 export const LoginForm = () => {
-  const navigate = useNavigate();
-
   const {
     register,
     handleSubmit,
@@ -21,22 +17,7 @@ export const LoginForm = () => {
     resolver: yupResolver(authSchema)
   });
 
-  const [mutate, { isLoading, data: responseData }] = useLoginMutation();
-
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const onHandleSubmit = async (data: TAuthFormDto) => {
-    try {
-      await mutate(data).unwrap();
-      navigate("/groups");
-    } catch (e) {
-      if (responseData) {
-        console.log(e);
-        setErrorMessage(responseData?.error);
-        setTimeout(() => setErrorMessage(null), 3000);
-      }
-    }
-  };
+  const { onHandleSubmit, isLoading, errorMessage } = useLogin();
 
   return (
     <AuthFormLayout
