@@ -1,3 +1,4 @@
+import type { RootState } from "@/app/store/rootReducers";
 import { STORE_NAMESPACE } from "@/shared/model/constants/store.namespace";
 import { createSlice } from "@reduxjs/toolkit";
 
@@ -21,5 +22,8 @@ export const authSlice = createSlice({
     }
   }
 });
+
+export const selectToken = (state: RootState) =>
+  state[STORE_NAMESPACE.AUTH].token;
 
 export const { setToken, removeToken } = authSlice.actions;

@@ -1,28 +1,31 @@
-import type { TRoles } from "@/shared";
+import { useGetMySelf } from "@/hooks/use-get-my-self";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Outlet } from "react-router-dom";
 
-interface IProtectedRoutesProps {
-  roles: TRoles[];
-}
+// interface IProtectedRoutesProps {
+//   roles: TRoles[];
+// }
 
-export const ProtectedRoutes = ({ roles }: IProtectedRoutesProps) => {
-  const { data, isError } = useGetUser();
+export const ProtectedRoutes = () => {
+  const { token } = useGetMySelf();
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (data) {
-      const role = data.role;
-      if (!roles?.includes(role)) {
-        navigate("/profile");
-      }
-    }
-    if (isError) {
+    if (!token) {
       navigate("/login");
     }
-  }, [data, isError, navigate, roles]);
+    // if (data) {
+    //   const role = data.role;
+    //   if (!roles?.includes(role)) {
+    //     navigate("/profile");
+    //   }
+    // }
+    // if (isError) {
+    //   navigate("/login");
+    // }
+  }, [navigate, token]);
 
   return (
     <>
@@ -30,17 +33,3 @@ export const ProtectedRoutes = ({ roles }: IProtectedRoutesProps) => {
     </>
   );
 };
-
-function useGetUser(): {
-  data: {
-    role: TRoles;
-  };
-  isError: boolean;
-} {
-  return {
-    data: {
-      role: "admin"
-    },
-    isError: false
-  };
-}
