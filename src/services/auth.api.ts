@@ -11,7 +11,7 @@ export const authApi = createApi({
   endpoints: (builder) => ({
     login: builder.mutation<TAuthResponseDto, TAuthFormDto>({
       query: (credentials) => ({
-        url: "/Auth/session",
+        url: "/Auth/sessions",
         method: "POST",
         body: credentials
       })
