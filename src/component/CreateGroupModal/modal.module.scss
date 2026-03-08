@@ -64,6 +64,13 @@
     width: 100%;
     max-width: 650px;
   }
+  option {
+    background: $color-primary;
+    color: white;
+  }
+  option:hover {
+    color: red;
+  }
   input,
   select {
     display: block;

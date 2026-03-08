@@ -1,5 +1,5 @@
 import { useState } from "react";
-import styles from "./styles.module.scss";
+import styles from "./modal.module.scss";
 
 interface CreateGroupModalProps {
   isOpen: boolean;
@@ -27,10 +27,14 @@ const CreateGroupModal = ({
 
   if (!isOpen) return null;
 
-  const handleClose = () => {
+  const resetField = () => {
     setGroupName("");
     setCurator("");
     setError("");
+  };
+
+  const handleClose = () => {
+    resetField();
     onClose();
   };
 
@@ -52,9 +56,7 @@ const CreateGroupModal = ({
     };
 
     onCreate(newGroup);
-    setError("");
-    setGroupName("");
-    setCurator("");
+    resetField();
     onClose();
   };
 
@@ -110,7 +112,6 @@ const CreateGroupModal = ({
           <button className={styles.CreateBtn} onClick={handleCreate}>
             Создать
           </button>
-          \
         </div>
       </div>
     </div>
