@@ -127,7 +127,14 @@
 .GroupCard {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 15px;
+}
+
+.Error {
+  color: red;
+  font-size: 14px;
+  margin-top: 4px;
+  font-weight: 500;
 }
 
 @keyframes fadeIn {

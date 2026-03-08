@@ -1,5 +1,8 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import styles from "./modal.module.scss";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { groupSchema } from "../../shared/model/schemas/check.group";
 
 interface CreateGroupModalProps {
   isOpen: boolean;
@@ -13,52 +16,39 @@ export interface Group {
   numberStudents: number;
 }
 
-const MAX_LENGTH = 50;
-const NAME_REGEX = /^[А-Яа-яЁё0-9]+(-[А-Яа-яЁё0-9]+)*$/;
-
 const CreateGroupModal = ({
   isOpen,
   onClose,
   onCreate
 }: CreateGroupModalProps) => {
-  const [groupName, setGroupName] = useState<string>("");
-  const [curator, setCurator] = useState<string>("");
-  const [error, setError] = useState<string>("");
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors }
+  } = useForm<Group>({
+    resolver: yupResolver(groupSchema),
+    defaultValues: {
+      groupName: "",
+      curator: "",
+      numberStudents: 0
+    }
+  });
+
+  const groupNameValue = watch("groupName");
+
+  useEffect(() => {
+    if (!isOpen) reset();
+  }, [isOpen, reset]);
+
+  const onSubmit = (data: Group) => {
+    onCreate({ ...data, numberStudents: 0 });
+    onClose();
+    reset();
+  };
 
   if (!isOpen) return null;
-
-  const resetField = () => {
-    setGroupName("");
-    setCurator("");
-    setError("");
-  };
-
-  const handleClose = () => {
-    resetField();
-    onClose();
-  };
-
-  const handleCreate = () => {
-    if (!groupName.trim()) {
-      setError("Поле не может быть пустым");
-      return;
-    }
-
-    if (!NAME_REGEX.test(groupName)) {
-      setError("Поле содержит недопустимые символы");
-      return;
-    }
-
-    const newGroup: Group = {
-      groupName: groupName.trim(),
-      curator,
-      numberStudents: 0
-    };
-
-    onCreate(newGroup);
-    resetField();
-    onClose();
-  };
 
   return (
     <div className={styles.ModalOverlay}>
@@ -67,52 +57,54 @@ const CreateGroupModal = ({
           <h2>Создание группы</h2>
           <img
             className={styles.CloseBtn}
-            onClick={handleClose}
+            onClick={onClose}
             src="./icons/X.svg"
-          ></img>
+            alt="Закрыть"
+          />
         </div>
 
-        <div className={styles.ModalBody}>
+        <form onSubmit={handleSubmit(onSubmit)} className={styles.ModalBody}>
           <div className={styles.Group}>
             <label>Имя группы</label>
-            <input
-              type="text"
-              maxLength={MAX_LENGTH}
-              value={groupName}
-              onChange={(e) => setGroupName(e.target.value)}
-            />
+            <input type="text" maxLength={50} {...register("groupName")} />
             <div
               className={`${styles.CharCounter} ${
-                groupName.length === MAX_LENGTH ? styles.limit : ""
+                groupNameValue.length === 50 ? styles.limit : ""
               }`}
             >
-              {groupName.length}/{MAX_LENGTH}
+              {groupNameValue.length}/50
             </div>
+            {errors.groupName && (
+              <p className={styles.Error}>{errors.groupName.message}</p>
+            )}
           </div>
 
           <div className={styles.Group}>
             <label>Куратор группы</label>
-            <select
-              value={curator}
-              onChange={(e) => setCurator(e.target.value)}
-            >
+            <select {...register("curator")}>
               <option value="" disabled hidden></option>
               <option value="sample1">sample1</option>
               <option value="sample2">sample2</option>
               <option value="sample3">sample3</option>
             </select>
+            {errors.curator && (
+              <p className={styles.Error}>{errors.curator.message}</p>
+            )}
           </div>
-        </div>
 
-        <div className={styles.ModalFooter}>
-          {error && <div className={styles.Error}>{error}</div>}
-          <button className={styles.CancelBtn} onClick={handleClose}>
-            Отмена
-          </button>
-          <button className={styles.CreateBtn} onClick={handleCreate}>
-            Создать
-          </button>
-        </div>
+          <div className={styles.ModalFooter}>
+            <button
+              type="button"
+              className={styles.CancelBtn}
+              onClick={onClose}
+            >
+              Отмена
+            </button>
+            <button type="submit" className={styles.CreateBtn}>
+              Создать
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
