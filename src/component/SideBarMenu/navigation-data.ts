@@ -12,8 +12,8 @@ export const menuData: IMenuItem[] = [
     icon: HomeIcon
   },
   {
-    to: "/about",
-    label: "Расписание",
+    to: "/calendar",
+    label: "Календарь",
     icon: CalendarIcon
   },
   {

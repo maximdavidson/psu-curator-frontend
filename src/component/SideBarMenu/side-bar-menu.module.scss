@@ -18,18 +18,21 @@ $sidebar-padding-top: 32px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  height: 95vh;
   background-color: rgba(82, 82, 82, 0.08);
-  min-height: calc(100vh - ($header-height + $sidebar-padding-top));
   border-top-left-radius: $radius-large;
   border-top-right-radius: $radius-large;
 
   &__navigation {
+    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 25px;
-
+    overflow-y: auto;
+    padding-right: 4px;
     &-item {
       width: 333px;
+
       a {
         @include sidebar-item;
       }
@@ -42,6 +45,7 @@ $sidebar-padding-top: 32px;
         height: 28px;
         width: 28px;
       }
+
       &--active {
         background-color: rgba($color: #55657259, $alpha: 0.35);
         border-bottom-right-radius: $radius-large;

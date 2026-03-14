@@ -9,6 +9,8 @@ import { PublicRoutes } from "./PublicRoutes";
 import { AppLayout } from "./AppLoyout";
 import { SurveysPage } from "@/pages/surveys/surveys.component";
 import { DocumentsPage } from "@/pages/documents/";
+import { CalendarPage } from "@/pages/calendar/calendar.component";
+import { GroupDetailPage } from "@/pages/group-detail/group-detail.page";
 
 export const router = createBrowserRouter([
   {
@@ -53,6 +55,14 @@ export const router = createBrowserRouter([
               {
                 path: "/documents",
                 element: <DocumentsPage />
+              },
+              {
+                path: "/calendar",
+                element: <CalendarPage />
+              },
+              {
+                path: "/groups/:groupId",
+                element: <GroupDetailPage />
               }
             ]
           },

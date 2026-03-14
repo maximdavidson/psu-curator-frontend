@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import styles from "./group-card.module.scss";
 
 import HatIcon from "../../assets/hat-icon.svg";
@@ -8,22 +9,37 @@ interface GroupCardProps {
   curator: string;
   groupName: string;
   numberStudents: number;
+  groupId: string | number; // добавили id для перехода на страницу
 }
 
 export const GroupCard = ({
   curator,
   groupName,
-  numberStudents
+  numberStudents,
+  groupId
 }: GroupCardProps) => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    // Переход на страницу группы по ID
+    navigate(`/groups/${groupId}`);
+  };
+
   return (
-    <div className={styles.wrapper}>
+    <div className={styles.wrapper} onClick={handleClick}>
       <div className={styles.card}>
         <div className={styles.actions}>
-          <button className={styles.iconButton}>
+          <button
+            className={styles.iconButton}
+            onClick={(e) => e.stopPropagation()} // чтобы кнопки не триггерили переход
+          >
             <img src={BellIcon} alt="notifications" />
           </button>
 
-          <button className={styles.iconButton}>
+          <button
+            className={styles.iconButton}
+            onClick={(e) => e.stopPropagation()}
+          >
             <img src={MoreIcon} alt="more" />
           </button>
         </div>
