@@ -12,7 +12,7 @@ export const Navigation = ({ pathname }: INavigationProps) => {
         {menuData.map((item, index) => (
           <NavigationItem
             {...item}
-            isActive={pathname.includes(item.to)}
+            isActive={pathname === item.to}
             key={index}
           />
         ))}

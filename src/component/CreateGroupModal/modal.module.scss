@@ -1,0 +1,147 @@
+@use "../../styles/variables.module.scss" as *;
+
+.AddBtn {
+  cursor: pointer;
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  z-index: 1000;
+}
+
+.ModalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.2s ease-in-out;
+  z-index: 1000;
+}
+
+.Modal {
+  position: relative;
+  border-radius: 50px;
+  background: #fff;
+  max-height: 580px;
+  height: 100%;
+  max-width: 700px;
+  width: 100%;
+  padding: 26px;
+}
+
+.ModalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 50px;
+
+  h2 {
+    font-size: 36px;
+  }
+
+  .CloseBtn {
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+  }
+}
+
+.ModalBody {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 45px;
+
+  label {
+    font-size: 25px;
+  }
+  .Group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    width: 100%;
+    max-width: 650px;
+  }
+  option {
+    background: $color-primary;
+    color: white;
+  }
+  option:hover {
+    color: red;
+  }
+  input,
+  select {
+    display: block;
+    box-sizing: border-box;
+    height: 50px;
+    width: 100%;
+    border-radius: 15px;
+
+    &:focus {
+      border-color: $color-primary;
+    }
+  }
+
+  .CharCounter {
+    margin-left: 15px;
+    font-size: 16px;
+  }
+
+  .limit {
+    color: red;
+  }
+}
+
+.ModalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 25px;
+  position: absolute;
+  right: 30px;
+  bottom: 50px;
+
+  button {
+    padding: 12px 41px;
+    font-size: 25px;
+    border-radius: 15px;
+    cursor: pointer;
+    border: none;
+  }
+  .Error {
+    margin-left: 10px;
+    color: red;
+    font-size: 16px;
+  }
+
+  .CancelBtn {
+    background: #f8ecec;
+  }
+
+  .CreateBtn {
+    background: #cccfff;
+  }
+}
+
+.GroupCard {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.Error {
+  color: red;
+  font-size: 14px;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

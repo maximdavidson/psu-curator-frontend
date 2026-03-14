@@ -4,9 +4,11 @@ import { LoginationPage } from "@/pages/login";
 import { RegistrationPage } from "@/pages/registration";
 import { GroupsPage } from "@/pages/groups";
 import { ProtectedRoutes } from "./ProtectedRoutes";
-import { BaseLayout } from "@/component/BaseLayout";
 import { DynamicPlaceholder } from "@/component/Placeholder/DynamicPlayceholder";
 import { PublicRoutes } from "./PublicRoutes";
+import { AppLayout } from "./AppLoyout";
+import { SurveysPage } from "@/pages/surveys/surveys.component";
+import { DocumentsPage } from "@/pages/documents/";
 
 export const router = createBrowserRouter([
   {
@@ -30,7 +32,11 @@ export const router = createBrowserRouter([
         ]
       },
       {
-        element: <BaseLayout />,
+        path: "/",
+        element: <Navigate to="/register" />
+      },
+      {
+        element: <AppLayout />,
         children: [
           {
             //roles={["admin"]}
@@ -39,14 +45,22 @@ export const router = createBrowserRouter([
               {
                 path: "/groups",
                 element: <GroupsPage />
+              },
+              {
+                path: "/surveys",
+                element: <SurveysPage />
+              },
+              {
+                path: "/documents",
+                element: <DocumentsPage />
               }
             ]
+          },
+          {
+            path: "*",
+            element: <DynamicPlaceholder />
           }
         ]
-      },
-      {
-        path: "*",
-        element: <DynamicPlaceholder />
       }
     ]
   }

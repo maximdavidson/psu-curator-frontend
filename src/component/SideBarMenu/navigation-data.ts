@@ -22,12 +22,12 @@ export const menuData: IMenuItem[] = [
     icon: TeachesrIcon
   },
   {
-    to: "/teachers",
+    to: "/surveys",
     label: "Опросы",
     icon: PoolsIcon
   },
   {
-    to: "/teachers",
+    to: "/documents",
     label: "Документы",
     icon: DocumentsIcon
   }
