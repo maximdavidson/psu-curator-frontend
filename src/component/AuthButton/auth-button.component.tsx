@@ -1,14 +1,24 @@
 import styles from "./auth-button.styles.module.scss";
+import { getButtonContent } from "./helper";
 
-interface IAuthButtonProps {
-  isPending: boolean;
-  isLogin: boolean;
+export interface IAuthButtonProps {
+  children: React.ReactNode;
+  error?: string | null;
+  isLoading: boolean;
 }
 
-export const AuthButton = ({ isPending, isLogin }: IAuthButtonProps) => {
+export const AuthButton = ({
+  children,
+  isLoading,
+  error
+}: IAuthButtonProps) => {
   return (
-    <button className={styles.submitButton}>
-      {isPending ? "Отправка..." : isLogin ? "Войти" : "Зарегистрироваться"}
+    <button
+      type="submit"
+      className={`${styles.submitButton}`}
+      disabled={Boolean(error)}
+    >
+      {getButtonContent({ isLoading, error, children })}
     </button>
   );
 };

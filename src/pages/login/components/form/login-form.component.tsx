@@ -1,38 +1,50 @@
 import { AuthFormLayout } from "@/component/AuthFormLayout";
 import { AuthField } from "@/component/AuthField";
-import { useAuthForm } from "@/hooks/use-auth-form";
 import { AuthButton } from "@/component/AuthButton";
 import { LoginFooter } from "./login-footer.component";
-import { useLogin } from "../../api/query";
 import { ForgetPasswordLink } from "./forget-password-link";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { authSchema, type TAuthFormDto } from "@/shared";
+import { useLogin } from "../../model/use-login";
 
 export const LoginForm = () => {
-  const { register, handleSubmit, errors } = useAuthForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors }
+  } = useForm<TAuthFormDto>({
+    resolver: yupResolver(authSchema)
+  });
 
-  const { onSubmit, isPending } = useLogin();
+  const { onHandleSubmit, isLoading, errorMessage } = useLogin();
 
   return (
     <AuthFormLayout
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(onHandleSubmit)}
       footer={<LoginFooter />}
       title={"Вход"}
     >
-      <AuthField
+      <AuthField<TAuthFormDto>
         label={"Почта"}
         name={"email"}
         register={register}
         error={errors.email?.message || ""}
         placeholder={"email"}
+        type={"email"}
       />
-      <AuthField
+      <AuthField<TAuthFormDto>
         additionalLink={<ForgetPasswordLink />}
         label={"Пароль"}
         name={"password"}
         register={register}
         error={errors.password?.message || ""}
         placeholder={"пароль"}
+        type={"password"}
       />
-      <AuthButton isPending={isPending} isLogin={true} />
+      <AuthButton isLoading={isLoading} error={errorMessage}>
+        Войти
+      </AuthButton>
     </AuthFormLayout>
   );
 };

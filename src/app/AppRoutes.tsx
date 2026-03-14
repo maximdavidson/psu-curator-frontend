@@ -5,6 +5,7 @@ import { RegistrationPage } from "@/pages/registration";
 import { GroupsPage } from "@/pages/groups";
 import { ProtectedRoutes } from "./ProtectedRoutes";
 import { DynamicPlaceholder } from "@/component/Placeholder/DynamicPlayceholder";
+import { PublicRoutes } from "./PublicRoutes";
 import { AppLayout } from "./AppLoyout";
 import { SurveysPage } from "@/pages/surveys/surveys.component";
 import { DocumentsPage } from "@/pages/documents/";
@@ -14,12 +15,21 @@ export const router = createBrowserRouter([
     element: <CommonProvider />,
     children: [
       {
-        path: "/login",
-        element: <LoginationPage />
-      },
-      {
-        path: "/register",
-        element: <RegistrationPage />
+        element: <PublicRoutes />,
+        children: [
+          {
+            path: "/",
+            element: <Navigate to="/register" />
+          },
+          {
+            path: "/login",
+            element: <LoginationPage />
+          },
+          {
+            path: "/register",
+            element: <RegistrationPage />
+          }
+        ]
       },
       {
         path: "/",
@@ -29,7 +39,8 @@ export const router = createBrowserRouter([
         element: <AppLayout />,
         children: [
           {
-            element: <ProtectedRoutes roles={["admin"]} />,
+            //roles={["admin"]}
+            element: <ProtectedRoutes />,
             children: [
               {
                 path: "/groups",

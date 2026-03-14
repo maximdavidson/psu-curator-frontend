@@ -8,12 +8,12 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  padding-bottom: $spacing-xxl;
+  padding-bottom: $spacing-md;
 }
 
 .title {
-  margin-bottom: $spacing-5xl;
-  font-size: $font-size-xl;
+  margin-bottom: $spacing-sm;
+  font-size: $font-size-lg;
   font-weight: $font-weight-bold;
   line-height: 100%;
   text-align: center;
