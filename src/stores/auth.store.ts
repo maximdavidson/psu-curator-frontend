@@ -7,7 +7,7 @@ interface IAuthState {
 }
 
 const initialState: IAuthState = {
-  token: null
+  token: localStorage.getItem("token")
 };
 
 export const authSlice = createSlice({
@@ -16,9 +16,11 @@ export const authSlice = createSlice({
   reducers: {
     setToken: (state, action) => {
       state.token = action.payload;
+      localStorage.setItem("token", action.payload);
     },
     removeToken: (state) => {
       state.token = null;
+      localStorage.removeItem("token");
     }
   }
 });

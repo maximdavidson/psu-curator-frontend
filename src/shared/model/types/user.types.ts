@@ -2,7 +2,25 @@ export interface IUser {
   id: string;
   email: string;
   name: string;
-  role: TRoles;
+  role: number;
 }
 
-export type TRoles = "admin" | "user"; // in the future, we will add more roles
+export const UserRole = {
+  Student: 1,
+  Headman: 2,
+  Curator: 3,
+  Dean: 4,
+  DeputyDean: 5,
+  Admin: 6
+} as const;
+
+export type UserRoleType = (typeof UserRole)[keyof typeof UserRole];
+
+export const UserRoleLabels: Record<UserRoleType, string> = {
+  [UserRole.Student]: "Студент",
+  [UserRole.Headman]: "Староста",
+  [UserRole.Curator]: "Куратор",
+  [UserRole.Dean]: "Декан",
+  [UserRole.DeputyDean]: "Заместитель декана",
+  [UserRole.Admin]: "Администратор"
+};

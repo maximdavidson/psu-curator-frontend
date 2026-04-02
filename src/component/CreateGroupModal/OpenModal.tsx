@@ -1,52 +1,68 @@
 import { useState } from "react";
 import styles from "./modal.module.scss";
 import CreateGroupModal from "./CreateGroupModal";
-import type { Group } from "./CreateGroupModal";
+import type { CreateGroupFormData } from "./CreateGroupModal";
 import { GroupCard } from "@/component/GroupCards/group-card.component";
-
-const ExampleGroup = {
-  groupName: "22-ИТ-1",
-  curator: "Коноплева Галина Филипповна",
-  numberStudents: 22
-};
+import {
+  useGetGroupsQuery,
+  useCreateGroupMutation
+} from "@/pages/groups/group.api";
 
 export default function GroupsPageCreate() {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [groups, setGroups] = useState<Group[]>([ExampleGroup]);
+  const [isOpen, setIsOpen] = useState(false);
+  const { data: groups = [] } = useGetGroupsQuery();
+  const [createGroup] = useCreateGroupMutation();
 
-  const handleCreateGroup = (newGroup: Group) => {
-    setGroups([...groups, newGroup]);
-    setIsOpen(false);
-  };
+  const handleCreateGroup = async (data: CreateGroupFormData) => {
+    try {
+      const payload = {
+        name: data.groupName,
+        faculty: data.faculty,
+        courseNumber: data.courseNumber,
+        curatorEmail: data.curatorEmail,
+        ...(data.headStudentEmail &&
+          data.headStudentEmail.trim() !== "" && {
+            headStudentEmail: data.headStudentEmail
+          })
+      };
 
-  const handleCloseModal = () => {
-    setIsOpen(false);
-  };
+      console.log("Отправляемые данные:", payload);
 
-  const handleOpenModal = () => {
-    setIsOpen(true);
+      await createGroup(payload).unwrap();
+
+      // ❌ refetch НЕ нужен — RTK Query сам обновит
+      setIsOpen(false);
+    } catch (err) {
+      console.error("Ошибка при создании группы:", err);
+      if (err && typeof err === "object" && "data" in err) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        console.error("Детали ошибки:", (err as any).data);
+      }
+    }
   };
 
   return (
     <>
       <div className={styles.GroupCard}>
-        {groups.map((g, index) => (
+        {groups.map((group) => (
           <GroupCard
-            key={index}
-            groupName={g.groupName}
-            curator={g.curator}
-            numberStudents={g.numberStudents}
+            key={group.id}
+            groupId={group.id}
+            groupName={group.name}
+            curator={`${group.firstName} ${group.lastName}`}
+            numberStudents={group.countOfstudents}
           />
         ))}
       </div>
+
       <CreateGroupModal
         isOpen={isOpen}
-        onClose={handleCloseModal}
+        onClose={() => setIsOpen(false)}
         onCreate={handleCreateGroup}
       />
 
       <img
-        onClick={handleOpenModal}
+        onClick={() => setIsOpen(true)}
         className={styles.AddBtn}
         src="./icons/Add_btn.svg"
         alt="Добавить группу"

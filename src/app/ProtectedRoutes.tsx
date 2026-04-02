@@ -1,32 +1,12 @@
-import { Outlet } from "react-router-dom";
-
-// interface IProtectedRoutesProps {
-//   roles: TRoles[];
-// }
+import { Outlet, Navigate } from "react-router-dom";
+import { useGetMySelf } from "@/hooks/use-get-my-self";
 
 export const ProtectedRoutes = () => {
-  // const { token } = useGetMySelf();
+  const { token } = useGetMySelf();
 
-  // const navigate = useNavigate();
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
 
-  // useEffect(() => {
-  //   if (!token) {
-  //     navigate("/login");
-  //   }
-  //   // if (data) {
-  //   //   const role = data.role;
-  //   //   if (!roles?.includes(role)) {
-  //   //     navigate("/profile");
-  //   //   }
-  //   // }
-  //   // if (isError) {
-  //   //   navigate("/login");
-  //   // }
-  // }, [navigate, token]);
-
-  return (
-    <>
-      <Outlet />
-    </>
-  );
+  return <Outlet />;
 };

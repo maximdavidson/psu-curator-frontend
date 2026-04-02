@@ -1,35 +1,41 @@
-import {
-  baseQueryWithReauth,
-  type TAuthFormDto,
-  type TAuthResponseDto
-} from "@/shared";
-import { createApi } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import type { TRegisterFormDto } from "@/shared";
+import type { TLoginFormDto } from "@/shared";
+
+export interface TAuthResponseDto {
+  accessToken: string;
+}
 
 export const authApi = createApi({
   reducerPath: "authApi",
-  baseQuery: baseQueryWithReauth,
+  baseQuery: fetchBaseQuery({
+    baseUrl: import.meta.env.VITE_API_URL,
+    prepareHeaders: (headers) => {
+      const token = localStorage.getItem("token");
+      if (token) headers.set("authorization", `Bearer ${token}`);
+      return headers;
+    }
+  }),
   endpoints: (builder) => ({
-    login: builder.mutation<TAuthResponseDto, TAuthFormDto>({
+    register: builder.mutation<TAuthResponseDto, TRegisterFormDto>({
+      query: (credentials) => ({
+        url: "/Auth/users",
+        method: "POST",
+        body: {
+          email: credentials.email,
+          password: credentials.password,
+          role: credentials.role
+        }
+      })
+    }),
+    login: builder.mutation<TAuthResponseDto, TLoginFormDto>({
       query: (credentials) => ({
         url: "/Auth/sessions",
         method: "POST",
         body: credentials
       })
-    }),
-    register: builder.mutation<TAuthResponseDto, TAuthFormDto>({
-      query: (credentials) => ({
-        url: "/Auth/users",
-        method: "POST",
-        body: { ...credentials, role: 1 }
-      })
     })
-    // logout: builder.mutation({
-    //   query: () => ({
-    //     url: "/Auth/logout",
-    //     method: "POST"
-    //   })
-    // }) TODO
   })
 });
 
-export const { useLoginMutation, useRegisterMutation } = authApi;
+export const { useRegisterMutation, useLoginMutation } = authApi;

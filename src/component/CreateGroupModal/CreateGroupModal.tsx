@@ -1,20 +1,41 @@
 import { useEffect } from "react";
 import styles from "./modal.module.scss";
-import { useForm } from "react-hook-form";
+import { useForm, type SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { groupSchema } from "../../shared/model/schemas/check.group";
+import * as yup from "yup";
 
 interface CreateGroupModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (newGroup: Group) => void;
+  onCreate: (newGroup: CreateGroupFormData) => void;
 }
 
-export interface Group {
+export interface CreateGroupFormData {
   groupName: string;
-  curator: string;
-  numberStudents: number;
+  faculty: string;
+  courseNumber: number;
+  curatorEmail: string;
+  headStudentEmail?: string;
 }
+
+// Убираем nullable() и используем только optional()
+const groupSchema = yup.object({
+  groupName: yup
+    .string()
+    .required("Название группы обязательно")
+    .max(50, "Максимум 50 символов"),
+  faculty: yup.string().required("Выберите факультет"),
+  courseNumber: yup
+    .number()
+    .min(1, "Курс от 1 до 6")
+    .max(6, "Курс от 1 до 6")
+    .required("Укажите курс"),
+  curatorEmail: yup
+    .string()
+    .email("Введите корректный email")
+    .required("Введите email куратора"),
+  headStudentEmail: yup.string().email("Введите корректный email").optional() // только optional, без nullable
+});
 
 const CreateGroupModal = ({
   isOpen,
@@ -27,23 +48,34 @@ const CreateGroupModal = ({
     reset,
     watch,
     formState: { errors }
-  } = useForm<Group>({
-    resolver: yupResolver(groupSchema),
+  } = useForm<CreateGroupFormData>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: yupResolver(groupSchema) as any, // временное решение
     defaultValues: {
       groupName: "",
-      curator: "",
-      numberStudents: 0
+      faculty: "",
+      courseNumber: 1,
+      curatorEmail: "",
+      headStudentEmail: undefined // меняем с "" на undefined
     }
   });
 
   const groupNameValue = watch("groupName");
 
   useEffect(() => {
-    if (!isOpen) reset();
+    if (!isOpen) {
+      reset({
+        groupName: "",
+        faculty: "",
+        courseNumber: 1,
+        curatorEmail: "",
+        headStudentEmail: undefined
+      });
+    }
   }, [isOpen, reset]);
 
-  const onSubmit = (data: Group) => {
-    onCreate({ ...data, numberStudents: 0 });
+  const onSubmit: SubmitHandler<CreateGroupFormData> = (data) => {
+    onCreate(data);
     onClose();
     reset();
   };
@@ -65,14 +97,14 @@ const CreateGroupModal = ({
 
         <form onSubmit={handleSubmit(onSubmit)} className={styles.ModalBody}>
           <div className={styles.Group}>
-            <label>Имя группы</label>
+            <label>Название группы</label>
             <input type="text" maxLength={50} {...register("groupName")} />
             <div
               className={`${styles.CharCounter} ${
-                groupNameValue.length === 50 ? styles.limit : ""
+                groupNameValue?.length === 50 ? styles.limit : ""
               }`}
             >
-              {groupNameValue.length}/50
+              {groupNameValue?.length || 0}/50
             </div>
             {errors.groupName && (
               <p className={styles.Error}>{errors.groupName.message}</p>
@@ -80,15 +112,59 @@ const CreateGroupModal = ({
           </div>
 
           <div className={styles.Group}>
-            <label>Куратор группы</label>
-            <select {...register("curator")}>
-              <option value="" disabled hidden></option>
-              <option value="sample1">sample1</option>
-              <option value="sample2">sample2</option>
-              <option value="sample3">sample3</option>
+            <label>Факультет</label>
+            <select {...register("faculty")}>
+              <option value="" disabled hidden>
+                Выберите факультет
+              </option>
+              <option value="ФИТ">ФИТ</option>
+              <option value="ФЭУ">ФЭУ</option>
+              <option value="ФК">ФК</option>
             </select>
-            {errors.curator && (
-              <p className={styles.Error}>{errors.curator.message}</p>
+            {errors.faculty && (
+              <p className={styles.Error}>{errors.faculty.message}</p>
+            )}
+          </div>
+
+          <div className={styles.Group}>
+            <label>Курс</label>
+            <select {...register("courseNumber", { valueAsNumber: true })}>
+              <option value="" disabled hidden>
+                Выберите курс
+              </option>
+              <option value={1}>1 курс</option>
+              <option value={2}>2 курс</option>
+              <option value={3}>3 курс</option>
+              <option value={4}>4 курс</option>
+              <option value={5}>5 курс</option>
+              <option value={6}>6 курс</option>
+            </select>
+            {errors.courseNumber && (
+              <p className={styles.Error}>{errors.courseNumber.message}</p>
+            )}
+          </div>
+
+          <div className={styles.Group}>
+            <label>Email куратора</label>
+            <input
+              type="email"
+              placeholder="curator@psu.ru"
+              {...register("curatorEmail")}
+            />
+            {errors.curatorEmail && (
+              <p className={styles.Error}>{errors.curatorEmail.message}</p>
+            )}
+          </div>
+
+          <div className={styles.Group}>
+            <label>Email старосты (опционально)</label>
+            <input
+              type="email"
+              placeholder="headman@psu.ru"
+              {...register("headStudentEmail")}
+            />
+            {errors.headStudentEmail && (
+              <p className={styles.Error}>{errors.headStudentEmail.message}</p>
             )}
           </div>
 

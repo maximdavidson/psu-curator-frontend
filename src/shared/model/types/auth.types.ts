@@ -8,7 +8,10 @@ import type { authSchema } from "../schemas/auth.schema";
 export type TAuthFormDto = InferType<typeof authSchema>;
 
 export type TAuthResponseDto = {
-  accessToken: string;
-  error: string;
-  isSuccess: boolean;
+  tokenPair: {
+    accessToken: string;
+    refreshToken: string;
+  };
+  accountStatus: number;
+  message: string | null;
 };

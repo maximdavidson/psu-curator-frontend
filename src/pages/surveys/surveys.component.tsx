@@ -1,3 +1,4 @@
+// pages/surveys/surveys-page.tsx
 import { useState } from "react";
 import styles from "./surveys.module.scss";
 import { SurveyCard } from "./components/survey-card/survey-card";
@@ -5,26 +6,46 @@ import {
   CreateSurveyModal,
   type SurveyData
 } from "./components/create-survey-modal/create-survey-modal";
+import { useGetUserSurveysQuery, useCreateSurveyMutation } from "./survey.api";
 
-export interface ISurvey {
-  id: string;
-  title: string;
-  description: string;
-}
+// Получаем userId из токена
+const getUserIdFromToken = (): string => {
+  const token = localStorage.getItem("token");
+  if (!token) return "";
+
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const userId =
+      payload[
+        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/primarysid"
+      ];
+    return userId || "";
+  } catch (error) {
+    console.error("Ошибка при декодировании токена:", error);
+    return "";
+  }
+};
 
 export const SurveysPage = () => {
+  const userId = getUserIdFromToken();
+
+  const { data: surveys = [], refetch } = useGetUserSurveysQuery(userId, {
+    skip: !userId
+  });
+  const [createSurvey] = useCreateSurveyMutation();
   const [isOpen, setIsOpen] = useState(false);
-  const [surveys, setSurveys] = useState<ISurvey[]>([]);
 
-  const handleCreateSurvey = (data: SurveyData) => {
-    const newSurvey: ISurvey = {
-      id: crypto.randomUUID(),
-      title: data.title,
-      description: data.description
-    };
-
-    setSurveys((prev) => [newSurvey, ...prev]);
-    setIsOpen(false);
+  const handleCreateSurvey = async (data: SurveyData) => {
+    try {
+      await createSurvey({
+        ...data,
+        userId
+      }).unwrap();
+      refetch();
+      setIsOpen(false);
+    } catch (err) {
+      console.error("Ошибка при создании опроса", err);
+    }
   };
 
   return (

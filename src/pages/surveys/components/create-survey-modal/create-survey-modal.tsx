@@ -3,13 +3,8 @@ import styles from "./create-survey-modal.module.scss";
 import { nanoid } from "nanoid";
 import * as yup from "yup";
 import { surveySchema } from "@/shared/model/schemas/create-survey-modal.schema";
-
-export interface Question {
-  id: string;
-  text: string;
-  type: "single" | "multiple" | "text";
-  options: string[];
-}
+import type { Question } from "../../survey.types";
+import { useCreateSurveyMutation } from "../../survey.api";
 
 export interface SurveyData {
   title: string;
@@ -19,7 +14,7 @@ export interface SurveyData {
 
 interface Props {
   onClose: () => void;
-  onCreate: (data: SurveyData) => void;
+  onCreate?: (data: SurveyData & { userId: string }) => void;
 }
 
 export const CreateSurveyModal = ({ onClose, onCreate }: Props) => {
@@ -31,6 +26,23 @@ export const CreateSurveyModal = ({ onClose, onCreate }: Props) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isValid, setIsValid] = useState(false);
   const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
+  const [authError, setAuthError] = useState<string>("");
+  const [createSurvey, { isLoading }] = useCreateSurveyMutation();
+
+  // Получаем userId из токена
+  const getUserIdFromToken = (): string | null => {
+    const token = localStorage.getItem("token");
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload[
+        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/primarysid"
+      ];
+    } catch {
+      return null;
+    }
+  };
 
   useEffect(() => {
     const validate = async () => {
@@ -104,27 +116,69 @@ export const CreateSurveyModal = ({ onClose, onCreate }: Props) => {
     setQuestions((prev) => prev.filter((q) => q.id !== id));
   };
 
-  const handleSubmit = () => {
-    if (!isValid) return;
-    onCreate({ title, description, questions });
-  };
-
   const handleFieldTouch = (field: string) => {
     setTouchedFields((prev) => new Set(prev).add(field));
   };
 
-  const getError = (path: string) => {
-    return touchedFields.has(path) ? errors[path] : undefined;
-  };
+  const getError = (path: string) =>
+    touchedFields.has(path) ? errors[path] : undefined;
+  const shouldShowFieldError = (path: string) =>
+    touchedFields.has(path) && errors[path];
 
-  const shouldShowFieldError = (path: string) => {
-    return touchedFields.has(path) && errors[path];
+  const handleSubmit = async () => {
+    if (!isValid || isLoading) return;
+
+    const userId = getUserIdFromToken();
+    if (!userId) {
+      setAuthError("Сессия истекла. Пожалуйста, войдите заново.");
+      setTimeout(() => setAuthError(""), 3000);
+      return;
+    }
+
+    setAuthError("");
+
+    try {
+      const payload = {
+        title,
+        description,
+        userId,
+        questions: questions.map((q) => ({
+          text: q.text,
+          type: q.type,
+          options:
+            q.type === "text"
+              ? []
+              : q.options.filter((opt) => opt.trim() !== "")
+        }))
+      };
+
+      console.log("Отправляемые данные:", payload);
+
+      if (onCreate) {
+        onCreate(payload);
+      } else {
+        await createSurvey(payload).unwrap();
+        onClose();
+        // Сброс формы после успешного создания
+        setTitle("");
+        setDescription("");
+        setQuestions([
+          { id: nanoid(), text: "", type: "single", options: ["", ""] }
+        ]);
+      }
+    } catch (err) {
+      console.error("Ошибка при создании опроса:", err);
+      setAuthError("Ошибка при создании опроса. Попробуйте позже.");
+      setTimeout(() => setAuthError(""), 3000);
+    }
   };
 
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
         <h2>Создать опрос</h2>
+
+        {authError && <div className={styles.authError}>{authError}</div>}
 
         <div className={styles.field}>
           <input
@@ -159,7 +213,7 @@ export const CreateSurveyModal = ({ onClose, onCreate }: Props) => {
             <div className={styles.questionHeader}>
               <h4>Вопрос {idx + 1}</h4>
               {questions.length > 1 && (
-                <button type="button" onClick={() => removeQuestion(q.id)}>
+                <button type="button" onClick={() => removeQuestion(q.id!)}>
                   Удалить
                 </button>
               )}
@@ -175,7 +229,7 @@ export const CreateSurveyModal = ({ onClose, onCreate }: Props) => {
                 placeholder="Текст вопроса"
                 value={q.text}
                 onChange={(e) =>
-                  handleQuestionChange(q.id, "text", e.target.value)
+                  handleQuestionChange(q.id!, "text", e.target.value)
                 }
                 onBlur={() => handleFieldTouch(`questions[${idx}].text`)}
               />
@@ -196,7 +250,7 @@ export const CreateSurveyModal = ({ onClose, onCreate }: Props) => {
                 value={q.type}
                 onChange={(e) =>
                   handleQuestionChange(
-                    q.id,
+                    q.id!,
                     "type",
                     e.target.value as Question["type"]
                   )
@@ -228,7 +282,7 @@ export const CreateSurveyModal = ({ onClose, onCreate }: Props) => {
                       placeholder={`Вариант ${i + 1}`}
                       value={opt}
                       onChange={(e) =>
-                        handleOptionChange(q.id, i, e.target.value)
+                        handleOptionChange(q.id!, i, e.target.value)
                       }
                       onBlur={() =>
                         handleFieldTouch(`questions[${idx}].options`)
@@ -236,12 +290,7 @@ export const CreateSurveyModal = ({ onClose, onCreate }: Props) => {
                     />
                   </div>
                 ))}
-                {getError(`questions[${idx}].options`) && (
-                  <span className={styles.errorText}>
-                    {getError(`questions[${idx}].options`)}
-                  </span>
-                )}
-                <button type="button" onClick={() => addOption(q.id)}>
+                <button type="button" onClick={() => addOption(q.id!)}>
                   + Добавить вариант
                 </button>
               </div>
@@ -261,8 +310,12 @@ export const CreateSurveyModal = ({ onClose, onCreate }: Props) => {
           <button type="button" onClick={onClose}>
             Отмена
           </button>
-          <button type="button" onClick={handleSubmit} disabled={!isValid}>
-            Создать
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={!isValid || isLoading}
+          >
+            {isLoading ? "Создание..." : "Создать"}
           </button>
         </div>
       </div>
