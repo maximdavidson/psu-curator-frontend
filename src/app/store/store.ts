@@ -6,12 +6,14 @@ import { authApi } from "@/services/auth.api";
 import { surveyApi } from "@/pages/surveys/survey.api";
 import { groupApi } from "@/pages/groups/group.api";
 import { combineReducers } from "@reduxjs/toolkit";
+import { calendarApi } from "@/services/calendar.api";
 
 const rootReducer = combineReducers({
   [authSlice.name]: authSlice.reducer,
   [authApi.reducerPath]: authApi.reducer,
   [surveyApi.reducerPath]: surveyApi.reducer,
-  [groupApi.reducerPath]: groupApi.reducer
+  [groupApi.reducerPath]: groupApi.reducer,
+  [calendarApi.reducerPath]: calendarApi.reducer
 });
 
 const persistConfig = {
@@ -29,7 +31,12 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"]
       }
-    }).concat(authApi.middleware, surveyApi.middleware, groupApi.middleware)
+    }).concat(
+      authApi.middleware,
+      surveyApi.middleware,
+      groupApi.middleware,
+      calendarApi.middleware
+    )
 });
 
 export const persistor = persistStore(store);

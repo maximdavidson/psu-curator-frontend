@@ -17,7 +17,8 @@ export const useRegister = () => {
       const response = await mutate(data).unwrap();
 
       dispatch(setToken(response.accessToken));
-      localStorage.setItem("token", response.accessToken); // ← ДОБАВЛЯЕМ сохранение токена
+      localStorage.setItem("token", response.accessToken);
+      localStorage.setItem("email", data.email);
 
       console.log("Регистрация успешна, редирект на /groups");
       navigate("/groups");

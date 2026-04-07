@@ -24,7 +24,7 @@ export const useLogin = () => {
 
       dispatch(setToken(response.accessToken));
       localStorage.setItem("token", response.accessToken);
-
+      localStorage.setItem("email", data.email);
       navigate("/groups");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {

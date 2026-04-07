@@ -14,7 +14,7 @@ export interface SurveyData {
 
 interface Props {
   onClose: () => void;
-  onCreate?: (data: SurveyData & { userId: string }) => void;
+  onCreate?: (data: SurveyData) => void; // ❌ убрали userId
 }
 
 export const CreateSurveyModal = ({ onClose, onCreate }: Props) => {
@@ -28,21 +28,6 @@ export const CreateSurveyModal = ({ onClose, onCreate }: Props) => {
   const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
   const [authError, setAuthError] = useState<string>("");
   const [createSurvey, { isLoading }] = useCreateSurveyMutation();
-
-  // Получаем userId из токена
-  const getUserIdFromToken = (): string | null => {
-    const token = localStorage.getItem("token");
-    if (!token) return null;
-
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      return payload[
-        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/primarysid"
-      ];
-    } catch {
-      return null;
-    }
-  };
 
   useEffect(() => {
     const validate = async () => {
@@ -73,7 +58,7 @@ export const CreateSurveyModal = ({ onClose, onCreate }: Props) => {
   const handleQuestionChange = (
     id: string,
     field: keyof Question,
-    value: string | Question["type"] | string[]
+    value: string | Question["type"] | string[] // ← вот это оставь, это правильно
   ) => {
     setQuestions((prev) =>
       prev.map((q) => (q.id === id ? { ...q, [field]: value } : q))
@@ -122,18 +107,12 @@ export const CreateSurveyModal = ({ onClose, onCreate }: Props) => {
 
   const getError = (path: string) =>
     touchedFields.has(path) ? errors[path] : undefined;
+
   const shouldShowFieldError = (path: string) =>
     touchedFields.has(path) && errors[path];
 
   const handleSubmit = async () => {
     if (!isValid || isLoading) return;
-
-    const userId = getUserIdFromToken();
-    if (!userId) {
-      setAuthError("Сессия истекла. Пожалуйста, войдите заново.");
-      setTimeout(() => setAuthError(""), 3000);
-      return;
-    }
 
     setAuthError("");
 
@@ -141,7 +120,6 @@ export const CreateSurveyModal = ({ onClose, onCreate }: Props) => {
       const payload = {
         title,
         description,
-        userId,
         questions: questions.map((q) => ({
           text: q.text,
           type: q.type,
@@ -159,7 +137,7 @@ export const CreateSurveyModal = ({ onClose, onCreate }: Props) => {
       } else {
         await createSurvey(payload).unwrap();
         onClose();
-        // Сброс формы после успешного создания
+
         setTitle("");
         setDescription("");
         setQuestions([

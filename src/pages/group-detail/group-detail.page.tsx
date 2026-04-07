@@ -2,16 +2,27 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import styles from "./group-detail.module.scss";
 import { FeedTab } from "./components/feed-tab/feed-tab.component";
+import { useGetGroupsQuery } from "../groups/group.api";
 
 export const GroupDetailPage = () => {
   const { groupId } = useParams<{ groupId: string }>();
   const [activeTab, setActiveTab] = useState<"feed" | "members">("feed");
 
-  const groupName = `Группа №${groupId}`;
+  const { data: groups, isLoading } = useGetGroupsQuery();
+
+  const group = groups?.find((g) => g.id === groupId);
+
+  if (isLoading) {
+    return <div className={styles.page}>Загрузка...</div>;
+  }
+
+  if (!group) {
+    return <div className={styles.page}>Группа не найдена</div>;
+  }
 
   return (
     <div className={styles.page}>
-      <h1 className={styles.title}>{groupName}</h1>
+      <h1 className={styles.title}>{group.name}</h1>
 
       <div className={styles.tabs}>
         <button
@@ -20,6 +31,7 @@ export const GroupDetailPage = () => {
         >
           Лента
         </button>
+
         <button
           className={`${styles.tab} ${activeTab === "members" ? styles.active : ""}`}
           onClick={() => setActiveTab("members")}

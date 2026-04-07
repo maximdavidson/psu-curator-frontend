@@ -4,12 +4,14 @@ import { authSlice } from "@/stores/auth.store";
 import { STORE_NAMESPACE } from "@/shared";
 import { surveyApi } from "@/pages/surveys/survey.api";
 import { groupApi } from "@/pages/groups/group.api";
+import { calendarApi } from "@/services/calendar.api";
 
 export const rootReducer = combineReducers({
   [authApi.reducerPath]: authApi.reducer,
   [STORE_NAMESPACE.AUTH]: authSlice.reducer,
   [surveyApi.reducerPath]: surveyApi.reducer,
-  [groupApi.reducerPath]: groupApi.reducer
+  [groupApi.reducerPath]: groupApi.reducer,
+  [calendarApi.reducerPath]: calendarApi.reducer
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

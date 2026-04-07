@@ -18,6 +18,13 @@ export interface CreateGroupRequest {
   headStudentEmail?: string;
 }
 
+export interface UpdateGroupRequest {
+  id: string;
+  name: string;
+  faculty: string;
+  courseNumber: number;
+}
+
 export const groupApi = createApi({
   reducerPath: "groupApi",
   baseQuery: fetchBaseQuery({
@@ -32,17 +39,49 @@ export const groupApi = createApi({
   endpoints: (builder) => ({
     getGroups: builder.query<Group[], void>({
       query: () => "/Group",
-      providesTags: ["Group"]
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ id }) => ({
+                type: "Group" as const,
+                id
+              })),
+              { type: "Group" as const, id: "LIST" }
+            ]
+          : [{ type: "Group" as const, id: "LIST" }]
     }),
+
     createGroup: builder.mutation<Group, CreateGroupRequest>({
       query: (data) => ({
         url: "/Group",
         method: "POST",
         body: data
       }),
-      invalidatesTags: ["Group"]
+      invalidatesTags: [{ type: "Group", id: "LIST" }]
+    }),
+
+    deleteGroup: builder.mutation<void, string>({
+      query: (groupId) => ({
+        url: `/Group/${groupId}`,
+        method: "DELETE"
+      }),
+      invalidatesTags: [{ type: "Group", id: "LIST" }]
+    }),
+
+    updateGroup: builder.mutation<Group, UpdateGroupRequest>({
+      query: ({ id, ...body }) => ({
+        url: `/Group`,
+        method: "PUT",
+        body: { id, ...body }
+      }),
+      invalidatesTags: [{ type: "Group", id: "LIST" }]
     })
   })
 });
 
-export const { useGetGroupsQuery, useCreateGroupMutation } = groupApi;
+export const {
+  useGetGroupsQuery,
+  useCreateGroupMutation,
+  useDeleteGroupMutation,
+  useUpdateGroupMutation
+} = groupApi;

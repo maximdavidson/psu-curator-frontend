@@ -4,12 +4,6 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
-interface CreateGroupModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onCreate: (newGroup: CreateGroupFormData) => void;
-}
-
 export interface CreateGroupFormData {
   groupName: string;
   faculty: string;
@@ -18,29 +12,53 @@ export interface CreateGroupFormData {
   headStudentEmail?: string;
 }
 
-// Убираем nullable() и используем только optional()
+export interface EditGroupData {
+  id: string;
+  name: string;
+  faculty: string;
+  courseNumber: number;
+  curatorEmail?: string;
+  headStudentEmail?: string;
+}
+
+interface CreateGroupModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onCreate: (data: CreateGroupFormData) => void;
+  onUpdate: (data: EditGroupData) => void;
+  initialData?: EditGroupData | null;
+  mode: "create" | "edit";
+}
+
 const groupSchema = yup.object({
   groupName: yup
     .string()
     .required("Название группы обязательно")
     .max(50, "Максимум 50 символов"),
+
   faculty: yup.string().required("Выберите факультет"),
+
   courseNumber: yup
     .number()
     .min(1, "Курс от 1 до 6")
     .max(6, "Курс от 1 до 6")
     .required("Укажите курс"),
+
   curatorEmail: yup
     .string()
     .email("Введите корректный email")
     .required("Введите email куратора"),
-  headStudentEmail: yup.string().email("Введите корректный email").optional() // только optional, без nullable
+
+  headStudentEmail: yup.string().email("Введите корректный email").optional()
 });
 
 const CreateGroupModal = ({
   isOpen,
   onClose,
-  onCreate
+  onCreate,
+  onUpdate,
+  initialData,
+  mode
 }: CreateGroupModalProps) => {
   const {
     register,
@@ -50,19 +68,29 @@ const CreateGroupModal = ({
     formState: { errors }
   } = useForm<CreateGroupFormData>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: yupResolver(groupSchema) as any, // временное решение
+    resolver: yupResolver(groupSchema) as any,
     defaultValues: {
       groupName: "",
       faculty: "",
       courseNumber: 1,
       curatorEmail: "",
-      headStudentEmail: undefined // меняем с "" на undefined
+      headStudentEmail: undefined
     }
   });
 
   const groupNameValue = watch("groupName");
 
   useEffect(() => {
+    if (isOpen && mode === "edit" && initialData) {
+      reset({
+        groupName: initialData.name,
+        faculty: initialData.faculty,
+        courseNumber: initialData.courseNumber,
+        curatorEmail: initialData.curatorEmail ?? "",
+        headStudentEmail: initialData.headStudentEmail ?? undefined
+      });
+    }
+
     if (!isOpen) {
       reset({
         groupName: "",
@@ -72,10 +100,22 @@ const CreateGroupModal = ({
         headStudentEmail: undefined
       });
     }
-  }, [isOpen, reset]);
+  }, [isOpen, mode, initialData, reset]);
 
   const onSubmit: SubmitHandler<CreateGroupFormData> = (data) => {
-    onCreate(data);
+    if (mode === "edit" && initialData) {
+      onUpdate({
+        id: initialData.id,
+        name: data.groupName,
+        faculty: data.faculty,
+        courseNumber: data.courseNumber,
+        curatorEmail: data.curatorEmail,
+        headStudentEmail: data.headStudentEmail
+      });
+    } else {
+      onCreate(data);
+    }
+
     onClose();
     reset();
   };
@@ -86,7 +126,9 @@ const CreateGroupModal = ({
     <div className={styles.ModalOverlay}>
       <div className={styles.Modal}>
         <div className={styles.ModalHeader}>
-          <h2>Создание группы</h2>
+          <h2>
+            {mode === "edit" ? "Редактирование группы" : "Создание группы"}
+          </h2>
           <img
             className={styles.CloseBtn}
             onClick={onClose}
@@ -99,11 +141,7 @@ const CreateGroupModal = ({
           <div className={styles.Group}>
             <label>Название группы</label>
             <input type="text" maxLength={50} {...register("groupName")} />
-            <div
-              className={`${styles.CharCounter} ${
-                groupNameValue?.length === 50 ? styles.limit : ""
-              }`}
-            >
+            <div className={styles.CharCounter}>
               {groupNameValue?.length || 0}/50
             </div>
             {errors.groupName && (
@@ -176,8 +214,9 @@ const CreateGroupModal = ({
             >
               Отмена
             </button>
+
             <button type="submit" className={styles.CreateBtn}>
-              Создать
+              {mode === "edit" ? "Сохранить" : "Создать"}
             </button>
           </div>
         </form>

@@ -1,4 +1,3 @@
-// pages/surveys/surveys-page.tsx
 import { useState } from "react";
 import styles from "./surveys.module.scss";
 import { SurveyCard } from "./components/survey-card/survey-card";
@@ -37,10 +36,8 @@ export const SurveysPage = () => {
 
   const handleCreateSurvey = async (data: SurveyData) => {
     try {
-      await createSurvey({
-        ...data,
-        userId
-      }).unwrap();
+      // ❌ убрали userId
+      await createSurvey(data).unwrap();
       refetch();
       setIsOpen(false);
     } catch (err) {

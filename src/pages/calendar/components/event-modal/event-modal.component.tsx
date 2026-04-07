@@ -1,25 +1,33 @@
 import { useState } from "react";
 import styles from "./event-modal.module.scss";
 
-interface EventData {
-  title: string;
-  description: string;
-}
-
 interface Props {
-  event?: EventData | null;
+  event?: {
+    id?: string;
+    title: string;
+    description?: string;
+  } | null;
   onClose: () => void;
   onSave: (title: string, description: string) => void;
+  onDelete: (id: string) => void;
 }
 
-export const EventModal = ({ event, onClose, onSave }: Props) => {
+export const EventModal = ({ event, onClose, onSave, onDelete }: Props) => {
   const [title, setTitle] = useState(event?.title ?? "");
   const [description, setDescription] = useState(event?.description ?? "");
 
   const handleSubmit = () => {
     if (!title.trim()) return;
-
     onSave(title, description);
+  };
+
+  const handleDelete = () => {
+    if (!event?.id) return;
+
+    const confirmDelete = confirm("Удалить событие?");
+    if (!confirmDelete) return;
+
+    onDelete(event.id);
   };
 
   return (
@@ -29,20 +37,25 @@ export const EventModal = ({ event, onClose, onSave }: Props) => {
 
         <input
           className={styles.input}
-          placeholder="Заголовок"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
 
         <textarea
           className={styles.textarea}
-          placeholder="Описание"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
 
         <div className={styles.actions}>
           <button onClick={onClose}>Отмена</button>
+
+          {event && (
+            <button onClick={handleDelete} style={{ color: "red" }}>
+              Удалить
+            </button>
+          )}
+
           <button onClick={handleSubmit}>
             {event ? "Сохранить" : "Создать"}
           </button>

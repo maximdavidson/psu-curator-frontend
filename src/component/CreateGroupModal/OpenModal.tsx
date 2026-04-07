@@ -1,18 +1,29 @@
 import { useState } from "react";
 import styles from "./modal.module.scss";
 import CreateGroupModal from "./CreateGroupModal";
-import type { CreateGroupFormData } from "./CreateGroupModal";
+import type { CreateGroupFormData, EditGroupData } from "./CreateGroupModal";
+
 import { GroupCard } from "@/component/GroupCards/group-card.component";
 import {
   useGetGroupsQuery,
-  useCreateGroupMutation
+  useCreateGroupMutation,
+  useDeleteGroupMutation,
+  useUpdateGroupMutation
 } from "@/pages/groups/group.api";
 
 export default function GroupsPageCreate() {
   const [isOpen, setIsOpen] = useState(false);
+  const [mode, setMode] = useState<"create" | "edit">("create");
+  const [selectedGroup, setSelectedGroup] = useState<EditGroupData | null>(
+    null
+  );
+
   const { data: groups = [] } = useGetGroupsQuery();
   const [createGroup] = useCreateGroupMutation();
+  const [deleteGroup] = useDeleteGroupMutation();
+  const [updateGroup] = useUpdateGroupMutation();
 
+  // CREATE
   const handleCreateGroup = async (data: CreateGroupFormData) => {
     try {
       const payload = {
@@ -26,19 +37,51 @@ export default function GroupsPageCreate() {
           })
       };
 
-      console.log("Отправляемые данные:", payload);
-
       await createGroup(payload).unwrap();
-
-      // ❌ refetch НЕ нужен — RTK Query сам обновит
       setIsOpen(false);
     } catch (err) {
       console.error("Ошибка при создании группы:", err);
-      if (err && typeof err === "object" && "data" in err) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        console.error("Детали ошибки:", (err as any).data);
-      }
     }
+  };
+
+  // UPDATE
+  const handleUpdateGroup = async (data: EditGroupData) => {
+    try {
+      await updateGroup({
+        id: data.id,
+        name: data.name,
+        faculty: data.faculty,
+        courseNumber: data.courseNumber
+      }).unwrap();
+
+      setIsOpen(false);
+      setSelectedGroup(null);
+    } catch (err) {
+      console.error("Ошибка при обновлении группы:", err);
+    }
+  };
+
+  // DELETE (ВАЖНО: теперь это единственная точка удаления)
+  const handleDeleteGroup = async (groupId: string) => {
+    try {
+      await deleteGroup(groupId).unwrap();
+    } catch (err) {
+      console.error("Ошибка при удалении группы:", err);
+    }
+  };
+
+  // OPEN CREATE
+  const openCreateModal = () => {
+    setMode("create");
+    setSelectedGroup(null);
+    setIsOpen(true);
+  };
+
+  // OPEN EDIT
+  const openEditModal = (group: EditGroupData) => {
+    setMode("edit");
+    setSelectedGroup(group);
+    setIsOpen(true);
   };
 
   return (
@@ -51,18 +94,28 @@ export default function GroupsPageCreate() {
             groupName={group.name}
             curator={`${group.firstName} ${group.lastName}`}
             numberStudents={group.countOfstudents}
+            faculty={group.faculty}
+            courseNumber={1}
+            onEdit={openEditModal}
+            onDelete={handleDeleteGroup}
           />
         ))}
       </div>
 
       <CreateGroupModal
         isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
+        onClose={() => {
+          setIsOpen(false);
+          setSelectedGroup(null);
+        }}
         onCreate={handleCreateGroup}
+        onUpdate={handleUpdateGroup}
+        mode={mode}
+        initialData={selectedGroup}
       />
 
       <img
-        onClick={() => setIsOpen(true)}
+        onClick={openCreateModal}
         className={styles.AddBtn}
         src="./icons/Add_btn.svg"
         alt="Добавить группу"

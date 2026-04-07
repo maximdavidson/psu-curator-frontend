@@ -1,11 +1,9 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { ISurvey } from "./survey.types";
 
-// Обновите тип для создания опроса
 export interface CreateSurveyRequest {
   title: string;
   description: string;
-  userId: string; // ← добавляем userId
   questions: {
     text: string;
     type: string;
@@ -39,7 +37,7 @@ export const surveyApi = createApi({
       query: (data) => ({
         url: "/Survey",
         method: "POST",
-        body: data // теперь data содержит userId
+        body: data
       }),
       invalidatesTags: ["Survey"]
     }),
