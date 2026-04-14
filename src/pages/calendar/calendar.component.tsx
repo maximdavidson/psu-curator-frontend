@@ -52,18 +52,18 @@ export const CalendarPage = () => {
     setIsModalOpen(true);
   };
 
-  const handleSaveEvent = async (title: string, description: string) => {
-    if (editingEvent) {
-      return; // update пока нет
-    }
-
+  const handleSaveEvent = async (
+    title: string,
+    description: string,
+    invitedEmails: string[]
+  ) => {
     if (!slot) return;
 
     await createEvent({
       title,
       description,
       dateOfEvent: slot.start.toISOString(),
-      invitedUserIds: []
+      invitedUserEmails: invitedEmails
     });
 
     setIsModalOpen(false);

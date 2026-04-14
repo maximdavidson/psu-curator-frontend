@@ -4,13 +4,7 @@ import styles from "./group-card.module.scss";
 import HatIcon from "../../assets/hat-icon.svg";
 import BellIcon from "../../assets/notification-card-icon.svg";
 import MoreIcon from "../../assets/more-icon.svg";
-
-interface EditGroupData {
-  id: string;
-  name: string;
-  faculty: string;
-  courseNumber: number;
-}
+import type { EditGroupData } from "../CreateGroupModal/CreateGroupModal";
 
 interface GroupCardProps {
   curator: string;
@@ -19,6 +13,8 @@ interface GroupCardProps {
   groupId: string;
   faculty: string;
   courseNumber: number;
+  curatorEmail: string;
+  headStudentEmail?: string;
   onEdit: (group: EditGroupData) => void;
   onDelete: (groupId: string) => void;
 }
@@ -30,6 +26,8 @@ export const GroupCard = ({
   groupId,
   faculty,
   courseNumber,
+  curatorEmail,
+  headStudentEmail,
   onEdit,
   onDelete
 }: GroupCardProps) => {
@@ -61,7 +59,9 @@ export const GroupCard = ({
       id: groupId,
       name: groupName,
       faculty,
-      courseNumber
+      courseNumber,
+      curatorEmail,
+      headStudentEmail
     });
   };
 

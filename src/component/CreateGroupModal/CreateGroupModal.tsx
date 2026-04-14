@@ -44,10 +44,7 @@ const groupSchema = yup.object({
     .max(6, "Курс от 1 до 6")
     .required("Укажите курс"),
 
-  curatorEmail: yup
-    .string()
-    .email("Введите корректный email")
-    .required("Введите email куратора"),
+  curatorEmail: yup.string().email("Введите корректный email").optional(),
 
   headStudentEmail: yup.string().email("Введите корректный email").optional()
 });

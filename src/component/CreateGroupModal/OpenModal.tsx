@@ -51,7 +51,9 @@ export default function GroupsPageCreate() {
         id: data.id,
         name: data.name,
         faculty: data.faculty,
-        courseNumber: data.courseNumber
+        courseNumber: data.courseNumber,
+        curatorEmail: data.curatorEmail!,
+        headEmail: data.headStudentEmail
       }).unwrap();
 
       setIsOpen(false);
@@ -96,6 +98,8 @@ export default function GroupsPageCreate() {
             numberStudents={group.countOfstudents}
             faculty={group.faculty}
             courseNumber={1}
+            curatorEmail={group.curatorEmail}
+            headStudentEmail={group.headStudentEmail}
             onEdit={openEditModal}
             onDelete={handleDeleteGroup}
           />

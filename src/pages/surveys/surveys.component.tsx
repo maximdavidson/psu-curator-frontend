@@ -3,7 +3,7 @@ import styles from "./surveys.module.scss";
 import { SurveyCard } from "./components/survey-card/survey-card";
 import {
   CreateSurveyModal,
-  type SurveyData
+  type CreateSurveyPayload
 } from "./components/create-survey-modal/create-survey-modal";
 import { useGetUserSurveysQuery, useCreateSurveyMutation } from "./survey.api";
 
@@ -16,7 +16,7 @@ const getUserIdFromToken = (): string => {
     const payload = JSON.parse(atob(token.split(".")[1]));
     const userId =
       payload[
-        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/primarysid"
+        "http://schemas.microsoft.com/ws/2008/06/identity/claims/primarysid"
       ];
     return userId || "";
   } catch (error) {
@@ -34,10 +34,15 @@ export const SurveysPage = () => {
   const [createSurvey] = useCreateSurveyMutation();
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleCreateSurvey = async (data: SurveyData) => {
+  const handleCreateSurvey = async (data: CreateSurveyPayload) => {
     try {
-      // ❌ убрали userId
-      await createSurvey(data).unwrap();
+      // ✅ Создаём новый объект с userId
+      const requestData = {
+        ...data,
+        userId
+      };
+
+      await createSurvey(requestData).unwrap();
       refetch();
       setIsOpen(false);
     } catch (err) {

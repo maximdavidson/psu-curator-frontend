@@ -8,17 +8,24 @@ interface Props {
     description?: string;
   } | null;
   onClose: () => void;
-  onSave: (title: string, description: string) => void;
+  onSave: (title: string, description: string, emails: string[]) => void;
   onDelete: (id: string) => void;
 }
 
 export const EventModal = ({ event, onClose, onSave, onDelete }: Props) => {
   const [title, setTitle] = useState(event?.title ?? "");
   const [description, setDescription] = useState(event?.description ?? "");
+  const [emails, setEmails] = useState<string>("");
 
   const handleSubmit = () => {
     if (!title.trim()) return;
-    onSave(title, description);
+
+    const parsedEmails = emails
+      .split(",")
+      .map((e) => e.trim())
+      .filter(Boolean);
+
+    onSave(title, description, parsedEmails);
   };
 
   const handleDelete = () => {
@@ -37,15 +44,26 @@ export const EventModal = ({ event, onClose, onSave, onDelete }: Props) => {
 
         <input
           className={styles.input}
+          placeholder="Название"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
 
         <textarea
           className={styles.textarea}
+          placeholder="Описание"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
+
+        {!event && (
+          <input
+            className={styles.input}
+            placeholder="Emails через запятую"
+            value={emails}
+            onChange={(e) => setEmails(e.target.value)}
+          />
+        )}
 
         <div className={styles.actions}>
           <button onClick={onClose}>Отмена</button>

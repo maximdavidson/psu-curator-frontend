@@ -8,6 +8,9 @@ export interface Group {
   firstName: string;
   lastName: string;
   surname: string;
+
+  curatorEmail: string;
+  headStudentEmail?: string;
 }
 
 export interface CreateGroupRequest {
@@ -23,6 +26,8 @@ export interface UpdateGroupRequest {
   name: string;
   faculty: string;
   courseNumber: number;
+  curatorEmail: string;
+  headEmail?: string;
 }
 
 export const groupApi = createApi({

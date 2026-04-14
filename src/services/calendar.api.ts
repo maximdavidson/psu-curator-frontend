@@ -13,22 +13,14 @@ export interface CalendarEventDetails {
   title: string;
   description: string;
   creatorFullName: string;
-  invitedUsersIds: string[];
+  invitedUserEmails: string[];
 }
 
 export interface CreateCalendarEventRequest {
   dateOfEvent: string;
   title: string;
-  description: string;
-  invitedUserIds: string[];
-}
-
-export interface GetEventByIdResponse {
-  dateOfEvent: string;
-  title: string;
-  description: string;
-  creatorFullName: string;
-  invitedUsersIds: string[];
+  description?: string;
+  invitedUserEmails: string[];
 }
 
 export const calendarApi = createApi({
@@ -43,7 +35,6 @@ export const calendarApi = createApi({
   }),
   tagTypes: ["CalendarEvent"],
   endpoints: (builder) => ({
-    // GET all
     getEvents: builder.query<CalendarEvent[], void>({
       query: () => "/CalendarEvent/events",
       providesTags: (result) =>
@@ -58,13 +49,6 @@ export const calendarApi = createApi({
           : [{ type: "CalendarEvent", id: "LIST" }]
     }),
 
-    // GET by id
-    getEventById: builder.query<GetEventByIdResponse, string>({
-      query: (id) => `/CalendarEvent/events/${id}`,
-      providesTags: (_res, _err, id) => [{ type: "CalendarEvent", id }]
-    }),
-
-    // CREATE
     createEvent: builder.mutation<CalendarEvent, CreateCalendarEventRequest>({
       query: (body) => ({
         url: "/CalendarEvent/events",
@@ -74,23 +58,18 @@ export const calendarApi = createApi({
       invalidatesTags: [{ type: "CalendarEvent", id: "LIST" }]
     }),
 
-    // DELETE
     deleteEvent: builder.mutation<void, string>({
       query: (id) => ({
         url: `/CalendarEvent/events/${id}`,
         method: "DELETE"
       }),
-      invalidatesTags: (_res, _err, id) => [
-        { type: "CalendarEvent", id },
-        { type: "CalendarEvent", id: "LIST" }
-      ]
+      invalidatesTags: [{ type: "CalendarEvent", id: "LIST" }]
     })
   })
 });
 
 export const {
   useGetEventsQuery,
-  useGetEventByIdQuery,
   useCreateEventMutation,
   useDeleteEventMutation
 } = calendarApi;
