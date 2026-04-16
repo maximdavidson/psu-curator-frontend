@@ -1,11 +1,56 @@
-.page {
-  padding: 24px;
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 20px;
+  background: #f5f5f5;
+  border-radius: 8px;
 }
 
-.title {
-  margin-bottom: 20px;
+.toolbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toolbarRight {
+  display: flex;
+  gap: 5px;
+}
+
+.currentDate {
+  margin-left: 20px;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.toolbar button {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #e0e0e0;
+  }
+
+  &.active {
+    background: #1976d2;
+    color: white;
+    border-color: #1976d2;
+  }
 }
 
 .calendarWrapper {
-  height: 80vh;
+  height: 800px;
+  padding: 20px;
+
+  :global {
+    .rbc-calendar {
+      height: 100%;
+    }
+  }
 }

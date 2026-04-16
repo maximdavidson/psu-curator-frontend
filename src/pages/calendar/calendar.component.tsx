@@ -1,5 +1,11 @@
-import { useState } from "react";
-import { Calendar, momentLocalizer, type SlotInfo } from "react-big-calendar";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useCallback } from "react";
+import {
+  Calendar,
+  momentLocalizer,
+  Views,
+  type SlotInfo
+} from "react-big-calendar";
 import moment from "moment";
 import styles from "./calendar.module.scss";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -21,11 +27,56 @@ interface CalendarEventUI {
   end: Date;
 }
 
+// Компонент для кастомной панели инструментов
+const CustomToolbar = ({ date, onNavigate, onView, view }: any) => {
+  return (
+    <div className={styles.toolbar}>
+      <div className={styles.toolbarLeft}>
+        <button onClick={() => onNavigate("TODAY")}>Сегодня</button>
+        <button onClick={() => onNavigate("PREV")}>Назад</button>
+        <button onClick={() => onNavigate("NEXT")}>Вперед</button>
+        <span className={styles.currentDate}>
+          {moment(date).format("MMMM YYYY")}
+        </span>
+      </div>
+
+      <div className={styles.toolbarRight}>
+        <button
+          className={view === Views.MONTH ? styles.active : ""}
+          onClick={() => onView(Views.MONTH)}
+        >
+          Месяц
+        </button>
+        <button
+          className={view === Views.WEEK ? styles.active : ""}
+          onClick={() => onView(Views.WEEK)}
+        >
+          Неделя
+        </button>
+        <button
+          className={view === Views.DAY ? styles.active : ""}
+          onClick={() => onView(Views.DAY)}
+        >
+          День
+        </button>
+        <button
+          className={view === Views.AGENDA ? styles.active : ""}
+          onClick={() => onView(Views.AGENDA)}
+        >
+          Повестка
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export const CalendarPage = () => {
   const { data: events = [] } = useGetEventsQuery();
   const [createEvent] = useCreateEventMutation();
   const [deleteEvent] = useDeleteEventMutation();
 
+  const [view, setView] = useState(Views.MONTH);
+  const [date, setDate] = useState(new Date());
   const [slot, setSlot] = useState<SlotInfo | null>(null);
   const [editingEvent, setEditingEvent] = useState<CalendarEventUI | null>(
     null
@@ -82,10 +133,16 @@ export const CalendarPage = () => {
     setSlot(null);
   };
 
+  const handleNavigate = useCallback((newDate: Date) => {
+    setDate(newDate);
+  }, []);
+
+  const handleView = useCallback((newView: any) => {
+    setView(newView);
+  }, []);
+
   return (
     <div className={styles.page}>
-      <h1 className={styles.title}>Календарь</h1>
-
       <div className={styles.calendarWrapper}>
         <Calendar
           selectable
@@ -93,9 +150,16 @@ export const CalendarPage = () => {
           events={mappedEvents}
           startAccessor="start"
           endAccessor="end"
-          defaultDate={new Date()}
+          date={date}
+          view={view}
+          onNavigate={handleNavigate}
+          onView={handleView}
           onSelectSlot={handleSelectSlot}
           onSelectEvent={handleSelectEvent}
+          components={{
+            toolbar: CustomToolbar
+          }}
+          views={[Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA]}
         />
       </div>
 
