@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { useLocation } from "react-router-dom";
 import styles from "./header.module.scss";
+import { setSearchText } from "@/app/store/searchStore";
 
 const getUserEmail = (): string => {
   return localStorage.getItem("email") || "";
@@ -18,14 +20,40 @@ const getInitialsFromEmail = (email: string): string => {
   return namePart.slice(0, 2).toUpperCase();
 };
 
+// Маппинг путей к плейсхолдерам
+const getPlaceholderByPath = (path: string): string => {
+  if (path.startsWith("/groups") && path !== "/groups") {
+    return "Поиск по студентам...";
+  }
+  if (path === "/groups") {
+    return "Поиск по группам...";
+  }
+  if (path === "/surveys") {
+    return "Поиск по опросам...";
+  }
+  if (path === "/documents") {
+    return "Поиск по документам...";
+  }
+  return "Поиск...";
+};
+
+// Проверка, нужно ли показывать поиск
+const shouldShowSearch = (path: string): boolean => {
+  return path !== "/calendar";
+};
+
 export const Header = () => {
   const [text, setText] = useState<string>("");
+  const location = useLocation();
 
   const email = getUserEmail();
   const initials = getInitialsFromEmail(email);
+  const placeholder = getPlaceholderByPath(location.pathname);
+  const showSearch = shouldShowSearch(location.pathname);
 
-  const search = (value: string) => {
+  const handleSearch = (value: string) => {
     setText(value);
+    setSearchText(value);
   };
 
   return (
@@ -35,20 +63,22 @@ export const Header = () => {
         <h2 className={styles.PSU_text}>PSU Curator</h2>
       </div>
 
-      <div className={`${styles.center} ${styles.search}`}>
-        <img
-          className={styles.search_icon}
-          src="./icons/Search-icon.svg"
-          alt=""
-        />
-        <input
-          className={styles.search_input}
-          type="text"
-          placeholder="Поиск по группам..."
-          onChange={(e) => search(e.target.value)}
-          value={text}
-        />
-      </div>
+      {showSearch && (
+        <div className={`${styles.center} ${styles.search}`}>
+          <img
+            className={styles.search_icon}
+            src="./icons/Search-icon.svg"
+            alt=""
+          />
+          <input
+            className={styles.search_input}
+            type="text"
+            placeholder={placeholder}
+            onChange={(e) => handleSearch(e.target.value)}
+            value={text}
+          />
+        </div>
+      )}
 
       <div className={styles.right}>
         <img className={styles.bell} src="./icons/Bell-icon.svg" />

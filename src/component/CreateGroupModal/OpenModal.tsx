@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./modal.module.scss";
 import CreateGroupModal from "./CreateGroupModal";
 import type { CreateGroupFormData, EditGroupData } from "./CreateGroupModal";
-
 import { GroupCard } from "@/component/GroupCards/group-card.component";
 import {
   useGetGroupsQuery,
@@ -10,6 +9,7 @@ import {
   useDeleteGroupMutation,
   useUpdateGroupMutation
 } from "@/pages/groups/group.api";
+import { getSearchText, subscribeToSearch } from "@/app/store/searchStore";
 
 export default function GroupsPageCreate() {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,11 +17,21 @@ export default function GroupsPageCreate() {
   const [selectedGroup, setSelectedGroup] = useState<EditGroupData | null>(
     null
   );
+  const [search, setSearch] = useState(getSearchText());
 
   const { data: groups = [] } = useGetGroupsQuery();
   const [createGroup] = useCreateGroupMutation();
   const [deleteGroup] = useDeleteGroupMutation();
   const [updateGroup] = useUpdateGroupMutation();
+
+  useEffect(() => {
+    const unsubscribe = subscribeToSearch(setSearch);
+    return unsubscribe;
+  }, []);
+
+  const filteredGroups = groups.filter((group) =>
+    group.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   // CREATE
   const handleCreateGroup = async (data: CreateGroupFormData) => {
@@ -63,7 +73,7 @@ export default function GroupsPageCreate() {
     }
   };
 
-  // DELETE (ВАЖНО: теперь это единственная точка удаления)
+  // DELETE
   const handleDeleteGroup = async (groupId: string) => {
     try {
       await deleteGroup(groupId).unwrap();
@@ -89,7 +99,7 @@ export default function GroupsPageCreate() {
   return (
     <>
       <div className={styles.GroupCard}>
-        {groups.map((group) => (
+        {filteredGroups.map((group) => (
           <GroupCard
             key={group.id}
             groupId={group.id}

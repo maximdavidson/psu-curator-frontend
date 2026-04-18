@@ -27,7 +27,6 @@ interface CalendarEventUI {
   end: Date;
 }
 
-// Компонент для кастомной панели инструментов
 const CustomToolbar = ({ date, onNavigate, onView, view }: any) => {
   return (
     <div className={styles.toolbar}>
@@ -159,6 +158,7 @@ export const CalendarPage = () => {
           components={{
             toolbar: CustomToolbar
           }}
+          popup
           views={[Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA]}
         />
       </div>

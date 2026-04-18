@@ -4,7 +4,7 @@ import type { ISurvey } from "./survey.types";
 export interface CreateSurveyRequest {
   title: string;
   description: string;
-  userId: string; // ← добавили
+  userId: string;
   questions: {
     text: string;
     type: string;

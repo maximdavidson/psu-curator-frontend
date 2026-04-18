@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./surveys.module.scss";
 import { SurveyCard } from "./components/survey-card/survey-card";
 import {
@@ -6,6 +6,7 @@ import {
   type CreateSurveyPayload
 } from "./components/create-survey-modal/create-survey-modal";
 import { useGetUserSurveysQuery, useCreateSurveyMutation } from "./survey.api";
+import { getSearchText, subscribeToSearch } from "@/app/store/searchStore";
 
 // Получаем userId из токена
 const getUserIdFromToken = (): string => {
@@ -27,6 +28,7 @@ const getUserIdFromToken = (): string => {
 
 export const SurveysPage = () => {
   const userId = getUserIdFromToken();
+  const [search, setSearch] = useState(getSearchText());
 
   const { data: surveys = [], refetch } = useGetUserSurveysQuery(userId, {
     skip: !userId
@@ -34,9 +36,17 @@ export const SurveysPage = () => {
   const [createSurvey] = useCreateSurveyMutation();
   const [isOpen, setIsOpen] = useState(false);
 
+  useEffect(() => {
+    const unsubscribe = subscribeToSearch(setSearch);
+    return unsubscribe;
+  }, []);
+
+  const filteredSurveys = surveys.filter((survey) =>
+    survey.title.toLowerCase().includes(search.toLowerCase())
+  );
+
   const handleCreateSurvey = async (data: CreateSurveyPayload) => {
     try {
-      // ✅ Создаём новый объект с userId
       const requestData = {
         ...data,
         userId
@@ -50,6 +60,10 @@ export const SurveysPage = () => {
     }
   };
 
+  const handleDelete = () => {
+    refetch(); // обновляем список после удаления
+  };
+
   return (
     <div className={styles.page}>
       <div className={styles.header}>
@@ -58,8 +72,12 @@ export const SurveysPage = () => {
       </div>
 
       <div className={styles.list}>
-        {surveys.map((survey) => (
-          <SurveyCard key={survey.id} survey={survey} />
+        {filteredSurveys.map((survey) => (
+          <SurveyCard
+            key={survey.id}
+            survey={survey}
+            onDeleted={handleDelete}
+          />
         ))}
       </div>
 
