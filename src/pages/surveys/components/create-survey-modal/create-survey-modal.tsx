@@ -5,7 +5,6 @@ import * as yup from "yup";
 import { surveySchema } from "@/shared/model/schemas/create-survey-modal.schema";
 import type { Question, QuestionType } from "../../survey.types";
 
-// Тип для данных, отправляемых на сервер (без id)
 export interface CreateSurveyPayload {
   title: string;
   description: string;
@@ -16,14 +15,13 @@ export interface CreateSurveyPayload {
   }[];
 }
 
-// Для обратной совместимости оставляем SurveyData, но теперь он расширяет CreateSurveyPayload
 export interface SurveyData extends CreateSurveyPayload {
   questions: Question[];
 }
 
 interface Props {
   onClose: () => void;
-  onCreate: (data: CreateSurveyPayload) => void; // ← убрали ?, теперь обязательный
+  onCreate: (data: CreateSurveyPayload) => void;
   isLoading?: boolean;
 }
 
