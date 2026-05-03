@@ -1,36 +1,32 @@
-import { formatSize } from "../../model/format-size";
-import type { IFileEntity } from "../../model/types";
 import styles from "./FilesList.module.scss";
 
-type TProps = IFileEntity & {
-  handleDownload: (file: IFileEntity) => void;
-  handleDelete: (id?: number) => void;
+type TProps = {
+  id: string;
+  name: string;
+  size: number;
+  createdAt: number;
+  handleDownload: () => void;
+  handleDelete: (id?: string) => void;
 };
 
 export const FilesItem = ({
-  handleDelete,
+  id,
+  name,
+  size,
   handleDownload,
-  ...file
+  handleDelete
 }: TProps) => {
   return (
-    <li key={file.id} className={styles.item}>
+    <li className={styles.item}>
       <div className={styles.info}>
-        <span className={styles.name}>{file.name}</span>
-        <span className={styles.meta}>
-          {formatSize(file.size)} • {new Date(file.createdAt).toLocaleString()}
-        </span>
+        <span className={styles.name}>{name}</span>
+        <span className={styles.meta}>{size} bytes</span>
       </div>
       <div className={styles.actions}>
-        <button
-          className={styles.btnDownload}
-          onClick={() => handleDownload(file)}
-        >
+        <button className={styles.btnDownload} onClick={handleDownload}>
           Скачать
         </button>
-        <button
-          className={styles.btnDelete}
-          onClick={() => handleDelete(file.id)}
-        >
+        <button className={styles.btnDelete} onClick={() => handleDelete(id)}>
           Удалить
         </button>
       </div>

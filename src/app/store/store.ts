@@ -7,13 +7,19 @@ import { surveyApi } from "@/pages/surveys/survey.api";
 import { groupApi } from "@/pages/groups/group.api";
 import { combineReducers } from "@reduxjs/toolkit";
 import { calendarApi } from "@/services/calendar.api";
+import { groupFeedApi } from "@/pages/group-detail/groupFeed.api";
+import { documentsApi } from "@/pages/documents/documents.api";
+import { notificationApi } from "@/services/notification.api";
 
 const rootReducer = combineReducers({
   [authSlice.name]: authSlice.reducer,
   [authApi.reducerPath]: authApi.reducer,
   [surveyApi.reducerPath]: surveyApi.reducer,
   [groupApi.reducerPath]: groupApi.reducer,
-  [calendarApi.reducerPath]: calendarApi.reducer
+  [calendarApi.reducerPath]: calendarApi.reducer,
+  [groupFeedApi.reducerPath]: groupFeedApi.reducer,
+  [documentsApi.reducerPath]: documentsApi.reducer,
+  [notificationApi.reducerPath]: notificationApi.reducer
 });
 
 const persistConfig = {
@@ -35,7 +41,10 @@ export const store = configureStore({
       authApi.middleware,
       surveyApi.middleware,
       groupApi.middleware,
-      calendarApi.middleware
+      calendarApi.middleware,
+      groupFeedApi.middleware,
+      documentsApi.middleware,
+      notificationApi.middleware
     )
 });
 

@@ -114,7 +114,13 @@ export const CalendarPage = () => {
       description,
       dateOfEvent: slot.start.toISOString(),
       invitedUserEmails: invitedEmails
-    });
+    }).unwrap();
+
+    // Если invitedEmails не пустой — показываем уведомление
+    if (invitedEmails.length > 0) {
+      // Уведомление создастся на бэкенде автоматически
+      // или можно инвалидировать тег Notification
+    }
 
     setIsModalOpen(false);
     setSlot(null);

@@ -30,6 +30,36 @@ export interface UpdateGroupRequest {
   headEmail?: string;
 }
 
+export interface FeedItem {
+  id: string;
+  title: string;
+  description: string;
+  authorId: string;
+  authorName: string;
+  createdAt: string;
+  attachments: {
+    id: string;
+    fileName: string;
+    contentType: string;
+    fileSize: number;
+    description: string;
+    downloadUrl: string;
+    uploadedByName: string;
+  }[];
+}
+
+export interface GroupDetails {
+  id: string;
+  name: string;
+  faculty: string;
+  courseNumber: number;
+  curatorId: string;
+  curatorFullName: string;
+  headStudentId: string;
+  headStudentName: string;
+  feedItems: FeedItem[];
+}
+
 export const groupApi = createApi({
   reducerPath: "groupApi",
   baseQuery: fetchBaseQuery({
@@ -80,6 +110,16 @@ export const groupApi = createApi({
         body: { id, ...body }
       }),
       invalidatesTags: [{ type: "Group", id: "LIST" }]
+    }),
+    getGroupById: builder.query<GroupDetails, string>({
+      query: (groupId) => `/Group/${groupId}`,
+      providesTags: (result) =>
+        result
+          ? [
+              { type: "Group", id: result.id },
+              { type: "Group", id: "LIST" }
+            ]
+          : [{ type: "Group", id: "LIST" }]
     })
   })
 });
@@ -88,5 +128,6 @@ export const {
   useGetGroupsQuery,
   useCreateGroupMutation,
   useDeleteGroupMutation,
-  useUpdateGroupMutation
+  useUpdateGroupMutation,
+  useGetGroupByIdQuery
 } = groupApi;

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import styles from "./header.module.scss";
 import { setSearchText } from "@/app/store/searchStore";
+import { NotificationDropdown } from "../NotificationDropdown/notification-dropdown.component";
 
 const getUserEmail = (): string => {
   return localStorage.getItem("email") || "";
@@ -9,18 +10,14 @@ const getUserEmail = (): string => {
 
 const getInitialsFromEmail = (email: string): string => {
   if (!email) return "??";
-
   const namePart = email.split("@")[0];
   const parts = namePart.split(/[._-]/);
-
   if (parts.length >= 2) {
     return (parts[0][0] + parts[1][0]).toUpperCase();
   }
-
   return namePart.slice(0, 2).toUpperCase();
 };
 
-// Маппинг путей к плейсхолдерам
 const getPlaceholderByPath = (path: string): string => {
   if (path.startsWith("/groups") && path !== "/groups") {
     return "Поиск по студентам...";
@@ -37,7 +34,6 @@ const getPlaceholderByPath = (path: string): string => {
   return "Поиск...";
 };
 
-// Проверка, нужно ли показывать поиск
 const shouldShowSearch = (path: string): boolean => {
   return path !== "/calendar";
 };
@@ -81,7 +77,7 @@ export const Header = () => {
       )}
 
       <div className={styles.right}>
-        <img className={styles.bell} src="./icons/Bell-icon.svg" />
+        <NotificationDropdown />
         <div className={styles.user_icon}>{initials}</div>
       </div>
     </header>

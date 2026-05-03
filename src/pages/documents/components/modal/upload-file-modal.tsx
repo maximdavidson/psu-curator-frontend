@@ -5,46 +5,73 @@ import React, {
   type ChangeEvent
 } from "react";
 import styles from "./upload-file-modal.module.scss";
-import { db } from "../../model/db";
+import { useUploadFileMutation } from "../../documents.api";
 
 interface IFileUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "pdf", "doc", "docx", "txt"];
+
 export const FileUploadModal = ({ isOpen, onClose }: IFileUploadModalProps) => {
   const [isOver, setIsOver] = useState<boolean>(false);
-
+  const [error, setError] = useState<string | null>(null);
+  const [uploadFile] = useUploadFileMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
+
+  const resetState = () => {
+    setError(null);
+    setIsOver(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleClose = () => {
+    resetState();
+    onClose();
+  };
+
+  const isValidFile = (file: File): boolean => {
+    const extension = file.name.split(".").pop()?.toLowerCase();
+    return extension ? ALLOWED_EXTENSIONS.includes(extension) : false;
+  };
 
   const saveFiles = async (fileList: FileList | null): Promise<void> => {
     if (!fileList) return;
 
     const fileArray = Array.from(fileList);
 
-    try {
-      const uploadPromises = fileArray.map((file) => {
-        return db.files.add({
-          name: file.name,
-          type: file.type,
-          size: file.size,
-          content: file,
-          createdAt: Date.now()
-        });
-      });
+    const validFiles = fileArray.filter(isValidFile);
+    const invalidFiles = fileArray.filter((file) => !isValidFile(file));
 
-      await Promise.all(uploadPromises);
-      onClose();
+    if (invalidFiles.length > 0) {
+      setError("Такой формат не поддерживается!");
+    } else {
+      setError(null);
+    }
+
+    if (validFiles.length === 0) return;
+
+    try {
+      await Promise.all(
+        validFiles.map((file) => uploadFile({ file }).unwrap())
+      );
+
+      handleClose();
     } catch (error) {
-      console.error("Ошибка при сохранении файлов:", error);
+      console.error("Ошибка при загрузке:", error);
+      setError("Ошибка при загрузке файла");
     }
   };
 
   const handleDrop = (e: DragEvent<HTMLDivElement>): void => {
     e.preventDefault();
     setIsOver(false);
+
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       saveFiles(e.dataTransfer.files);
     }
@@ -55,12 +82,16 @@ export const FileUploadModal = ({ isOpen, onClose }: IFileUploadModalProps) => {
   };
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
+    <div className={styles.overlay} onClick={handleClose}>
       <div
         className={styles.modal}
         onClick={(e: React.MouseEvent) => e.stopPropagation()}
       >
         <h2>Загрузить файлы</h2>
+
+        <p className={styles.hint}>
+          Поддерживаемые форматы: JPG, JPEG, PNG, PDF, DOC, DOCX, TXT
+        </p>
 
         <div
           className={`${styles.dropZone} ${isOver ? styles.isOver : ""}`}
@@ -79,12 +110,15 @@ export const FileUploadModal = ({ isOpen, onClose }: IFileUploadModalProps) => {
             type="file"
             multiple
             ref={fileInputRef}
+            accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.txt"
             style={{ display: "none" }}
             onChange={handleInputChange}
           />
         </div>
 
-        <button className={styles.closeBtn} onClick={onClose}>
+        {error && <p className={styles.error}>{error}</p>}
+
+        <button className={styles.closeBtn} onClick={handleClose}>
           Отмена
         </button>
       </div>

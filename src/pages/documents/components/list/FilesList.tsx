@@ -1,46 +1,51 @@
-import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "../../model/db";
-import type { IFileEntity } from "../../model/types";
+import {
+  useGetUserFilesQuery,
+  useDeleteFileMutation,
+  useLazyDownloadFileQuery
+} from "../../documents.api";
 import styles from "./FilesList.module.scss";
 import { FilesItem } from "./FilesItem";
-export const FilesList = () => {
-  const files = useLiveQuery(
-    () => db.files.reverse().toArray() as Promise<IFileEntity[]>,
-    [] as IFileEntity[]
-  );
 
-  const handleDelete = async (id?: number) => {
-    if (id !== undefined) {
-      await db.files.delete(id);
-    }
+export const FilesList = () => {
+  const { data: files, isLoading } = useGetUserFilesQuery();
+  const [deleteFile] = useDeleteFileMutation();
+  const [downloadFile] = useLazyDownloadFileQuery();
+
+  const handleDelete = async (id?: string) => {
+    if (!id) return;
+    await deleteFile(id);
   };
 
-  const handleDownload = (file: IFileEntity) => {
-    const url = URL.createObjectURL(file.content);
+  const handleDownload = async (fileId: string, fileName: string) => {
+    const result = await downloadFile(fileId).unwrap();
+
+    const url = URL.createObjectURL(result);
     const link = document.createElement("a");
     link.href = url;
-    link.download = file.name;
-    document.body.appendChild(link);
+    link.download = fileName;
     link.click();
-    document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
 
-  if (!files) return <div>Загрузка...</div>;
+  if (isLoading) return <div>Загрузка...</div>;
 
   return (
     <div className={styles.container}>
-      <h3 className={styles.title}>Загруженные файлы ({files.length})</h3>
-      {files.length === 0 ? (
+      <h3 className={styles.title}>Загруженные файлы ({files?.length ?? 0})</h3>
+
+      {!files?.length ? (
         <p>Файлов пока нет</p>
       ) : (
         <ul className={styles.list}>
           {files.map((file) => (
             <FilesItem
               key={file.id}
-              {...file}
+              id={file.id}
+              name={file.fileName}
+              size={file.fileSize}
+              createdAt={0}
               handleDelete={handleDelete}
-              handleDownload={handleDownload}
+              handleDownload={() => handleDownload(file.id, file.fileName)}
             />
           ))}
         </ul>
