@@ -8,33 +8,33 @@ import {
 import { useGetUserSurveysQuery, useCreateSurveyMutation } from "./survey.api";
 import { getSearchText, subscribeToSearch } from "@/app/store/searchStore";
 
-// Получаем userId из токена
 const getUserIdFromToken = (): string => {
   const token = localStorage.getItem("token");
   if (!token) return "";
 
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
-    const userId =
+    return (
       payload[
         "http://schemas.microsoft.com/ws/2008/06/identity/claims/primarysid"
-      ];
-    return userId || "";
-  } catch (error) {
-    console.error("Ошибка при декодировании токена:", error);
+      ] || ""
+    );
+  } catch {
     return "";
   }
 };
 
 export const SurveysPage = () => {
   const userId = getUserIdFromToken();
+
   const [search, setSearch] = useState(getSearchText());
+  const [isOpen, setIsOpen] = useState(false);
 
   const { data: surveys = [], refetch } = useGetUserSurveysQuery(userId, {
     skip: !userId
   });
+
   const [createSurvey] = useCreateSurveyMutation();
-  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const unsubscribe = subscribeToSearch(setSearch);
@@ -47,12 +47,11 @@ export const SurveysPage = () => {
 
   const handleCreateSurvey = async (data: CreateSurveyPayload) => {
     try {
-      const requestData = {
+      await createSurvey({
         ...data,
         userId
-      };
+      }).unwrap();
 
-      await createSurvey(requestData).unwrap();
       refetch();
       setIsOpen(false);
     } catch (err) {
@@ -61,14 +60,20 @@ export const SurveysPage = () => {
   };
 
   const handleDelete = () => {
-    refetch(); // обновляем список после удаления
+    refetch();
   };
 
   return (
     <div className={styles.page}>
       <div className={styles.header}>
         <h1>Опросы</h1>
-        <button onClick={() => setIsOpen(true)}>Создать опрос</button>
+
+        <button
+          className={styles["primary-button"]}
+          onClick={() => setIsOpen(true)}
+        >
+          Создать опрос
+        </button>
       </div>
 
       <div className={styles.list}>

@@ -11,6 +11,7 @@ import { SurveysPage } from "@/pages/surveys/surveys.component";
 import { DocumentsPage } from "@/pages/documents/";
 import { CalendarPage } from "@/pages/calendar/calendar.component";
 import { GroupDetailPage } from "@/pages/group-detail/group-detail.page";
+import { TeachersPage } from "@/pages/teachers/teachers.page";
 
 export const router = createBrowserRouter([
   {
@@ -59,6 +60,10 @@ export const router = createBrowserRouter([
               {
                 path: "/calendar",
                 element: <CalendarPage />
+              },
+              {
+                path: "/teachers",
+                element: <TeachersPage />
               },
               {
                 path: "/groups/:groupId",

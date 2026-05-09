@@ -2,9 +2,38 @@
 @use "@/styles/mixins.module.scss" as *;
 
 .page {
-  padding: 10px;
+  padding: 24px;
+  min-height: 100%;
 }
 
-.upload-file-button {
-  @include create-button;
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+
+  h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1f2937;
+  }
+}
+
+.primary-button {
+  background: #4f46e5;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+  font-weight: 500;
+
+  &:hover {
+    background: #4338ca;
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
 }

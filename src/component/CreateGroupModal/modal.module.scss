@@ -1,203 +1,173 @@
 @use "../../styles/variables.module.scss" as *;
 
-.AddBtn {
-  cursor: pointer;
-  position: fixed;
-  bottom: 25px;
-  right: 25px;
-  z-index: 1000;
-}
-
 .ModalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(17, 24, 39, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
-  animation: fadeIn 0.2s ease-in-out;
   z-index: 1000;
+  animation: fadeIn 0.15s ease-in-out;
 }
 
 .Modal {
-  position: relative;
-  border-radius: 50px;
   background: #fff;
-  max-height: 90vh;
-  max-width: 700px;
+  border-radius: 16px;
   width: 90%;
-  padding: 26px;
-  overflow-y: visible;
+  max-width: 700px;
+  max-height: 90vh;
+  padding: 24px;
   display: flex;
   flex-direction: column;
-
-  &::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: $color-primary;
-    border-radius: 10px;
-  }
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
 }
 
 .ModalHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
-  position: sticky;
-  top: 0;
-  background: #fff;
-  padding-bottom: 10px;
-  z-index: 10;
+  margin-bottom: 20px;
 
   h2 {
-    font-size: 36px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #111827;
     margin: 0;
   }
 
   .CloseBtn {
-    width: 25px;
-    height: 25px;
+    width: 24px;
+    height: 24px;
     cursor: pointer;
+    opacity: 0.6;
+    transition: 0.2s;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 }
 
 .ModalBody {
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 16px;
   overflow-y: auto;
-  padding-right: 8px;
-  margin-right: -8px;
+  padding-right: 4px;
+}
 
-  label {
-    font-size: 20px;
-    font-weight: 500;
-    margin-bottom: 5px;
+.Group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+input,
+select {
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  padding: 0 12px;
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s;
+
+  &:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
   }
+}
 
-  .Group {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 5px;
-    width: 100%;
-  }
-
-  input,
-  select {
-    display: block;
-    box-sizing: border-box;
-    height: 50px;
-    width: 100%;
-    border-radius: 15px;
-    padding: 0 15px;
-    border: 1px solid #ddd;
-    font-size: 16px;
-    background: #fff;
-
-    &:focus {
-      border-color: $color-primary;
-      outline: none;
-      box-shadow: 0 0 0 2px rgba($color-primary, 0.1);
-    }
-  }
-
-  select {
-    cursor: pointer;
-
-    option {
-      background: #fff;
-      color: #333;
-
-      &:hover {
-        background: $color-primary;
-        color: white;
-      }
-    }
-  }
-
-  .CharCounter {
-    margin-left: 15px;
-    font-size: 14px;
-    color: #666;
-  }
-
-  .limit {
-    color: red;
-  }
+.CharCounter {
+  font-size: 12px;
+  color: #9ca3af;
 }
 
 .ModalFooter {
   display: flex;
   justify-content: flex-end;
-  gap: 20px;
+  gap: 10px;
   margin-top: 20px;
-  padding-top: 20px;
-  position: sticky;
-  bottom: 0;
-  background: #fff;
+  padding-top: 16px;
+  border-top: 1px solid #f3f4f6;
+}
 
-  button {
-    padding: 12px 30px;
-    font-size: 18px;
-    border-radius: 15px;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s ease;
+.ModalFooter button {
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+  border: none;
+}
 
-    &:hover {
-      transform: translateY(-2px);
-    }
+.CancelBtn {
+  background: #f3f4f6;
+  color: #374151;
 
-    &:active {
-      transform: translateY(0);
-    }
-  }
-
-  .CancelBtn {
-    background: #f8ecec;
-    color: #333;
-
-    &:hover {
-      background: #f0e0e0;
-    }
-  }
-
-  .CreateBtn {
-    background: #cccfff;
-    color: #333;
-
-    &:hover {
-      background: #b8bcee;
-    }
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
+  &:hover {
+    background: #e5e7eb;
   }
 }
 
-.GroupCard {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+.CreateBtn {
+  background: #4f46e5;
+  color: #fff;
+
+  &:hover {
+    background: #4338ca;
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 
 .Error {
-  color: red;
-  font-size: 14px;
-  margin-top: 4px;
-  font-weight: 500;
+  font-size: 12px;
+  color: #ef4444;
+}
+
+.AddBtn {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  font-size: 28px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(79, 70, 229, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+  z-index: 1000;
+
+  &:hover {
+    background: #a4a4a493;
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
 @keyframes fadeIn {

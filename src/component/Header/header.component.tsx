@@ -31,6 +31,9 @@ const getPlaceholderByPath = (path: string): string => {
   if (path === "/documents") {
     return "Поиск по документам...";
   }
+  if (path === "/teachers") {
+    return "Поиск по преподавателям...";
+  }
   return "Поиск...";
 };
 

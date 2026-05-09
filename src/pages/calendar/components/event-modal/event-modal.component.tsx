@@ -15,7 +15,7 @@ interface Props {
 export const EventModal = ({ event, onClose, onSave, onDelete }: Props) => {
   const [title, setTitle] = useState(event?.title ?? "");
   const [description, setDescription] = useState(event?.description ?? "");
-  const [emails, setEmails] = useState<string>("");
+  const [emails, setEmails] = useState("");
 
   const handleSubmit = () => {
     if (!title.trim()) return;
@@ -38,9 +38,11 @@ export const EventModal = ({ event, onClose, onSave, onDelete }: Props) => {
   };
 
   return (
-    <div className={styles.overlay}>
-      <div className={styles.modal}>
-        <h2>{event ? "Редактировать событие" : "Создать событие"}</h2>
+    <div className={styles.overlay} onClick={onClose}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <h2 className={styles.title}>
+          {event ? "Редактирование события" : "Создание события"}
+        </h2>
 
         <input
           className={styles.input}
@@ -66,15 +68,17 @@ export const EventModal = ({ event, onClose, onSave, onDelete }: Props) => {
         )}
 
         <div className={styles.actions}>
-          <button onClick={onClose}>Отмена</button>
+          <button onClick={onClose} className={styles.cancelButton}>
+            Отмена
+          </button>
 
           {event && (
-            <button onClick={handleDelete} style={{ color: "red" }}>
+            <button onClick={handleDelete} className={styles.deleteButton}>
               Удалить
             </button>
           )}
 
-          <button onClick={handleSubmit}>
+          <button onClick={handleSubmit} className={styles.submitButton}>
             {event ? "Сохранить" : "Создать"}
           </button>
         </div>
