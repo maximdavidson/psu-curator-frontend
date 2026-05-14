@@ -26,7 +26,8 @@ export interface CreateFeedItemRequest {
   type: FeedItemType;
   groupId: string;
   surveyId?: string;
-  attachments?: string[];
+  /** Файлы в multipart-поле Attachments (контракт OpenAPI: array binary). */
+  attachmentFiles?: File[];
 }
 
 export interface UpdateFeedItemRequest {
@@ -34,8 +35,8 @@ export interface UpdateFeedItemRequest {
   description: string;
   type: FeedItemType;
   groupId: string;
-  surveyId?: string;
-  attachments?: string[];
+  surveyId?: string | null;
+  documentId?: string | null;
 }
 
 export const groupFeedApi = createApi({
@@ -52,14 +53,17 @@ export const groupFeedApi = createApi({
   endpoints: (builder) => ({
     createFeedItem: builder.mutation<void, CreateFeedItemRequest>({
       query: (body) => {
-        // Создание - через FormData
         const formData = new FormData();
         formData.append("Title", body.title);
-        formData.append("Description", body.description);
-        formData.append("Type", body.type.toString());
+        formData.append("Description", body.description ?? "");
+        formData.append("Type", String(body.type));
         formData.append("GroupId", body.groupId);
-        formData.append("SurveyId", body.surveyId || "");
-        formData.append("Attachments", "");
+        if (body.surveyId) {
+          formData.append("SurveyId", body.surveyId);
+        }
+        for (const file of body.attachmentFiles ?? []) {
+          formData.append("Attachments", file);
+        }
 
         return {
           url: `/GroupFeedItem`,
@@ -67,7 +71,7 @@ export const groupFeedApi = createApi({
           body: formData
         };
       },
-      invalidatesTags: (result, error, arg) => [
+      invalidatesTags: (_result, _error, arg) => [
         { type: "Feed", id: "LIST" },
         { type: "Group", id: arg.groupId }
       ]
@@ -78,22 +82,21 @@ export const groupFeedApi = createApi({
       { id: string; body: UpdateFeedItemRequest }
     >({
       query: ({ id, body }) => ({
-        // Обновление - через JSON
         url: `/GroupFeedItem/${id}`,
         method: "PUT",
         headers: {
           "Content-Type": "application/json"
         },
         body: {
-          Title: body.title,
-          Description: body.description,
-          Type: body.type,
-          GroupId: body.groupId,
-          SurveyId: body.surveyId || null,
-          Attachments: body.attachments || []
+          title: body.title,
+          description: body.description,
+          type: body.type,
+          groupId: body.groupId,
+          surveyId: body.surveyId ?? null,
+          documentId: body.documentId ?? null
         }
       }),
-      invalidatesTags: (result, error, arg) => [
+      invalidatesTags: (_result, _error, arg) => [
         { type: "Feed", id: "LIST" },
         { type: "Group", id: arg.body.groupId }
       ]
@@ -104,7 +107,7 @@ export const groupFeedApi = createApi({
         url: `/GroupFeedItem/${id}`,
         method: "DELETE"
       }),
-      invalidatesTags: (result, error, arg) => [
+      invalidatesTags: (_result, _error, arg) => [
         { type: "Feed", id: "LIST" },
         { type: "Group", id: arg.groupId }
       ]

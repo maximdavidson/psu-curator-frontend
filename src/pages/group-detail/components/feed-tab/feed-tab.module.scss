@@ -20,6 +20,16 @@
     }
   }
 
+  .feedActionError {
+    margin: -8px 0 16px;
+    padding: 12px 14px;
+    font-size: 14px;
+    color: #991b1b;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+  }
+
   .feedList {
     display: flex;
     flex-direction: column;
@@ -80,6 +90,42 @@
       color: #999;
     }
 
+    .feedItemMeta {
+      padding: 0 20px 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .kindBadge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      color: #4b5563;
+    }
+
+    .kindBadge[data-kind="document"] {
+      background: #e0e7ff;
+      color: #4338ca;
+    }
+
+    .kindBadge[data-kind="poll"] {
+      background: #fce7f3;
+      color: #9d174d;
+    }
+
+    .kindBadge[data-kind="message"] {
+      background: #ecfdf5;
+      color: #047857;
+    }
+
     .feedItemContent {
       padding: 0 20px 16px;
     }
@@ -97,6 +143,32 @@
       color: #666;
       line-height: 1.6;
       margin: 0 0 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .pollActions {
+      margin: 0 0 14px;
+    }
+
+    .pollLinkButton {
+      padding: 8px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      color: #4f46e5;
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
+      border-radius: 10px;
+      cursor: pointer;
+      transition:
+        background 0.15s ease,
+        border-color 0.15s ease;
+
+      &:hover {
+        background: #e0e7ff;
+        border-color: #a5b4fc;
+      }
     }
 
     .attachments {

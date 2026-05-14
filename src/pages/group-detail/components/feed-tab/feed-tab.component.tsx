@@ -2,11 +2,13 @@ import styles from "./feed-tab.module.scss";
 import { EventFormModal } from "./event-form-modal/event-form-modal.component";
 import { useState } from "react";
 import {
+  useCreateFeedItemMutation,
   useDeleteFeedItemMutation,
   useUpdateFeedItemMutation,
   FeedItemType
 } from "../../groupFeed.api";
 import { useLazyDownloadFileQuery } from "@/pages/documents/documents.api";
+import { useGetUserFilesQuery } from "@/pages/documents/documents.api";
 import type { FeedItem } from "@/pages/groups/group.api";
 import { SurveyViewModal } from "./survey-view-modal/survey-view-modal.component";
 
@@ -17,8 +19,10 @@ interface Props {
 }
 
 const getInitials = (name: string): string => {
-  return name
-    .split(" ")
+  const n = name?.trim() || "?";
+  const parts = n.split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  return parts
     .map((word) => word[0])
     .join("")
     .toUpperCase()
@@ -62,16 +66,67 @@ const getFileIcon = (contentType: string): string => {
   return "📄";
 };
 
+type FeedKind = "message" | "poll" | "document";
+
+const getFeedKind = (item: FeedItem): { kind: FeedKind; label: string } => {
+  const t = item.type;
+  if ((item.attachments?.length ?? 0) > 0 || t === FeedItemType.Document) {
+    return { kind: "document", label: "Документ" };
+  }
+  if (t === FeedItemType.Poll || item.surveyId) {
+    return { kind: "poll", label: "Опрос" };
+  }
+  return { kind: "message", label: "Сообщение" };
+};
+
+const editContentTypeFromItem = (
+  item: FeedItem
+): "message" | "poll" | "file" => {
+  const k = getFeedKind(item).kind;
+  if (k === "document") return "file";
+  if (k === "poll") return "poll";
+  return "message";
+};
+
 export const FeedTab = ({ groupId, feed, onRefetch }: Props) => {
+  const [createFeedItem] = useCreateFeedItemMutation();
   const [updateFeedItem] = useUpdateFeedItemMutation();
   const [deleteFeedItem] = useDeleteFeedItemMutation();
   const [downloadFile] = useLazyDownloadFileQuery();
+  const { data: userFiles = [] } = useGetUserFilesQuery();
+
+  const [feedActionError, setFeedActionError] = useState<string | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<FeedItem | null>(null);
 
   // Для просмотра опроса
   const [viewingSurveyId, setViewingSurveyId] = useState<string | null>(null);
+
+  const buildAttachmentFilesFromLibrary = async (
+    fileIds: string[]
+  ): Promise<File[]> => {
+    const token = localStorage.getItem("token");
+    const files: File[] = [];
+    for (const fileId of fileIds) {
+      const meta = userFiles.find((f) => f.id === fileId);
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/Files/download/${fileId}`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        }
+      );
+      if (!res.ok) {
+        throw new Error(`download ${fileId}`);
+      }
+      const blob = await res.blob();
+      const name = meta?.fileName ?? "вложение";
+      const ctype =
+        meta?.contentType || blob.type || "application/octet-stream";
+      files.push(new File([blob], name, { type: ctype }));
+    }
+    return files;
+  };
 
   const handleCreate = async (item: {
     title: string;
@@ -80,40 +135,38 @@ export const FeedTab = ({ groupId, feed, onRefetch }: Props) => {
     selectedFileIds?: string[];
     selectedSurveyId?: string;
   }) => {
+    setFeedActionError(null);
     try {
       let feedType: FeedItemType = FeedItemType.Message;
       if (item.contentType === "file") feedType = FeedItemType.Document;
       if (item.contentType === "poll") feedType = FeedItemType.Poll;
 
-      const formData = new FormData();
-      formData.append("Title", item.title);
-      formData.append("Description", item.description || "");
-      formData.append("Type", feedType.toString());
-      formData.append("GroupId", groupId);
-      formData.append("SurveyId", item.selectedSurveyId || "");
-      formData.append("DocumentId", item.selectedFileIds?.[0] || "");
-      formData.append("Attachments", "");
-
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/GroupFeedItem`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
-          },
-          body: formData
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Ошибка создания записи");
+      let attachmentFiles: File[] | undefined;
+      if (item.contentType === "file" && item.selectedFileIds?.length) {
+        attachmentFiles = await buildAttachmentFilesFromLibrary(
+          item.selectedFileIds
+        );
       }
 
-      onRefetch();
+      await createFeedItem({
+        title: item.title,
+        description: item.description ?? "",
+        type: feedType,
+        groupId,
+        surveyId:
+          item.contentType === "poll" ? item.selectedSurveyId : undefined,
+        attachmentFiles
+      }).unwrap();
+
+      await onRefetch();
       setIsModalOpen(false);
       setEditingItem(null);
     } catch (err) {
       console.error("Ошибка создания:", err);
+      setFeedActionError(
+        "Не удалось создать запись. Проверьте вложения и доступ к файлам."
+      );
+      throw err;
     }
   };
 
@@ -126,27 +179,40 @@ export const FeedTab = ({ groupId, feed, onRefetch }: Props) => {
   }) => {
     if (!editingItem) return;
 
+    setFeedActionError(null);
     try {
       let feedType: FeedItemType = FeedItemType.Message;
       if (item.contentType === "file") feedType = FeedItemType.Document;
       if (item.contentType === "poll") feedType = FeedItemType.Poll;
 
+      const surveyId =
+        item.contentType === "poll" ? (item.selectedSurveyId ?? null) : null;
+      const documentId =
+        item.contentType === "file"
+          ? (item.selectedFileIds?.[0] ??
+            editingItem.attachments?.[0]?.id ??
+            null)
+          : null;
+
       await updateFeedItem({
         id: editingItem.id,
         body: {
           title: item.title,
-          description: item.description || "",
+          description: item.description ?? "",
           type: feedType,
           groupId,
-          surveyId: item.selectedSurveyId || ""
+          surveyId,
+          documentId
         }
       }).unwrap();
 
-      onRefetch();
+      await onRefetch();
       setEditingItem(null);
       setIsModalOpen(false);
     } catch (err) {
       console.error("Ошибка обновления:", err);
+      setFeedActionError("Не удалось сохранить изменения.");
+      throw err;
     }
   };
 
@@ -166,13 +232,21 @@ export const FeedTab = ({ groupId, feed, onRefetch }: Props) => {
   };
 
   const handleEditClick = (item: FeedItem) => {
+    setFeedActionError(null);
     setEditingItem(item);
     setIsModalOpen(true);
   };
 
   const handleModalClose = () => {
+    setFeedActionError(null);
     setIsModalOpen(false);
     setEditingItem(null);
+  };
+
+  const handleOpenCreateModal = () => {
+    setFeedActionError(null);
+    setEditingItem(null);
+    setIsModalOpen(true);
   };
 
   const handleFileDownload = async (file: {
@@ -195,16 +269,17 @@ export const FeedTab = ({ groupId, feed, onRefetch }: Props) => {
     }
   };
 
-  const getItemTypeLabel = (item: FeedItem): string => {
-    if (item.attachments && item.attachments.length > 0) return "📎";
-    return "";
-  };
-
   return (
     <div className={styles.feedTab}>
-      <button className={styles.addButton} onClick={() => setIsModalOpen(true)}>
+      <button className={styles.addButton} onClick={handleOpenCreateModal}>
         + Добавить запись
       </button>
+
+      {feedActionError && (
+        <div className={styles.feedActionError} role="alert">
+          {feedActionError}
+        </div>
+      )}
 
       <div className={styles.feedList}>
         {feed.length === 0 && (
@@ -216,70 +291,97 @@ export const FeedTab = ({ groupId, feed, onRefetch }: Props) => {
           </div>
         )}
 
-        {feed.map((item) => (
-          <div key={item.id} className={styles.feedItem}>
-            <div className={styles.feedItemHeader}>
-              <div className={styles.avatar}>
-                {getInitials(item.authorName)}
-              </div>
-              <div className={styles.authorInfo}>
-                <div className={styles.authorName}>
-                  {getItemTypeLabel(item)} {item.authorName}
+        {feed.map((item) => {
+          const { kind, label } = getFeedKind(item);
+          return (
+            <div key={item.id} className={styles.feedItem}>
+              <div className={styles.feedItemHeader}>
+                <div className={styles.avatar}>
+                  {getInitials(item.authorName)}
                 </div>
-                <div className={styles.date}>{formatDate(item.createdAt)}</div>
-              </div>
-            </div>
-
-            <div className={styles.feedItemContent}>
-              <h3 className={styles.title}>{item.title}</h3>
-              {item.description && (
-                <p className={styles.description}>{item.description}</p>
-              )}
-
-              {item.attachments && item.attachments.length > 0 && (
-                <div className={styles.attachments}>
-                  <div className={styles.attachmentsLabel}>
-                    Прикреплённые файлы:
+                <div className={styles.authorInfo}>
+                  <div className={styles.authorName}>{item.authorName}</div>
+                  <div className={styles.date}>
+                    {formatDate(item.createdAt)}
                   </div>
-                  {item.attachments.map((attachment) => (
-                    <div
-                      key={attachment.id}
-                      className={styles.attachmentBadge}
-                      onClick={() => handleFileDownload(attachment)}
-                      title={`Скачать ${attachment.fileName}`}
-                    >
-                      <span className={styles.attachmentIcon}>
-                        {getFileIcon(attachment.contentType)}
-                      </span>
-                      <span className={styles.attachmentName}>
-                        {attachment.fileName}
-                      </span>
-                      <span className={styles.attachmentSize}>
-                        {formatFileSize(attachment.fileSize)}
-                      </span>
-                      <span className={styles.downloadIcon}>↓</span>
-                    </div>
-                  ))}
                 </div>
-              )}
-            </div>
+              </div>
 
-            <div className={styles.feedItemActions}>
-              <button
-                className={`${styles.actionButton} ${styles.editButton}`}
-                onClick={() => handleEditClick(item)}
-              >
-                Редактировать
-              </button>
-              <button
-                className={`${styles.actionButton} ${styles.deleteButton}`}
-                onClick={() => handleDelete(item.id)}
-              >
-                Удалить
-              </button>
+              <div className={styles.feedItemMeta}>
+                <span className={styles.kindBadge} data-kind={kind}>
+                  {label}
+                </span>
+              </div>
+
+              <div className={styles.feedItemContent}>
+                <h3 className={styles.title}>{item.title}</h3>
+                {item.description?.trim() ? (
+                  <p className={styles.description}>{item.description}</p>
+                ) : null}
+
+                {item.surveyId && (
+                  <div className={styles.pollActions}>
+                    <button
+                      type="button"
+                      className={styles.pollLinkButton}
+                      onClick={() => setViewingSurveyId(item.surveyId!)}
+                    >
+                      Открыть опрос
+                    </button>
+                  </div>
+                )}
+
+                {item.attachments && item.attachments.length > 0 && (
+                  <div className={styles.attachments}>
+                    <div className={styles.attachmentsLabel}>Файлы</div>
+                    {item.attachments.map((attachment) => (
+                      <div
+                        key={attachment.id}
+                        className={styles.attachmentBadge}
+                        onClick={() => handleFileDownload(attachment)}
+                        title={`Скачать ${attachment.fileName}`}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            void handleFileDownload(attachment);
+                          }
+                        }}
+                      >
+                        <span className={styles.attachmentIcon}>
+                          {getFileIcon(attachment.contentType)}
+                        </span>
+                        <span className={styles.attachmentName}>
+                          {attachment.fileName}
+                        </span>
+                        <span className={styles.attachmentSize}>
+                          {formatFileSize(attachment.fileSize)}
+                        </span>
+                        <span className={styles.downloadIcon}>↓</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className={styles.feedItemActions}>
+                <button
+                  className={`${styles.actionButton} ${styles.editButton}`}
+                  onClick={() => handleEditClick(item)}
+                >
+                  Редактировать
+                </button>
+                <button
+                  className={`${styles.actionButton} ${styles.deleteButton}`}
+                  onClick={() => void handleDelete(item.id)}
+                >
+                  Удалить
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {isModalOpen && (
@@ -291,7 +393,10 @@ export const FeedTab = ({ groupId, feed, onRefetch }: Props) => {
             editingItem
               ? {
                   title: editingItem.title,
-                  description: editingItem.description || ""
+                  description: editingItem.description || "",
+                  contentType: editContentTypeFromItem(editingItem),
+                  selectedSurveyId: editingItem.surveyId ?? null,
+                  selectedFileId: editingItem.attachments?.[0]?.id ?? null
                 }
               : undefined
           }

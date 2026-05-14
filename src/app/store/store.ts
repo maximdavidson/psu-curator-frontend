@@ -10,6 +10,7 @@ import { calendarApi } from "@/services/calendar.api";
 import { groupFeedApi } from "@/pages/group-detail/groupFeed.api";
 import { documentsApi } from "@/pages/documents/documents.api";
 import { notificationApi } from "@/services/notification.api";
+import { userApi } from "@/services/user.api";
 
 const rootReducer = combineReducers({
   [authSlice.name]: authSlice.reducer,
@@ -19,7 +20,8 @@ const rootReducer = combineReducers({
   [calendarApi.reducerPath]: calendarApi.reducer,
   [groupFeedApi.reducerPath]: groupFeedApi.reducer,
   [documentsApi.reducerPath]: documentsApi.reducer,
-  [notificationApi.reducerPath]: notificationApi.reducer
+  [notificationApi.reducerPath]: notificationApi.reducer,
+  [userApi.reducerPath]: userApi.reducer
 });
 
 const persistConfig = {
@@ -44,7 +46,8 @@ export const store = configureStore({
       calendarApi.middleware,
       groupFeedApi.middleware,
       documentsApi.middleware,
-      notificationApi.middleware
+      notificationApi.middleware,
+      userApi.middleware
     )
 });
 

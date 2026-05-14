@@ -1,0 +1,171 @@
+.membersTab {
+  max-width: 720px;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 12px;
+  color: #333;
+}
+
+.memberList {
+  list-style: none;
+  margin: 0 0 28px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.memberCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1px solid #e8e8f0;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.memberMain {
+  min-width: 0;
+}
+
+.memberName {
+  font-weight: 600;
+  font-size: 15px;
+  color: #222;
+  margin: 0 0 4px;
+}
+
+.memberEmail {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  word-break: break-all;
+}
+
+.emptyHint {
+  color: #777;
+  font-size: 14px;
+  margin: 0 0 24px;
+}
+
+.searchBlock {
+  margin-bottom: 16px;
+}
+
+.searchLabel {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #444;
+}
+
+.searchInput {
+  width: 100%;
+  max-width: 420px;
+  padding: 10px 14px;
+  font-size: 15px;
+  border: 1px solid #d8d8e8;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.15s ease;
+
+  &:focus {
+    border-color: #a0a0e8;
+  }
+}
+
+.searchHint {
+  font-size: 13px;
+  color: #888;
+  margin: 8px 0 0;
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.resultRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #fafaff;
+  border: 1px solid #e8e8f0;
+  border-radius: 10px;
+}
+
+.addButton {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 10px;
+  background: #d0d0ff;
+  color: #333;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: #c0c0f0;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.removeButton {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  border: 1px solid #e0c0c8;
+  border-radius: 10px;
+  background: #fff8f8;
+  color: #8b1538;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  min-width: 104px;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: #ffe8ec;
+    border-color: #d4a8b0;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.errorText {
+  color: #b00020;
+  font-size: 14px;
+  margin: 8px 0 0;
+}
+
+.loadingText {
+  color: #666;
+  font-size: 14px;
+  margin: 8px 0 0;
+}
+
+.noResults {
+  color: #777;
+  font-size: 14px;
+  margin: 8px 0 0;
+}

@@ -201,11 +201,20 @@ select {
 
 .actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
+  align-items: center;
   gap: 10px;
   margin-top: 20px;
   padding-top: 16px;
   border-top: 1px solid #f3f4f6;
+}
+
+.submitError {
+  flex: 1 1 100%;
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: #b91c1c;
 }
 
 .cancelButton {
@@ -231,11 +240,16 @@ select {
   cursor: pointer;
   transition: 0.2s;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: #4338ca;
   }
 
-  &:active {
+  &:active:not(:disabled) {
     transform: scale(0.97);
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
   }
 }

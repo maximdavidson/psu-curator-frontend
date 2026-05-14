@@ -11,11 +11,13 @@ interface Props {
     contentType: "message" | "poll" | "file";
     selectedFileIds?: string[];
     selectedSurveyId?: string;
-  }) => void;
+  }) => void | Promise<void>;
   initialData?: {
     title: string;
     description?: string;
     contentType?: "message" | "poll" | "file";
+    selectedSurveyId?: string | null;
+    selectedFileId?: string | null;
   };
   mode?: "create" | "edit";
 }
@@ -53,14 +55,21 @@ export const EventFormModal = ({
 
   // Файлы
   const { data: userFiles, isLoading: isFilesLoading } = useGetUserFilesQuery();
-  const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
+  const [selectedFileId, setSelectedFileId] = useState<string | null>(
+    initialData?.selectedFileId ?? null
+  );
 
   // Опросы
   const { data: surveys, isLoading: isSurveysLoading } = useGetUserSurveysQuery(
     userId,
     { skip: !userId }
   );
-  const [selectedSurveyId, setSelectedSurveyId] = useState<string | null>(null);
+  const [selectedSurveyId, setSelectedSurveyId] = useState<string | null>(
+    initialData?.selectedSurveyId ?? null
+  );
+
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const formatFileSize = (bytes: number): string => {
     if (bytes < 1024) return `${bytes} B`;
@@ -90,26 +99,49 @@ export const EventFormModal = ({
   const safeSurveys = surveys || [];
   const safeFiles = userFiles || [];
 
-  const handleSubmit = () => {
-    if (!title.trim()) return;
+  const handleSubmit = async () => {
+    setSubmitError(null);
+    if (!title.trim()) {
+      setSubmitError("Укажите заголовок");
+      return;
+    }
+    if (contentType === "poll" && !selectedSurveyId) {
+      setSubmitError("Выберите опрос из списка");
+      return;
+    }
+    if (contentType === "file" && !selectedFileId) {
+      setSubmitError("Выберите файл из списка");
+      return;
+    }
 
-    onCreate({
-      title,
-      description: contentType === "message" ? description : undefined,
-      contentType,
-      selectedFileIds:
-        contentType === "file" && selectedFileId ? [selectedFileId] : undefined,
-      selectedSurveyId:
-        contentType === "poll" && selectedSurveyId
-          ? selectedSurveyId
-          : undefined
-    });
-
-    setSelectedFileId(null);
-    setSelectedSurveyId(null);
+    setIsSubmitting(true);
+    try {
+      await Promise.resolve(
+        onCreate({
+          title,
+          description: contentType === "message" ? description : undefined,
+          contentType,
+          selectedFileIds:
+            contentType === "file" && selectedFileId
+              ? [selectedFileId]
+              : undefined,
+          selectedSurveyId:
+            contentType === "poll" && selectedSurveyId
+              ? selectedSurveyId
+              : undefined
+        })
+      );
+      setSelectedFileId(null);
+      setSelectedSurveyId(null);
+    } catch {
+      setSubmitError("Не удалось сохранить. Попробуйте ещё раз.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleContentTypeChange = (type: "message" | "poll" | "file") => {
+    setSubmitError(null);
     setContentType(type);
     if (type !== "message") setDescription("");
     setSelectedFileId(null);
@@ -309,11 +341,24 @@ export const EventFormModal = ({
 
         {/* Кнопки */}
         <div className={styles.actions}>
+          {submitError && (
+            <p className={styles.submitError} role="alert">
+              {submitError}
+            </p>
+          )}
           <button onClick={onClose} className={styles.cancelButton}>
             Отмена
           </button>
-          <button onClick={handleSubmit} className={styles.submitButton}>
-            {mode === "edit" ? "Сохранить" : "Создать"}
+          <button
+            onClick={() => void handleSubmit()}
+            className={styles.submitButton}
+            disabled={isSubmitting}
+          >
+            {isSubmitting
+              ? "Сохранение…"
+              : mode === "edit"
+                ? "Сохранить"
+                : "Создать"}
           </button>
         </div>
       </div>

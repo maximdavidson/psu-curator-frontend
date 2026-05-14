@@ -37,6 +37,9 @@ export interface FeedItem {
   authorId: string;
   authorName: string;
   createdAt: string;
+  /** 0 — сообщение, 1 — опрос, 2 — документ (если отдаёт API). */
+  type?: number;
+  surveyId?: string | null;
   attachments: {
     id: string;
     fileName: string;
@@ -46,6 +49,12 @@ export interface FeedItem {
     downloadUrl: string;
     uploadedByName: string;
   }[];
+}
+
+export interface GroupMember {
+  id: string;
+  fullName: string | null;
+  email: string | null;
 }
 
 export interface GroupDetails {
@@ -58,7 +67,16 @@ export interface GroupDetails {
   headStudentId: string;
   headStudentName: string;
   feedItems: FeedItem[];
+  students?: GroupMember[] | null;
 }
+
+/** Тело как в OpenAPI бэкенда (свойство grouId). */
+export interface AddStudentsToGroupRequest {
+  groupId: string;
+  studentIds: string[];
+}
+
+export type RemoveStudentsFromGroupRequest = AddStudentsToGroupRequest;
 
 export const groupApi = createApi({
   reducerPath: "groupApi",
@@ -120,6 +138,41 @@ export const groupApi = createApi({
               { type: "Group", id: "LIST" }
             ]
           : [{ type: "Group", id: "LIST" }]
+    }),
+
+    addStudentsToGroup: builder.mutation<void, AddStudentsToGroupRequest>({
+      query: ({ groupId, studentIds }) => ({
+        url: "/Group/groups/students",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: {
+          grouId: groupId,
+          studentIds
+        }
+      }),
+      invalidatesTags: (_result, _error, { groupId }) => [
+        { type: "Group", id: groupId },
+        { type: "Group", id: "LIST" }
+      ]
+    }),
+
+    removeStudentsFromGroup: builder.mutation<
+      void,
+      RemoveStudentsFromGroupRequest
+    >({
+      query: ({ groupId, studentIds }) => ({
+        url: "/Group/groups/students",
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: {
+          grouId: groupId,
+          studentIds
+        }
+      }),
+      invalidatesTags: (_result, _error, { groupId }) => [
+        { type: "Group", id: groupId },
+        { type: "Group", id: "LIST" }
+      ]
     })
   })
 });
@@ -129,5 +182,7 @@ export const {
   useCreateGroupMutation,
   useDeleteGroupMutation,
   useUpdateGroupMutation,
-  useGetGroupByIdQuery
+  useGetGroupByIdQuery,
+  useAddStudentsToGroupMutation,
+  useRemoveStudentsFromGroupMutation
 } = groupApi;

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import styles from "./group-detail.module.scss";
 import { FeedTab } from "./components/feed-tab/feed-tab.component";
+import { MembersTab } from "./components/members-tab/members-tab.component";
 import { useGetGroupByIdQuery } from "../groups/group.api";
 
 export const GroupDetailPage = () => {
@@ -62,7 +63,13 @@ export const GroupDetailPage = () => {
           />
         )}
 
-        {activeTab === "members" && <p>Здесь будут участники группы</p>}
+        {activeTab === "members" && (
+          <MembersTab
+            groupId={group.id}
+            members={group.students ?? []}
+            onRefetch={refetch}
+          />
+        )}
       </div>
     </div>
   );
