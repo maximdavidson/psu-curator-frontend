@@ -56,7 +56,8 @@ export const groupFeedApi = createApi({
           formData.append("SurveyId", body.surveyId);
         }
         for (const file of body.attachmentFiles ?? []) {
-          formData.append("Attachments", file);
+          // Третий аргумент — имя файла для multipart (важно для IFormFile на сервере).
+          formData.append("Attachments", file, file.name);
         }
 
         return {
