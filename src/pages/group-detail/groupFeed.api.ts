@@ -1,4 +1,5 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { baseQueryWithReauth } from "@/shared/api/base-query";
 
 export const FeedItemType = {
   Message: 0,
@@ -41,14 +42,7 @@ export interface UpdateFeedItemRequest {
 
 export const groupFeedApi = createApi({
   reducerPath: "groupFeedApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_URL,
-    prepareHeaders: (headers) => {
-      const token = localStorage.getItem("token");
-      if (token) headers.set("authorization", `Bearer ${token}`);
-      return headers;
-    }
-  }),
+  baseQuery: baseQueryWithReauth,
   tagTypes: ["Feed", "Group"],
   endpoints: (builder) => ({
     createFeedItem: builder.mutation<void, CreateFeedItemRequest>({

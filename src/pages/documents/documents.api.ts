@@ -1,4 +1,5 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { createAppBaseQuery } from "@/shared/api/base-query";
 
 export interface IFileResponse {
   id: string;
@@ -10,18 +11,13 @@ export interface IFileResponse {
   uploadedByName: string;
 }
 
+const filesApiBaseUrl = `${(
+  (import.meta.env.VITE_API_URL as string | undefined) ?? "/api"
+).replace(/\/$/, "")}/Files`;
+
 export const documentsApi = createApi({
   reducerPath: "documentsApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: "/api/Files",
-    prepareHeaders: (headers) => {
-      const token = localStorage.getItem("token");
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
-      return headers;
-    }
-  }),
+  baseQuery: createAppBaseQuery(filesApiBaseUrl),
   tagTypes: ["Files"],
   endpoints: (builder) => ({
     getUserFiles: builder.query<IFileResponse[], void>({

@@ -8,6 +8,7 @@ export const useLogout = () => {
 
   const handleLogout = () => {
     dispatch(removeToken());
+    localStorage.removeItem("email");
     navigate("/login");
   };
 

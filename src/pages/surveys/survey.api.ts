@@ -1,4 +1,5 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { baseQueryWithReauth } from "@/shared/api/base-query";
 import type { ISurvey } from "./survey.types";
 
 export interface CreateSurveyRequest {
@@ -14,14 +15,7 @@ export interface CreateSurveyRequest {
 
 export const surveyApi = createApi({
   reducerPath: "surveyApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_URL,
-    prepareHeaders: (headers) => {
-      const token = localStorage.getItem("token");
-      if (token) headers.set("authorization", `Bearer ${token}`);
-      return headers;
-    }
-  }),
+  baseQuery: baseQueryWithReauth,
   tagTypes: ["Survey"],
   endpoints: (builder) => ({
     getUserSurveys: builder.query<ISurvey[], string>({

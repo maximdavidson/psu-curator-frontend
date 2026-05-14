@@ -1,4 +1,5 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { baseQueryWithReauth } from "@/shared/api/base-query";
 
 export interface Notification {
   id: string;
@@ -11,14 +12,7 @@ export interface Notification {
 
 export const notificationApi = createApi({
   reducerPath: "notificationApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_URL,
-    prepareHeaders: (headers) => {
-      const token = localStorage.getItem("token");
-      if (token) headers.set("authorization", `Bearer ${token}`);
-      return headers;
-    }
-  }),
+  baseQuery: baseQueryWithReauth,
   tagTypes: ["Notification"],
   endpoints: (builder) => ({
     getAllNotifications: builder.query<Notification[], void>({

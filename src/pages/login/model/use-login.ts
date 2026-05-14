@@ -1,6 +1,6 @@
 import { useLoginMutation } from "@/services/auth.api";
 import type { TLoginFormDto } from "@/shared/model/schemas/auth.schema";
-import { setToken } from "@/stores/auth.store";
+import { setTokens } from "@/stores/auth.store";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -12,18 +12,13 @@ export const useLogin = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const onHandleSubmit = async (data: TLoginFormDto) => {
-    console.log("Login data:", data);
-
     try {
       const response = await mutate({
         email: data.email,
         password: data.password
       }).unwrap();
 
-      console.log("Login response:", response);
-
-      dispatch(setToken(response.accessToken));
-      localStorage.setItem("token", response.accessToken);
+      dispatch(setTokens(response));
       localStorage.setItem("email", data.email);
       navigate("/groups");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -1,23 +1,17 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
 import type { TRegisterFormDto } from "@/shared";
 import type { TLoginFormDto } from "@/shared";
-
-export interface TAuthResponseDto {
-  accessToken: string;
-}
+import { baseQueryWithReauth } from "@/shared/api/base-query";
+import {
+  parseAuthTokens,
+  type ParsedAuthTokens
+} from "@/shared/lib/parse-auth-response";
 
 export const authApi = createApi({
   reducerPath: "authApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_URL,
-    prepareHeaders: (headers) => {
-      const token = localStorage.getItem("token");
-      if (token) headers.set("authorization", `Bearer ${token}`);
-      return headers;
-    }
-  }),
+  baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
-    register: builder.mutation<TAuthResponseDto, TRegisterFormDto>({
+    register: builder.mutation<ParsedAuthTokens, TRegisterFormDto>({
       query: (credentials) => ({
         url: "/Auth/users",
         method: "POST",
@@ -26,14 +20,28 @@ export const authApi = createApi({
           password: credentials.password,
           role: credentials.role
         }
-      })
+      }),
+      transformResponse: (raw: unknown) => {
+        const t = parseAuthTokens(raw);
+        if (!t?.accessToken) {
+          throw new Error("Некорректный ответ сервера при регистрации");
+        }
+        return t;
+      }
     }),
-    login: builder.mutation<TAuthResponseDto, TLoginFormDto>({
+    login: builder.mutation<ParsedAuthTokens, TLoginFormDto>({
       query: (credentials) => ({
         url: "/Auth/sessions",
         method: "POST",
         body: credentials
-      })
+      }),
+      transformResponse: (raw: unknown) => {
+        const t = parseAuthTokens(raw);
+        if (!t?.accessToken) {
+          throw new Error("Некорректный ответ сервера при входе");
+        }
+        return t;
+      }
     })
   })
 });

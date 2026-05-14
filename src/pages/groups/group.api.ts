@@ -1,4 +1,5 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { baseQueryWithReauth } from "@/shared/api/base-query";
 
 export interface Group {
   id: string;
@@ -80,14 +81,7 @@ export type RemoveStudentsFromGroupRequest = AddStudentsToGroupRequest;
 
 export const groupApi = createApi({
   reducerPath: "groupApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_URL,
-    prepareHeaders: (headers) => {
-      const token = localStorage.getItem("token");
-      if (token) headers.set("authorization", `Bearer ${token}`);
-      return headers;
-    }
-  }),
+  baseQuery: baseQueryWithReauth,
   tagTypes: ["Group"],
   endpoints: (builder) => ({
     getGroups: builder.query<Group[], void>({

@@ -1,17 +1,8 @@
 import type { InferType } from "yup";
 import type { authSchema } from "../schemas/auth.schema";
-// import type { signinSchema, signupFormSchema } from "../schemas/auth.schema";
-
-// export type TSignupFormDto = InferType<typeof signupFormSchema>;
-// export type TSigninFormDto = InferType<typeof signinSchema>;
+import type { ParsedAuthTokens } from "@/shared/lib/parse-auth-response";
 
 export type TAuthFormDto = InferType<typeof authSchema>;
 
-export type TAuthResponseDto = {
-  tokenPair: {
-    accessToken: string;
-    refreshToken: string;
-  };
-  accountStatus: number;
-  message: string | null;
-};
+/** Ответ логина/регистрации/refresh (см. parseAuthTokens). */
+export type TAuthResponseDto = ParsedAuthTokens;
