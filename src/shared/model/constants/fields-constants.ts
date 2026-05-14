@@ -1,5 +1,5 @@
 import type { InputType } from "@/shared";
-import type { TAuthFormDto } from "@/shared/model/types/auth.types";
+import type { TAuthFormDto } from "@/shared/model/schemas/auth.schema";
 
 type TFieldsKey = keyof TAuthFormDto;
 

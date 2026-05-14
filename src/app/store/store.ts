@@ -11,6 +11,7 @@ import { groupFeedApi } from "@/pages/group-detail/groupFeed.api";
 import { documentsApi } from "@/pages/documents/documents.api";
 import { notificationApi } from "@/services/notification.api";
 import { userApi } from "@/services/user.api";
+import { authCacheListener } from "./auth-cache-listener.middleware";
 
 const rootReducer = combineReducers({
   [authSlice.name]: authSlice.reducer,
@@ -47,7 +48,8 @@ export const store = configureStore({
       groupFeedApi.middleware,
       documentsApi.middleware,
       notificationApi.middleware,
-      userApi.middleware
+      userApi.middleware,
+      authCacheListener.middleware
     )
 });
 

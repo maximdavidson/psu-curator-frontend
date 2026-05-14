@@ -17,6 +17,8 @@ interface GroupCardProps {
   headStudentEmail?: string;
   onEdit: (group: EditGroupData) => void;
   onDelete: (groupId: string) => void;
+  /** Создание/редактирование/удаление групп — только для персонала, не для студента/старосты */
+  showStaffActions?: boolean;
 }
 
 export const GroupCard = ({
@@ -29,7 +31,8 @@ export const GroupCard = ({
   curatorEmail,
   headStudentEmail,
   onEdit,
-  onDelete
+  onDelete,
+  showStaffActions = true
 }: GroupCardProps) => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
@@ -76,23 +79,28 @@ export const GroupCard = ({
             <img src={BellIcon} alt="notifications" />
           </button>
 
-          <div className={styles.menuWrapper}>
-            <button className={styles.iconButton} onClick={toggleMenu}>
-              <img src={MoreIcon} alt="more" />
-            </button>
+          {showStaffActions && (
+            <div className={styles.menuWrapper}>
+              <button className={styles.iconButton} onClick={toggleMenu}>
+                <img src={MoreIcon} alt="more" />
+              </button>
 
-            {isOpen && (
-              <div className={styles.dropdown}>
-                <button className={styles.dropdownItem} onClick={handleEdit}>
-                  Редактировать
-                </button>
+              {isOpen && (
+                <div className={styles.dropdown}>
+                  <button className={styles.dropdownItem} onClick={handleEdit}>
+                    Редактировать
+                  </button>
 
-                <button className={styles.dropdownItem} onClick={handleDelete}>
-                  Удалить
-                </button>
-              </div>
-            )}
-          </div>
+                  <button
+                    className={styles.dropdownItem}
+                    onClick={handleDelete}
+                  >
+                    Удалить
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className={styles.iconWrapper}>

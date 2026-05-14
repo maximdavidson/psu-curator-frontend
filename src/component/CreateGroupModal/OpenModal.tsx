@@ -10,8 +10,10 @@ import {
   useUpdateGroupMutation
 } from "@/pages/groups/group.api";
 import { getSearchText, subscribeToSearch } from "@/app/store/searchStore";
+import { useCanManageGroups } from "@/hooks/use-can-manage-groups";
 
 export default function GroupsPageCreate() {
+  const canManageGroups = useCanManageGroups();
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<"create" | "edit">("create");
   const [selectedGroup, setSelectedGroup] = useState<EditGroupData | null>(
@@ -19,7 +21,9 @@ export default function GroupsPageCreate() {
   );
   const [search, setSearch] = useState(getSearchText());
 
-  const { data: groups = [] } = useGetGroupsQuery();
+  const { data: groups = [] } = useGetGroupsQuery(undefined, {
+    refetchOnMountOrArgChange: true
+  });
   const [createGroup] = useCreateGroupMutation();
   const [deleteGroup] = useDeleteGroupMutation();
   const [updateGroup] = useUpdateGroupMutation();
@@ -112,6 +116,7 @@ export default function GroupsPageCreate() {
             headStudentEmail={group.headStudentEmail}
             onEdit={openEditModal}
             onDelete={handleDeleteGroup}
+            showStaffActions={canManageGroups}
           />
         ))}
       </div>
@@ -128,12 +133,14 @@ export default function GroupsPageCreate() {
         initialData={selectedGroup}
       />
 
-      <img
-        onClick={openCreateModal}
-        className={styles.AddBtn}
-        src="./icons/Add_btn.svg"
-        alt="Добавить группу"
-      />
+      {canManageGroups && (
+        <img
+          onClick={openCreateModal}
+          className={styles.AddBtn}
+          src="./icons/Add_btn.svg"
+          alt="Добавить группу"
+        />
+      )}
     </>
   );
 }
