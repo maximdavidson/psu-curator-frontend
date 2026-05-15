@@ -1,14 +1,15 @@
 import { Outlet } from "react-router-dom";
 import { Header } from "@/component/Header";
 import { SideBarMenu } from "@/component/SideBarMenu";
+import styles from "./app-layout.module.scss";
 
 export const AppLayout = () => {
   return (
     <>
       <Header />
-      <div style={{ display: "flex" }}>
+      <div className={styles.shell}>
         <SideBarMenu />
-        <main style={{ flex: 1 }}>
+        <main className={styles.main}>
           <Outlet />
         </main>
       </div>

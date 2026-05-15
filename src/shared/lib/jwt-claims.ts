@@ -4,6 +4,11 @@ const ROLE_CLAIM_KEYS = [
   "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
 ] as const;
 
+const USER_ID_CLAIM_KEYS = [
+  "sub",
+  "http://schemas.microsoft.com/ws/2008/06/identity/claims/primarysid"
+] as const;
+
 export function decodeJwtPayload(
   accessToken: string
 ): Record<string, unknown> | null {
@@ -30,6 +35,19 @@ export function getRoleStringFromAccessToken(
     const v = payload[key];
     if (typeof v === "string" && v.length > 0) return v;
     if (Array.isArray(v) && typeof v[0] === "string") return v[0];
+  }
+  return null;
+}
+
+export function getUserIdFromAccessToken(
+  accessToken: string | null
+): string | null {
+  if (!accessToken) return null;
+  const payload = decodeJwtPayload(accessToken);
+  if (!payload) return null;
+  for (const key of USER_ID_CLAIM_KEYS) {
+    const v = payload[key];
+    if (typeof v === "string" && v.length > 0) return v;
   }
   return null;
 }

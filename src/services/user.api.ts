@@ -7,10 +7,24 @@ export interface UserFullName {
   email: string | null;
 }
 
+export interface UserFullInformation {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  surname?: string | null;
+  phoneNumber?: string;
+}
+
 export const userApi = createApi({
   reducerPath: "userApi",
   baseQuery: baseQueryWithReauth,
+  tagTypes: ["User"],
   endpoints: (builder) => ({
+    getUserById: builder.query<UserFullInformation, string>({
+      query: (userId) => `/User/${userId}`,
+      providesTags: (_result, _error, userId) => [{ type: "User", id: userId }]
+    }),
     searchUsersByName: builder.query<UserFullName[], string>({
       query: (name) => ({
         url: "/User/names",
@@ -20,4 +34,4 @@ export const userApi = createApi({
   })
 });
 
-export const { useLazySearchUsersByNameQuery } = userApi;
+export const { useGetUserByIdQuery, useLazySearchUsersByNameQuery } = userApi;

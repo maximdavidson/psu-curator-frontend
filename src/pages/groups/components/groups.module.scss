@@ -1,9 +1,73 @@
 .page {
-  padding: 16px;
+  padding: 24px 28px 40px;
+  max-width: 1400px;
+}
+
+.hero {
+  margin-bottom: 28px;
+}
+
+.greeting {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
 }
 
 .title {
-  font-size: 36px;
-  font-weight: 600;
-  margin-bottom: 35px;
+  margin: 0;
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--color-text);
+}
+
+.nameSkeleton {
+  display: inline-block;
+  width: min(280px, 70vw);
+  height: 0.95em;
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    var(--color-btn-secondary-bg) 25%,
+    var(--color-feed-hover) 50%,
+    var(--color-btn-secondary-bg) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.subtitle {
+  margin: 8px 0 0;
+  font-size: 16px;
+  color: var(--color-text-secondary);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  align-items: stretch;
+}
+
+.empty {
+  grid-column: 1 / -1;
+  padding: 48px 24px;
+  text-align: center;
+  border-radius: 16px;
+  border: 1px dashed var(--color-border);
+  background: var(--color-feed-surface);
+  color: var(--color-text-muted);
+  font-size: 16px;
 }

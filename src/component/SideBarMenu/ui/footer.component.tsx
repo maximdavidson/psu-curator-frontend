@@ -12,9 +12,9 @@ export const Footer = ({ pathname }: IFooterProps) => {
       <ul>
         <NavigationItem
           label={"Настройки"}
-          to={"settings"}
+          to={"/settings"}
           icon={SettingIcon}
-          isActive={pathname === "settings"}
+          isActive={pathname === "/settings"}
         />
         <LogoutButton />
       </ul>

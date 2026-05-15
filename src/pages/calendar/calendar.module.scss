@@ -1,23 +1,26 @@
 .page {
   padding: 24px;
   min-height: 100%;
+  color: var(--color-text);
 }
 
 .calendarWrapper {
   height: 800px;
   padding: 20px;
-  background: #ffffff;
+  background: var(--color-calendar-surface);
   border-radius: 16px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--color-card-border);
 
   :global {
     .rbc-calendar {
       height: 100%;
       font-family: inherit;
+      color: var(--color-text);
     }
 
     .rbc-toolbar {
-      background: #ffffff;
+      background: var(--color-calendar-surface);
       border: none;
       padding: 12px;
       margin-bottom: 12px;
@@ -25,42 +28,42 @@
     }
 
     .rbc-toolbar button {
-      background: #f3f4f6;
+      background: var(--color-calendar-toolbar-btn);
       border: none;
       padding: 8px 12px;
       border-radius: 10px;
       cursor: pointer;
       transition: 0.2s;
       font-weight: 500;
-      color: #374151;
+      color: var(--color-calendar-toolbar-text);
 
       &:hover {
-        background: #e5e7eb;
+        background: var(--color-calendar-toolbar-btn-hover);
       }
     }
 
     .rbc-toolbar button.rbc-active {
-      background: #4f46e5;
-      color: white;
+      background: var(--color-accent);
+      color: var(--color-btn-primary-text);
     }
 
     .rbc-event {
-      background: #4f46e5 !important;
+      background: var(--color-accent) !important;
       border-radius: 8px !important;
       border: none !important;
       padding: 2px 6px !important;
     }
 
     .rbc-event:hover {
-      background: #4338ca !important;
+      background: var(--color-accent-hover) !important;
     }
 
     .rbc-today {
-      background: rgba(79, 70, 229, 0.08);
+      background: var(--color-calendar-today);
     }
 
     .rbc-off-range-bg {
-      background: #fafafa;
+      background: var(--color-calendar-off-range);
     }
 
     .rbc-month-view,
@@ -71,8 +74,39 @@
     .rbc-header {
       padding: 10px 0;
       font-weight: 600;
-      color: #374151;
-      border-bottom: 1px solid #e5e7eb;
+      color: var(--color-calendar-header-text);
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    .rbc-day-bg + .rbc-day-bg,
+    .rbc-month-row + .rbc-month-row {
+      border-color: var(--color-border-subtle);
+    }
+
+    .rbc-time-content,
+    .rbc-time-header-content {
+      border-color: var(--color-border-subtle);
+    }
+
+    .rbc-day-bg {
+      background: var(--color-calendar-surface);
+    }
+
+    .rbc-date-cell,
+    .rbc-date-cell > a {
+      color: var(--color-text);
+    }
+
+    .rbc-label {
+      color: var(--color-text-secondary);
+    }
+
+    .rbc-time-slot {
+      border-color: var(--color-border-subtle);
+    }
+
+    .rbc-current-time-indicator {
+      background-color: var(--color-accent);
     }
   }
 }
@@ -83,9 +117,9 @@
   align-items: center;
   padding: 10px 12px;
   margin-bottom: 16px;
-  background: #ffffff;
+  background: var(--color-calendar-surface);
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-card-border);
 }
 
 .toolbarLeft {
@@ -103,25 +137,25 @@
   margin-left: 16px;
   font-weight: 600;
   font-size: 16px;
-  color: #111827;
+  color: var(--color-text);
 }
 
 .toolbar button {
   padding: 8px 12px;
   border: none;
-  background: #f3f4f6;
+  background: var(--color-calendar-toolbar-btn);
   border-radius: 10px;
   cursor: pointer;
   transition: 0.2s;
   font-weight: 500;
-  color: #374151;
+  color: var(--color-calendar-toolbar-text);
 
   &:hover {
-    background: #e5e7eb;
+    background: var(--color-calendar-toolbar-btn-hover);
   }
 
   &.active {
-    background: #4f46e5;
-    color: white;
+    background: var(--color-accent);
+    color: var(--color-btn-primary-text);
   }
 }

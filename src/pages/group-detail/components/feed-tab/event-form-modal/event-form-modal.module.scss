@@ -1,7 +1,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(17, 24, 39, 0.6);
+  background: var(--color-modal-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -9,14 +9,16 @@
 }
 
 .modal {
-  background: #fff;
+  background: var(--color-card-bg);
+  color: var(--color-text);
   border-radius: 12px;
   padding: 24px;
   width: 100%;
   max-width: 560px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-modal);
+  border: 1px solid var(--color-card-border);
   display: flex;
   flex-direction: column;
 }
@@ -25,7 +27,7 @@
   font-size: 18px;
   font-weight: 600;
   margin: 0 0 20px;
-  color: #111827;
+  color: var(--color-text);
 }
 
 .contentTypeSelector {
@@ -33,29 +35,29 @@
   gap: 8px;
   margin-bottom: 20px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--color-modal-footer-border);
 }
 
 .typeButton {
   flex: 1;
   padding: 10px 12px;
-  border: 1px solid #e5e7eb;
-  background: #fff;
+  border: 1px solid var(--color-input-border);
+  background: var(--color-input-bg);
   border-radius: 10px;
   cursor: pointer;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--color-text-muted);
   transition: 0.2s;
 
   &:hover {
-    border-color: #c7d2fe;
-    background: #f8fafc;
+    border-color: var(--color-accent);
+    background: var(--color-feed-surface);
   }
 
   &.active {
-    background: #eef2ff;
-    border-color: #4f46e5;
-    color: #4f46e5;
+    background: var(--color-link-hover-bg);
+    border-color: var(--color-accent);
+    color: var(--color-link);
     font-weight: 500;
   }
 }
@@ -68,7 +70,7 @@
   display: block;
   font-size: 13px;
   font-weight: 500;
-  color: #374151;
+  color: var(--color-text);
   margin-bottom: 6px;
 }
 
@@ -76,17 +78,18 @@
 .textarea,
 select {
   width: 100%;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-input-border);
   border-radius: 10px;
   padding: 10px 12px;
   font-size: 14px;
   outline: none;
   transition: 0.2s;
-  background: #fff;
+  background: var(--color-input-bg);
+  color: var(--color-text);
 
   &:focus {
-    border-color: #4f46e5;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-muted);
   }
 }
 
@@ -101,7 +104,7 @@ select {
 
 .loadingText {
   font-size: 13px;
-  color: #9ca3af;
+  color: var(--color-text-muted);
   text-align: center;
   padding: 12px;
 }
@@ -110,19 +113,19 @@ select {
   text-align: center;
   padding: 20px;
   border-radius: 10px;
-  background: #f9fafb;
-  border: 1px dashed #e5e7eb;
+  background: var(--color-feed-surface);
+  border: 1px dashed var(--color-border);
 
   p {
     margin: 0;
     font-size: 13px;
-    color: #6b7280;
+    color: var(--color-text-secondary);
   }
 
   .noFilesHint {
     margin-top: 6px;
     font-size: 12px;
-    color: #9ca3af;
+    color: var(--color-text-muted);
   }
 }
 
@@ -139,27 +142,27 @@ select {
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-input-border);
   border-radius: 10px;
   cursor: pointer;
   transition: 0.15s;
-  background: #fff;
+  background: var(--color-input-bg);
 
   &:hover {
-    border-color: #c7d2fe;
-    background: #f9fafb;
+    border-color: var(--color-accent);
+    background: var(--color-feed-surface);
   }
 }
 
 .fileItemSelected {
-  border-color: #4f46e5;
-  background: #eef2ff;
+  border-color: var(--color-accent);
+  background: var(--color-link-hover-bg);
 }
 
 .radioButton {
   width: 20px;
   height: 20px;
-  border: 2px solid #d1d5db;
+  border: 2px solid var(--color-border);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -175,7 +178,7 @@ select {
 }
 
 .radioSelected {
-  background: #4f46e5;
+  background: var(--color-accent);
 }
 
 .fileItemIcon {
@@ -191,12 +194,12 @@ select {
 
 .fileItemName {
   font-size: 13px;
-  color: #111827;
+  color: var(--color-text);
 }
 
 .fileItemMeta {
   font-size: 11px;
-  color: #9ca3af;
+  color: var(--color-text-muted);
 }
 
 .actions {
@@ -207,27 +210,27 @@ select {
   gap: 10px;
   margin-top: 20px;
   padding-top: 16px;
-  border-top: 1px solid #f3f4f6;
+  border-top: 1px solid var(--color-modal-footer-border);
 }
 
 .submitError {
   flex: 1 1 100%;
   margin: 0 0 4px;
   font-size: 13px;
-  color: #b91c1c;
+  color: var(--color-error);
 }
 
 .cancelButton {
   padding: 10px 14px;
   border-radius: 10px;
   border: none;
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--color-btn-secondary-bg);
+  color: var(--color-btn-secondary-text);
   cursor: pointer;
   transition: 0.2s;
 
   &:hover {
-    background: #e5e7eb;
+    background: var(--color-btn-secondary-hover);
   }
 }
 
@@ -235,13 +238,13 @@ select {
   padding: 10px 16px;
   border-radius: 10px;
   border: none;
-  background: #4f46e5;
-  color: #fff;
+  background: var(--color-accent);
+  color: var(--color-btn-primary-text);
   cursor: pointer;
   transition: 0.2s;
 
   &:hover:not(:disabled) {
-    background: #4338ca;
+    background: var(--color-accent-hover);
   }
 
   &:active:not(:disabled) {

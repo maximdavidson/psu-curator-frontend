@@ -12,6 +12,7 @@ import { DocumentsPage } from "@/pages/documents/";
 import { CalendarPage } from "@/pages/calendar/calendar.component";
 import { GroupDetailPage } from "@/pages/group-detail/group-detail.page";
 import { TeachersPage } from "@/pages/teachers/teachers.page";
+import { SettingsPage } from "@/pages/settings";
 
 export const router = createBrowserRouter([
   {
@@ -68,6 +69,10 @@ export const router = createBrowserRouter([
               {
                 path: "/groups/:groupId",
                 element: <GroupDetailPage />
+              },
+              {
+                path: "/settings",
+                element: <SettingsPage />
               }
             ]
           },

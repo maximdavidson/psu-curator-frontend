@@ -1,14 +1,10 @@
-$primary-color: #007bff;
-$border-color: #ccc;
-$bg-active: #f0f8ff;
-
 .overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--color-modal-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -17,23 +13,25 @@ $bg-active: #f0f8ff;
 }
 
 .modal {
-  background: white;
+  background: var(--color-card-bg);
+  color: var(--color-text);
   padding: 2rem;
   border-radius: 12px;
   width: 450px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-modal);
   text-align: center;
+  border: 1px solid var(--color-card-border);
 
   h2 {
     margin-bottom: 1.5rem;
-    color: #333;
+    color: var(--color-text);
   }
 }
 
 .dropZone {
   padding: 40px 20px;
   margin: 20px 0;
-  border: 2px dashed $border-color;
+  border: 2px dashed var(--color-border);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
@@ -41,16 +39,17 @@ $bg-active: #f0f8ff;
   flex-direction: column;
   align-items: center;
   gap: 10px;
+  background: var(--color-feed-surface);
 
   &.isOver {
-    background-color: $bg-active;
-    border-color: $primary-color;
+    background-color: var(--color-link-hover-bg);
+    border-color: var(--color-accent);
     transform: scale(1.02);
   }
 
   p {
     margin: 0;
-    color: #666;
+    color: var(--color-text-secondary);
   }
 
   input[type="file"] {
@@ -58,8 +57,8 @@ $bg-active: #f0f8ff;
   }
 
   .uploadButton {
-    background-color: $primary-color;
-    color: white;
+    background-color: var(--color-accent);
+    color: var(--color-btn-primary-text);
     padding: 8px 16px;
     border-radius: 4px;
     font-size: 14px;
@@ -69,24 +68,26 @@ $bg-active: #f0f8ff;
 
 .closeBtn {
   background: none;
-  border: 1px solid #999;
+  border: 1px solid var(--color-border);
   padding: 8px 20px;
   border-radius: 4px;
   cursor: pointer;
   margin-top: 10px;
+  color: var(--color-text);
 
   &:hover {
-    background-color: #f5f5f5;
+    background-color: var(--color-btn-secondary-bg);
   }
 }
+
 .hint {
   font-size: 13px;
-  color: #777;
+  color: var(--color-text-muted);
   margin-bottom: 10px;
 }
 
 .error {
-  color: red;
+  color: var(--color-error);
   margin-top: 10px;
   font-size: 14px;
 }

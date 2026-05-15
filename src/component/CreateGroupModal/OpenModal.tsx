@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import styles from "./modal.module.scss";
+import pageStyles from "@/pages/groups/components/groups.module.scss";
 import CreateGroupModal from "./CreateGroupModal";
 import type { CreateGroupFormData, EditGroupData } from "./CreateGroupModal";
 import { GroupCard } from "@/component/GroupCards/group-card.component";
@@ -36,6 +37,13 @@ export default function GroupsPageCreate() {
   const filteredGroups = groups.filter((group) =>
     group.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  const formatCuratorName = (group: (typeof groups)[number]) => {
+    const parts = [group.lastName, group.firstName, group.surname].filter((p) =>
+      p?.trim()
+    );
+    return parts.join(" ").trim();
+  };
 
   // CREATE
   const handleCreateGroup = async (data: CreateGroupFormData) => {
@@ -102,23 +110,31 @@ export default function GroupsPageCreate() {
 
   return (
     <>
-      <div className={styles.GroupCard}>
-        {filteredGroups.map((group) => (
-          <GroupCard
-            key={group.id}
-            groupId={group.id}
-            groupName={group.name}
-            curator={`${group.firstName} ${group.lastName}`}
-            numberStudents={group.countOfstudents}
-            faculty={group.faculty}
-            courseNumber={1}
-            curatorEmail={group.curatorEmail}
-            headStudentEmail={group.headStudentEmail}
-            onEdit={openEditModal}
-            onDelete={handleDeleteGroup}
-            showStaffActions={canManageGroups}
-          />
-        ))}
+      <div className={pageStyles.grid}>
+        {filteredGroups.length === 0 ? (
+          <p className={pageStyles.empty}>
+            {search.trim()
+              ? "Группы по вашему запросу не найдены"
+              : "Пока нет групп — создайте первую"}
+          </p>
+        ) : (
+          filteredGroups.map((group) => (
+            <GroupCard
+              key={group.id}
+              groupId={group.id}
+              groupName={group.name}
+              curator={formatCuratorName(group)}
+              numberStudents={group.countOfstudents}
+              faculty={group.faculty}
+              courseNumber={1}
+              curatorEmail={group.curatorEmail}
+              headStudentEmail={group.headStudentEmail}
+              onEdit={openEditModal}
+              onDelete={handleDeleteGroup}
+              showStaffActions={canManageGroups}
+            />
+          ))
+        )}
       </div>
 
       <CreateGroupModal

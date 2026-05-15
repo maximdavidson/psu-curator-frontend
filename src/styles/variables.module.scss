@@ -1,8 +1,8 @@
-$color-primary: rgba(67, 57, 218, 1);
-$color-text: rgba(51, 51, 51, 1);
-$color-border: rgba(204, 204, 204, 1);
-$color-background: rgba(255, 255, 255, 0.75);
-$color-error: rgba(255, 0, 0, 1);
+$color-primary: var(--color-primary);
+$color-text: var(--color-text);
+$color-border: var(--color-border);
+$color-background: var(--color-surface);
+$color-error: var(--color-error);
 
 $radius-small: 10px;
 $radius-medium: 12px;

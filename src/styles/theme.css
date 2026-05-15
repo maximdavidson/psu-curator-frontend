@@ -1,0 +1,170 @@
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  --color-primary: rgba(67, 57, 218, 1);
+  --color-text: rgba(51, 51, 51, 1);
+  --color-text-secondary: rgba(102, 102, 102, 1);
+  --color-text-muted: rgba(107, 114, 128, 1);
+  --color-border: rgba(204, 204, 204, 1);
+  --color-border-subtle: #e5e7eb;
+  --color-bg: #eef0f4;
+  --color-surface: rgba(255, 255, 255, 0.75);
+  --color-surface-solid: #ffffff;
+  --color-sidebar-bg: rgba(82, 82, 82, 0.08);
+  --color-sidebar-active: rgba(85, 101, 114, 0.35);
+  --color-sidebar-footer-border: rgba(188, 193, 198, 1);
+  --color-header-search: #f2f2f2;
+  --color-header-user-bg: #aec9ff;
+  --color-card-border: #e8e8e8;
+  --color-card-bg: #ffffff;
+  --color-card-hover-border: #d0d0d0;
+  --color-card-hover-bg: #fafafa;
+  --color-input-bg: #ffffff;
+  --color-input-border: #d1d5db;
+  --color-modal-overlay: rgba(17, 24, 39, 0.6);
+  --color-modal-footer-border: #f3f4f6;
+  --color-accent: #4f46e5;
+  --color-accent-hover: #4338ca;
+  --color-accent-muted: rgba(79, 70, 229, 0.12);
+  --color-error: #ef4444;
+  --color-error-bg: #fef2f2;
+  --color-error-text: #991b1b;
+  --color-btn-secondary-bg: #f3f4f6;
+  --color-btn-secondary-text: #374151;
+  --color-btn-secondary-hover: #e5e7eb;
+  --color-btn-primary-text: #ffffff;
+  --color-btn-soft-bg: #d0d0ff;
+  --color-btn-soft-text: #333333;
+  --color-btn-soft-hover: #c0c0f0;
+  --color-tab-bg: #f0f0f0;
+  --color-tab-hover: #e0e0e0;
+  --color-tab-active-bg: #d0d0ff;
+  --color-calendar-surface: #ffffff;
+  --color-calendar-toolbar-btn: #f3f4f6;
+  --color-calendar-toolbar-btn-hover: #e5e7eb;
+  --color-calendar-toolbar-text: #374151;
+  --color-calendar-off-range: #fafafa;
+  --color-calendar-today: rgba(79, 70, 229, 0.08);
+  --color-calendar-header-text: #374151;
+  --color-badge-neutral-bg: #f3f4f6;
+  --color-badge-neutral-text: #4b5563;
+  --color-badge-accent-bg: #e0e7ff;
+  --color-badge-accent-text: #4338ca;
+  --color-feed-surface: #fafafc;
+  --color-feed-hover: #f0f0f5;
+  --color-link: #4f46e5;
+  --color-link-hover-bg: #eef2ff;
+  --color-danger-soft-bg: #fff8f8;
+  --color-danger-soft-hover: #ffe8ec;
+  --color-badge-poll-bg: #fce7f3;
+  --color-badge-poll-text: #9d174d;
+  --color-badge-message-bg: #ecfdf5;
+  --color-badge-message-text: #047857;
+  --color-icon-filter: none;
+  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-card-hover: 0 10px 20px rgba(0, 0, 0, 0.15);
+  --shadow-modal: 0 10px 30px rgba(0, 0, 0, 0.12);
+  --shadow-nav-active: 0 4px 4px rgba(0, 0, 0, 0.25);
+  --shadow-fab: 0 10px 25px rgba(79, 70, 229, 0.35);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-primary: rgba(165, 180, 252, 1);
+  --color-text: rgba(237, 237, 237, 1);
+  --color-text-secondary: rgba(180, 180, 180, 1);
+  --color-text-muted: rgba(156, 163, 175, 1);
+  --color-border: rgba(75, 85, 99, 1);
+  --color-border-subtle: #3f4654;
+  --color-bg: #0f1117;
+  --color-surface: rgba(30, 33, 42, 0.92);
+  --color-surface-solid: #1e212a;
+  --color-sidebar-bg: rgba(255, 255, 255, 0.05);
+  --color-sidebar-active: rgba(129, 140, 248, 0.22);
+  --color-sidebar-footer-border: rgba(75, 85, 99, 0.8);
+  --color-header-search: #252830;
+  --color-header-user-bg: #3d4f7a;
+  --color-card-border: #3f4654;
+  --color-card-bg: #1e212a;
+  --color-card-hover-border: #525a6b;
+  --color-card-hover-bg: #252830;
+  --color-input-bg: #252830;
+  --color-input-border: #4b5563;
+  --color-modal-overlay: rgba(0, 0, 0, 0.72);
+  --color-modal-footer-border: #3f4654;
+  --color-accent: #818cf8;
+  --color-accent-hover: #a5b4fc;
+  --color-accent-muted: rgba(129, 140, 248, 0.2);
+  --color-error: #f87171;
+  --color-error-bg: rgba(127, 29, 29, 0.35);
+  --color-error-text: #fecaca;
+  --color-btn-secondary-bg: #2a2e38;
+  --color-btn-secondary-text: #e5e7eb;
+  --color-btn-secondary-hover: #353a47;
+  --color-btn-primary-text: #0f1117;
+  --color-btn-soft-bg: rgba(99, 102, 241, 0.28);
+  --color-btn-soft-text: #e0e7ff;
+  --color-btn-soft-hover: rgba(99, 102, 241, 0.42);
+  --color-tab-bg: #252830;
+  --color-tab-hover: #2f3440;
+  --color-tab-active-bg: rgba(99, 102, 241, 0.35);
+  --color-calendar-surface: #1e212a;
+  --color-calendar-toolbar-btn: #2a2e38;
+  --color-calendar-toolbar-btn-hover: #353a47;
+  --color-calendar-toolbar-text: #e5e7eb;
+  --color-calendar-off-range: #181b22;
+  --color-calendar-today: rgba(129, 140, 248, 0.15);
+  --color-calendar-header-text: #d1d5db;
+  --color-badge-neutral-bg: #2a2e38;
+  --color-badge-neutral-text: #d1d5db;
+  --color-badge-accent-bg: rgba(99, 102, 241, 0.3);
+  --color-badge-accent-text: #c7d2fe;
+  --color-feed-surface: #252830;
+  --color-feed-hover: #2f3440;
+  --color-link: #a5b4fc;
+  --color-link-hover-bg: rgba(99, 102, 241, 0.2);
+  --color-danger-soft-bg: rgba(127, 29, 29, 0.25);
+  --color-danger-soft-hover: rgba(153, 27, 27, 0.4);
+  --color-badge-poll-bg: rgba(157, 23, 77, 0.28);
+  --color-badge-poll-text: #fbcfe8;
+  --color-badge-message-bg: rgba(4, 120, 87, 0.28);
+  --color-badge-message-text: #a7f3d0;
+  --color-icon-filter: invert(1) brightness(1.08);
+  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-card-hover: 0 10px 20px rgba(0, 0, 0, 0.45);
+  --shadow-modal: 0 10px 40px rgba(0, 0, 0, 0.5);
+  --shadow-nav-active: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --shadow-fab: 0 10px 25px rgba(0, 0, 0, 0.45);
+}
+
+html,
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  background-color: var(--color-input-bg);
+  color: var(--color-text);
+  border-color: var(--color-input-border);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-muted);
+}
+
+main h1,
+main h2,
+main h3 {
+  color: var(--color-text);
+}

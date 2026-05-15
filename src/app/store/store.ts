@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import { authSlice } from "@/stores/auth.store";
+import { themeSlice } from "@/stores/theme.store";
 import { authApi } from "@/services/auth.api";
 import { surveyApi } from "@/pages/surveys/survey.api";
 import { groupApi } from "@/pages/groups/group.api";
@@ -15,6 +16,7 @@ import { authCacheListener } from "./auth-cache-listener.middleware";
 
 const rootReducer = combineReducers({
   [authSlice.name]: authSlice.reducer,
+  [themeSlice.name]: themeSlice.reducer,
   [authApi.reducerPath]: authApi.reducer,
   [surveyApi.reducerPath]: surveyApi.reducer,
   [groupApi.reducerPath]: groupApi.reducer,
@@ -28,7 +30,7 @@ const rootReducer = combineReducers({
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: [authSlice.name]
+  whitelist: [authSlice.name, themeSlice.name]
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

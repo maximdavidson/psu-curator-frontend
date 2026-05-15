@@ -1,7 +1,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--color-modal-overlay);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -9,7 +9,8 @@
 }
 
 .modal {
-  background: white;
+  background: var(--color-card-bg);
+  color: var(--color-text);
   border-radius: 24px;
   max-width: 600px;
   width: 90%;
@@ -17,6 +18,8 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  border: 1px solid var(--color-card-border);
+  box-shadow: var(--shadow-modal);
 }
 
 .modalContent {
@@ -28,12 +31,12 @@
   }
 
   &::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: var(--color-feed-surface);
     border-radius: 10px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #ccc;
+    background: var(--color-border);
     border-radius: 10px;
   }
 }
@@ -44,11 +47,12 @@
   align-items: center;
   margin-bottom: 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--color-border-subtle);
 
   h2 {
     margin: 0;
     font-size: 24px;
+    color: var(--color-text);
   }
 }
 
@@ -58,6 +62,7 @@
   font-size: 28px;
   cursor: pointer;
   padding: 0 8px;
+  color: var(--color-text);
 
   &:hover {
     opacity: 0.7;
@@ -65,16 +70,16 @@
 }
 
 .description {
-  color: #666;
+  color: var(--color-text-secondary);
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .loading {
   text-align: center;
   padding: 40px;
-  color: #666;
+  color: var(--color-text-muted);
 }
 
 .questions {
@@ -85,13 +90,15 @@
 
 .question {
   padding: 16px;
-  background: #f9f9f9;
+  background: var(--color-feed-surface);
   border-radius: 12px;
+  border: 1px solid var(--color-card-border);
 }
 
 .questionText {
   font-weight: 500;
   margin-bottom: 12px;
+  color: var(--color-text);
 }
 
 .optionsGroup {
@@ -108,7 +115,7 @@
   gap: 10px;
   cursor: pointer;
   font-size: 14px;
-  color: #333;
+  color: var(--color-text);
 
   input {
     cursor: pointer;
@@ -121,17 +128,19 @@
 .textarea {
   width: 100%;
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-input-border);
   border-radius: 8px;
   font-size: 14px;
   resize: vertical;
   min-height: 80px;
   font-family: inherit;
   box-sizing: border-box;
+  background: var(--color-input-bg);
+  color: var(--color-text);
 
   &:focus {
     outline: none;
-    border-color: #1976d2;
+    border-color: var(--color-accent);
   }
 }
 
@@ -140,19 +149,19 @@
   display: flex;
   justify-content: flex-end;
   padding-top: 16px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--color-border-subtle);
 }
 
 .submitBtn {
   padding: 10px 24px;
-  background: #1976d2;
-  color: white;
+  background: var(--color-accent);
+  color: var(--color-btn-primary-text);
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
 
   &:hover {
-    background: #1565c0;
+    background: var(--color-accent-hover);
   }
 }
