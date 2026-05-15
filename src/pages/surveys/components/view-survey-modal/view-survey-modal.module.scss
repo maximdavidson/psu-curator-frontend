@@ -161,7 +161,27 @@
   cursor: pointer;
   font-size: 14px;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: var(--color-accent-hover);
   }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.alreadyAnswered {
+  margin: 0 0 16px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--color-feed-surface);
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.submitError {
+  margin: 12px 0 0;
+  color: var(--color-error, #dc2626);
+  font-size: 14px;
 }

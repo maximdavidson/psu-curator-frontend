@@ -321,12 +321,17 @@ export const FeedTab = ({ groupId, feed, onRefetch }: Props) => {
 
                 {item.surveyId && (
                   <div className={styles.pollActions}>
+                    {item.surveyTitle && (
+                      <p className={styles.pollSurveyTitle}>
+                        {item.surveyTitle}
+                      </p>
+                    )}
                     <button
                       type="button"
                       className={styles.pollLinkButton}
                       onClick={() => setViewingSurveyId(item.surveyId!)}
                     >
-                      Открыть опрос
+                      Пройти опрос
                     </button>
                   </div>
                 )}

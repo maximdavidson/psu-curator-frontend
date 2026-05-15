@@ -38,9 +38,10 @@ export interface FeedItem {
   authorId: string;
   authorName: string;
   createdAt: string;
-  /** 0 — сообщение, 1 — опрос, 2 — документ (если отдаёт API). */
+  /** 0 — сообщение, 1 — опрос, 2 — документ. */
   type?: number;
   surveyId?: string | null;
+  surveyTitle?: string | null;
   attachments: {
     id: string;
     fileName: string;

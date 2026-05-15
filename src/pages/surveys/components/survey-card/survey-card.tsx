@@ -1,29 +1,44 @@
 import { useState } from "react";
 import MoreIcon from "../../../../assets/more-icon.svg";
 import { useDeleteSurveyMutation } from "../../survey.api";
-import type { ISurvey } from "../../survey.types";
+import type { SurveyListItem } from "../../survey.types";
 import styles from "./survey-card.module.scss";
 import { ViewSurveyModal } from "../view-survey-modal/view-survey-modal";
+import { SurveyStatisticsModal } from "../survey-statistics-modal/survey-statistics-modal";
+import { getUserIdFromAccessToken } from "@/shared/lib/jwt-claims";
 
 interface Props {
-  survey: ISurvey;
+  survey: SurveyListItem;
   onDeleted?: (id: string) => void;
 }
 
 export const SurveyCard = ({ survey, onDeleted }: Props) => {
   const [deleteSurvey, { isLoading }] = useDeleteSurveyMutation();
   const [isOpen, setIsOpen] = useState(false);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isTakeModalOpen, setIsTakeModalOpen] = useState(false);
+  const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
+
+  const currentUserId = getUserIdFromAccessToken(localStorage.getItem("token"));
+  const isCreator =
+    Boolean(currentUserId) &&
+    Boolean(survey.createdByUserId) &&
+    survey.createdByUserId === currentUserId;
 
   const toggleMenu = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsOpen((prev) => !prev);
   };
 
-  const handleView = (e: React.MouseEvent) => {
+  const handleTake = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsOpen(false);
-    setIsViewModalOpen(true);
+    setIsTakeModalOpen(true);
+  };
+
+  const handleStatistics = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsOpen(false);
+    setIsStatsModalOpen(true);
   };
 
   const handleDelete = async (e: React.MouseEvent) => {
@@ -44,6 +59,9 @@ export const SurveyCard = ({ survey, onDeleted }: Props) => {
         <div className={styles.content}>
           <h3 className={styles.title}>{survey.title}</h3>
           <p className={styles.description}>{survey.description}</p>
+          <p className={styles.meta}>
+            {survey.questionCount} вопр. · {survey.responseCount} ответов
+          </p>
         </div>
 
         <div className={styles.menuWrapper}>
@@ -57,22 +75,39 @@ export const SurveyCard = ({ survey, onDeleted }: Props) => {
 
           {isOpen && (
             <div className={styles.dropdown}>
-              <button className={styles.dropdownItem} onClick={handleView}>
-                Просмотреть
+              <button className={styles.dropdownItem} onClick={handleTake}>
+                Пройти опрос
               </button>
-              <button className={styles.dropdownItem} onClick={handleDelete}>
-                Удалить
-              </button>
+              {isCreator && (
+                <button
+                  className={styles.dropdownItem}
+                  onClick={handleStatistics}
+                >
+                  Статистика
+                </button>
+              )}
+              {isCreator && (
+                <button className={styles.dropdownItem} onClick={handleDelete}>
+                  Удалить
+                </button>
+              )}
             </div>
           )}
         </div>
       </div>
 
       <ViewSurveyModal
-        key={survey.id}
-        isOpen={isViewModalOpen}
+        key={`take-${survey.id}`}
+        isOpen={isTakeModalOpen}
         surveyId={survey.id}
-        onClose={() => setIsViewModalOpen(false)}
+        onClose={() => setIsTakeModalOpen(false)}
+      />
+
+      <SurveyStatisticsModal
+        key={`stats-${survey.id}`}
+        isOpen={isStatsModalOpen}
+        surveyId={survey.id}
+        onClose={() => setIsStatsModalOpen(false)}
       />
     </>
   );

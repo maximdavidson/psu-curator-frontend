@@ -7,25 +7,10 @@ import {
 } from "./components/create-survey-modal/create-survey-modal";
 import { useGetUserSurveysQuery, useCreateSurveyMutation } from "./survey.api";
 import { getSearchText, subscribeToSearch } from "@/app/store/searchStore";
-
-const getUserIdFromToken = (): string => {
-  const token = localStorage.getItem("token");
-  if (!token) return "";
-
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return (
-      payload[
-        "http://schemas.microsoft.com/ws/2008/06/identity/claims/primarysid"
-      ] || ""
-    );
-  } catch {
-    return "";
-  }
-};
+import { getUserIdFromAccessToken } from "@/shared/lib/jwt-claims";
 
 export const SurveysPage = () => {
-  const userId = getUserIdFromToken();
+  const userId = getUserIdFromAccessToken(localStorage.getItem("token")) ?? "";
 
   const [search, setSearch] = useState(getSearchText());
   const [isOpen, setIsOpen] = useState(false);
@@ -34,7 +19,7 @@ export const SurveysPage = () => {
     skip: !userId
   });
 
-  const [createSurvey] = useCreateSurveyMutation();
+  const [createSurvey, { isLoading: isCreating }] = useCreateSurveyMutation();
 
   useEffect(() => {
     const unsubscribe = subscribeToSearch(setSearch);
@@ -46,17 +31,9 @@ export const SurveysPage = () => {
   );
 
   const handleCreateSurvey = async (data: CreateSurveyPayload) => {
-    try {
-      await createSurvey({
-        ...data,
-        userId
-      }).unwrap();
-
-      refetch();
-      setIsOpen(false);
-    } catch (err) {
-      console.error("Ошибка при создании опроса", err);
-    }
+    await createSurvey(data).unwrap();
+    refetch();
+    setIsOpen(false);
   };
 
   const handleDelete = () => {
@@ -90,6 +67,7 @@ export const SurveysPage = () => {
         <CreateSurveyModal
           onClose={() => setIsOpen(false)}
           onCreate={handleCreateSurvey}
+          isLoading={isCreating}
         />
       )}
     </div>

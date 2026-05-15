@@ -21,7 +21,7 @@ export interface SurveyData extends CreateSurveyPayload {
 
 interface Props {
   onClose: () => void;
-  onCreate: (data: CreateSurveyPayload) => void;
+  onCreate: (data: CreateSurveyPayload) => void | Promise<void>;
   isLoading?: boolean;
 }
 
@@ -143,14 +143,14 @@ export const CreateSurveyModal = ({
 
       console.log("Отправляемые данные:", payload);
 
-      onCreate(payload);
-      onClose();
+      await onCreate(payload);
 
       setTitle("");
       setDescription("");
       setQuestions([
         { id: nanoid(), text: "", type: "single", options: ["", ""] }
       ]);
+      onClose();
     } catch (err) {
       console.error("Ошибка при создании опроса:", err);
       setAuthError("Ошибка при создании опроса. Попробуйте позже.");

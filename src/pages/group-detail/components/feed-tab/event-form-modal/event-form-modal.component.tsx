@@ -2,6 +2,7 @@ import { useState } from "react";
 import styles from "./event-form-modal.module.scss";
 import { useGetUserFilesQuery } from "@/pages/documents/documents.api";
 import { useGetUserSurveysQuery } from "@/pages/surveys/survey.api";
+import { getUserIdFromAccessToken } from "@/shared/lib/jwt-claims";
 
 interface Props {
   onClose: () => void;
@@ -22,28 +23,13 @@ interface Props {
   mode?: "create" | "edit";
 }
 
-const getUserIdFromToken = (): string => {
-  const token = localStorage.getItem("token");
-  if (!token) return "";
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    const userId =
-      payload[
-        "http://schemas.microsoft.com/ws/2008/06/identity/claims/primarysid"
-      ];
-    return userId || "";
-  } catch {
-    return "";
-  }
-};
-
 export const EventFormModal = ({
   onClose,
   onCreate,
   initialData,
   mode = "create"
 }: Props) => {
-  const userId = getUserIdFromToken();
+  const userId = getUserIdFromAccessToken(localStorage.getItem("token")) ?? "";
 
   const [title, setTitle] = useState(initialData?.title || "");
   const [description, setDescription] = useState(
@@ -238,7 +224,7 @@ export const EventFormModal = ({
               <div className={styles.fileList}>
                 {safeSurveys.map((survey) => {
                   const isSelected = selectedSurveyId === survey.id;
-                  const questionsCount = survey.questions?.length || 0;
+                  const questionsCount = survey.questionCount ?? 0;
 
                   return (
                     <div

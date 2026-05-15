@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./view-survey-modal.module.scss";
-import { useGetSurveyByIdQuery } from "../../survey.api";
+import {
+  useGetSurveyByIdQuery,
+  useSubmitSurveyResponseMutation
+} from "../../survey.api";
+import type { Question, QuestionAnswerPayload } from "../../survey.types";
 
 interface ViewSurveyModalProps {
   isOpen: boolean;
@@ -8,53 +12,123 @@ interface ViewSurveyModalProps {
   onClose: () => void;
 }
 
-interface Question {
-  text: string;
-  type: string;
-  options: string[];
-}
-
 export const ViewSurveyModal = ({
   isOpen,
   surveyId,
   onClose
 }: ViewSurveyModalProps) => {
-  const { data: survey, isLoading } = useGetSurveyByIdQuery(surveyId, {
+  const {
+    data: survey,
+    isLoading,
+    refetch
+  } = useGetSurveyByIdQuery(surveyId, {
     skip: !isOpen || !surveyId
   });
+  const [submitResponse, { isLoading: isSubmitting }] =
+    useSubmitSurveyResponseMutation();
 
-  const [answers, setAnswers] = useState<Record<number, string | string[]>>({});
+  const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setAnswers({});
+      setSubmitError(null);
+    }
+  }, [isOpen, surveyId]);
 
   if (!isOpen) return null;
 
-  const handleSingleAnswer = (questionIndex: number, value: string) => {
-    setAnswers((prev) => ({ ...prev, [questionIndex]: value }));
+  const alreadyResponded = survey?.hasCurrentUserResponded ?? false;
+
+  const handleSingleAnswer = (questionId: string, value: string) => {
+    setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
 
   const handleMultipleAnswer = (
-    questionIndex: number,
+    questionId: string,
     option: string,
     checked: boolean
   ) => {
-    const current = (answers[questionIndex] as string[]) || [];
+    const current = (answers[questionId] as string[]) || [];
     if (checked) {
       setAnswers((prev) => ({
         ...prev,
-        [questionIndex]: [...current, option]
+        [questionId]: [...current, option]
       }));
     } else {
       setAnswers((prev) => ({
         ...prev,
-        [questionIndex]: current.filter((o) => o !== option)
+        [questionId]: current.filter((o) => o !== option)
       }));
     }
   };
 
-  const handleTextAnswer = (questionIndex: number, value: string) => {
-    setAnswers((prev) => ({ ...prev, [questionIndex]: value }));
+  const handleTextAnswer = (questionId: string, value: string) => {
+    setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
 
-  const renderQuestion = (question: Question, idx: number) => {
+  const buildPayload = (): QuestionAnswerPayload[] | null => {
+    if (!survey?.questions?.length) return null;
+
+    const payload: QuestionAnswerPayload[] = [];
+
+    for (const question of survey.questions) {
+      const raw = answers[question.id];
+
+      if (question.type === "text") {
+        const text = typeof raw === "string" ? raw.trim() : "";
+        if (!text) return null;
+        payload.push({
+          questionId: question.id,
+          selectedOptions: [],
+          textValue: text
+        });
+        continue;
+      }
+
+      if (question.type === "single") {
+        if (typeof raw !== "string" || !raw) return null;
+        payload.push({
+          questionId: question.id,
+          selectedOptions: [raw]
+        });
+        continue;
+      }
+
+      if (question.type === "multiple") {
+        const selected = Array.isArray(raw) ? raw : [];
+        if (selected.length === 0) return null;
+        payload.push({
+          questionId: question.id,
+          selectedOptions: selected
+        });
+      }
+    }
+
+    return payload.length === survey.questions.length ? payload : null;
+  };
+
+  const handleSubmit = async () => {
+    setSubmitError(null);
+    const payload = buildPayload();
+    if (!payload) {
+      setSubmitError("Ответьте на все вопросы перед отправкой.");
+      return;
+    }
+
+    try {
+      await submitResponse({ surveyId, body: { answers: payload } }).unwrap();
+      await refetch();
+    } catch {
+      setSubmitError("Не удалось отправить ответы. Попробуйте позже.");
+    }
+  };
+
+  const renderQuestion = (question: Question) => {
+    const qid = question.id;
+
     switch (question.type) {
       case "single":
         return (
@@ -63,10 +137,11 @@ export const ViewSurveyModal = ({
               <label key={optIdx} className={styles.radioLabel}>
                 <input
                   type="radio"
-                  name={`question_${idx}`}
+                  name={`question_${qid}`}
                   value={opt}
-                  checked={answers[idx] === opt}
-                  onChange={(e) => handleSingleAnswer(idx, e.target.value)}
+                  checked={answers[qid] === opt}
+                  disabled={alreadyResponded}
+                  onChange={(e) => handleSingleAnswer(qid, e.target.value)}
                 />
                 {opt}
               </label>
@@ -78,14 +153,15 @@ export const ViewSurveyModal = ({
         return (
           <div className={styles.optionsGroup}>
             {question.options.map((opt, optIdx) => {
-              const selected = (answers[idx] as string[]) || [];
+              const selected = (answers[qid] as string[]) || [];
               return (
                 <label key={optIdx} className={styles.checkboxLabel}>
                   <input
                     type="checkbox"
                     checked={selected.includes(opt)}
+                    disabled={alreadyResponded}
                     onChange={(e) =>
-                      handleMultipleAnswer(idx, opt, e.target.checked)
+                      handleMultipleAnswer(qid, opt, e.target.checked)
                     }
                   />
                   {opt}
@@ -100,8 +176,9 @@ export const ViewSurveyModal = ({
           <textarea
             className={styles.textarea}
             placeholder="Введите ваш ответ..."
-            value={(answers[idx] as string) || ""}
-            onChange={(e) => handleTextAnswer(idx, e.target.value)}
+            value={(answers[qid] as string) || ""}
+            disabled={alreadyResponded}
+            onChange={(e) => handleTextAnswer(qid, e.target.value)}
           />
         );
 
@@ -112,8 +189,12 @@ export const ViewSurveyModal = ({
 
   const handleClose = () => {
     setAnswers({});
+    setSubmitError(null);
     onClose();
   };
+
+  const canSubmit =
+    !alreadyResponded && !isSubmitting && buildPayload() !== null;
 
   return (
     <div className={styles.overlay} onClick={handleClose}>
@@ -128,29 +209,42 @@ export const ViewSurveyModal = ({
 
           <p className={styles.description}>{survey?.description}</p>
 
+          {alreadyResponded && (
+            <p className={styles.alreadyAnswered}>
+              Вы уже прошли этот опрос. Повторная отправка недоступна.
+            </p>
+          )}
+
           {isLoading ? (
             <div className={styles.loading}>Загрузка...</div>
           ) : (
             <>
               <div className={styles.questions}>
                 {survey?.questions.map((question, idx) => (
-                  <div key={idx} className={styles.question}>
+                  <div key={question.id} className={styles.question}>
                     <div className={styles.questionText}>
                       {idx + 1}. {question.text}
                     </div>
-                    {renderQuestion(question, idx)}
+                    {renderQuestion(question)}
                   </div>
                 ))}
               </div>
 
-              <div className={styles.footer}>
-                <button
-                  className={styles.submitBtn}
-                  onClick={() => alert("Ответы сохранены (демо)")}
-                >
-                  Отправить ответы
-                </button>
-              </div>
+              {submitError && (
+                <p className={styles.submitError}>{submitError}</p>
+              )}
+
+              {!alreadyResponded && (
+                <div className={styles.footer}>
+                  <button
+                    className={styles.submitBtn}
+                    disabled={!canSubmit}
+                    onClick={handleSubmit}
+                  >
+                    {isSubmitting ? "Отправка..." : "Отправить ответы"}
+                  </button>
+                </div>
+              )}
             </>
           )}
         </div>
