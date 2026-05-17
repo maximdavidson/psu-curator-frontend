@@ -1,20 +1,62 @@
 import { useState, useRef, useEffect } from "react";
+import type { MouseEvent as ReactMouseEvent } from "react";
+import { HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
+import { useNavigate } from "react-router-dom";
 import styles from "./notification-dropdown.module.scss";
 import {
+  notificationApi,
   useGetUnreadNotificationsQuery,
   useGetAllNotificationsQuery,
   useMarkAsReadMutation,
-  useMarkAllAsReadMutation
+  useMarkAllAsReadMutation,
+  useDeleteNotificationMutation
 } from "@/services/notification.api";
+import { getUserIdFromAccessToken } from "@/shared/lib/jwt-claims";
+import { useAppDispatch } from "@/app/store/store.types";
 
 export const NotificationDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const { data: unreadNotifications = [] } = useGetUnreadNotificationsQuery();
   const { data: allNotifications = [] } = useGetAllNotificationsQuery();
   const [markAsRead] = useMarkAsReadMutation();
   const [markAllAsRead] = useMarkAllAsReadMutation();
+  const [deleteNotification] = useDeleteNotificationMutation();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const userId = getUserIdFromAccessToken(token);
+    const apiUrl = (import.meta.env.VITE_API_URL as string | undefined)
+      ?.replace(/\/$/, "")
+      .replace(/\/api$/i, "");
+
+    if (!token || !userId || !apiUrl) return;
+
+    const connection = new HubConnectionBuilder()
+      .withUrl(`${apiUrl}/notificationHub`, {
+        accessTokenFactory: () => localStorage.getItem("token") ?? ""
+      })
+      .withAutomaticReconnect()
+      .configureLogging(LogLevel.Warning)
+      .build();
+
+    connection.on("ReceiveNotification", () => {
+      dispatch(notificationApi.util.invalidateTags(["Notification"]));
+    });
+
+    connection
+      .start()
+      .then(() => connection.invoke("SubscribeToUser", userId))
+      .catch(() => undefined);
+
+    return () => {
+      connection.off("ReceiveNotification");
+      void connection.stop();
+    };
+  }, [dispatch]);
 
   // Закрытие при клике вне
   useEffect(() => {
@@ -31,12 +73,29 @@ export const NotificationDropdown = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleNotificationClick = async (id: string) => {
+  const handleNotificationClick = async (
+    id: string,
+    type?: string,
+    relatedEntityId?: string | null
+  ) => {
     await markAsRead(id);
+
+    if (type === "event" && relatedEntityId) {
+      setIsOpen(false);
+      navigate(`/calendar?eventId=${relatedEntityId}`);
+    }
   };
 
   const handleMarkAllRead = async () => {
     await markAllAsRead();
+  };
+
+  const handleDeleteNotification = async (
+    event: ReactMouseEvent<HTMLButtonElement>,
+    id: string
+  ) => {
+    event.stopPropagation();
+    await deleteNotification(id);
   };
 
   const formatDate = (dateString: string): string => {
@@ -95,7 +154,13 @@ export const NotificationDropdown = () => {
                 className={`${styles.notification} ${
                   !notification.isRead ? styles.unread : ""
                 }`}
-                onClick={() => handleNotificationClick(notification.id)}
+                onClick={() =>
+                  handleNotificationClick(
+                    notification.id,
+                    notification.type,
+                    notification.relatedEntityId
+                  )
+                }
               >
                 <div className={styles.notificationIcon}>
                   {notification.type === "event" && "📅"}
@@ -115,6 +180,16 @@ export const NotificationDropdown = () => {
                     {formatDate(notification.createdAt)}
                   </span>
                 </div>
+                <button
+                  type="button"
+                  className={styles.deleteButton}
+                  aria-label="Удалить уведомление"
+                  onClick={(event) =>
+                    handleDeleteNotification(event, notification.id)
+                  }
+                >
+                  ×
+                </button>
                 {!notification.isRead && <div className={styles.unreadDot} />}
               </div>
             ))}

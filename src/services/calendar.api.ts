@@ -4,24 +4,36 @@ import { baseQueryWithReauth } from "@/shared/api/base-query";
 export interface CalendarEvent {
   id: string;
   dateOfEvent: string;
+  endDateOfEvent?: string | null;
   title: string;
   description?: string;
+  isCreator?: boolean;
 }
 
 export interface CalendarEventDetails {
   id: string;
   dateOfEvent: string;
+  endDateOfEvent?: string | null;
   title: string;
   description: string;
   creatorFullName: string;
   invitedUserEmails: string[];
+  isCreator: boolean;
 }
 
 export interface CreateCalendarEventRequest {
   dateOfEvent: string;
+  endDateOfEvent?: string | null;
   title: string;
   description?: string;
   invitedUserEmails: string[];
+}
+
+export interface UpdateCalendarEventRequest {
+  newDateOfEvent?: string;
+  newEndDateOfEvent?: string | null;
+  newTitle?: string;
+  newDescription?: string;
 }
 
 export const calendarApi = createApi({
@@ -58,6 +70,21 @@ export const calendarApi = createApi({
         method: "DELETE"
       }),
       invalidatesTags: [{ type: "CalendarEvent", id: "LIST" }]
+    }),
+
+    updateEvent: builder.mutation<
+      void,
+      { id: string; body: UpdateCalendarEventRequest }
+    >({
+      query: ({ id, body }) => ({
+        url: `/CalendarEvent/events/${id}`,
+        method: "PATCH",
+        body
+      }),
+      invalidatesTags: (_result, _error, arg) => [
+        { type: "CalendarEvent", id: arg.id },
+        { type: "CalendarEvent", id: "LIST" }
+      ]
     })
   })
 });
@@ -65,5 +92,6 @@ export const calendarApi = createApi({
 export const {
   useGetEventsQuery,
   useCreateEventMutation,
-  useDeleteEventMutation
+  useDeleteEventMutation,
+  useUpdateEventMutation
 } = calendarApi;

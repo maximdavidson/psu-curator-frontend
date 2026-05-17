@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Calendar,
   momentLocalizer,
@@ -14,7 +15,8 @@ import { EventModal } from "./components/event-modal/event-modal.component";
 import {
   useCreateEventMutation,
   useDeleteEventMutation,
-  useGetEventsQuery
+  useGetEventsQuery,
+  useUpdateEventMutation
 } from "@/services/calendar.api";
 
 const localizer = momentLocalizer(moment);
@@ -23,6 +25,7 @@ interface CalendarEventUI {
   id: string;
   title: string;
   description?: string;
+  isCreator?: boolean;
   start: Date;
   end: Date;
 }
@@ -73,6 +76,7 @@ export const CalendarPage = () => {
   const { data: events = [] } = useGetEventsQuery();
   const [createEvent] = useCreateEventMutation();
   const [deleteEvent] = useDeleteEventMutation();
+  const [updateEvent] = useUpdateEventMutation();
 
   const [view, setView] = useState(Views.MONTH);
   const [date, setDate] = useState(new Date());
@@ -81,14 +85,22 @@ export const CalendarPage = () => {
     null
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const mappedEvents: CalendarEventUI[] = events.map((e) => ({
-    id: e.id,
-    title: e.title,
-    description: e.description,
-    start: new Date(e.dateOfEvent),
-    end: new Date(e.dateOfEvent)
-  }));
+  const mappedEvents: CalendarEventUI[] = useMemo(
+    () =>
+      events.map((e) => ({
+        id: e.id,
+        title: e.title,
+        description: e.description,
+        isCreator: e.isCreator,
+        start: new Date(e.dateOfEvent),
+        end: e.endDateOfEvent
+          ? new Date(e.endDateOfEvent)
+          : moment(e.dateOfEvent).add(1, "hour").toDate()
+      })),
+    [events]
+  );
 
   const handleSelectSlot = (slotInfo: SlotInfo) => {
     setSlot(slotInfo);
@@ -102,17 +114,49 @@ export const CalendarPage = () => {
     setIsModalOpen(true);
   };
 
+  useEffect(() => {
+    const eventId = searchParams.get("eventId");
+    if (!eventId || events.length === 0) return;
+
+    const event = mappedEvents.find((item) => item.id === eventId);
+    if (!event) return;
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setDate(event.start);
+    setEditingEvent(event);
+    setSlot(null);
+    setIsModalOpen(true);
+    setSearchParams({}, { replace: true });
+  }, [events.length, mappedEvents, searchParams, setSearchParams]);
+
   const handleSaveEvent = async (
     title: string,
     description: string,
-    invitedEmails: string[]
+    invitedEmails: string[],
+    start: Date,
+    end: Date
   ) => {
-    if (!slot) return;
+    if (editingEvent?.id) {
+      await updateEvent({
+        id: editingEvent.id,
+        body: {
+          newTitle: title,
+          newDescription: description,
+          newDateOfEvent: start.toISOString(),
+          newEndDateOfEvent: end.toISOString()
+        }
+      }).unwrap();
+
+      setIsModalOpen(false);
+      setEditingEvent(null);
+      return;
+    }
 
     await createEvent({
       title,
       description,
-      dateOfEvent: slot.start.toISOString(),
+      dateOfEvent: start.toISOString(),
+      endDateOfEvent: end.toISOString(),
       invitedUserEmails: invitedEmails
     }).unwrap();
 
@@ -173,6 +217,7 @@ export const CalendarPage = () => {
         <EventModal
           key={editingEvent?.id ?? "create"}
           event={editingEvent}
+          slot={slot}
           onClose={handleCloseModal}
           onSave={handleSaveEvent}
           onDelete={handleDeleteEvent}
