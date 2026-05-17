@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./members-tab.module.scss";
 import {
+  useAssignHeadStudentMutation,
   useAddStudentsToGroupMutation,
+  useRemoveHeadStudentMutation,
   useRemoveStudentsFromGroupMutation,
   type GroupMember
 } from "@/pages/groups/group.api";
@@ -12,6 +14,7 @@ const MIN_QUERY_LEN = 2;
 interface Props {
   groupId: string;
   members: GroupMember[];
+  headStudentId?: string | null;
   onRefetch: () => void;
   canManage: boolean;
 }
@@ -19,6 +22,7 @@ interface Props {
 export const MembersTab = ({
   groupId,
   members,
+  headStudentId,
   onRefetch,
   canManage
 }: Props) => {
@@ -28,8 +32,12 @@ export const MembersTab = ({
   const [addStudents, { isLoading: isAdding }] =
     useAddStudentsToGroupMutation();
   const [removeStudents] = useRemoveStudentsFromGroupMutation();
+  const [assignHeadStudent] = useAssignHeadStudentMutation();
+  const [removeHeadStudent] = useRemoveHeadStudentMutation();
   const [error, setError] = useState<string | null>(null);
   const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
+  const [pendingHeadId, setPendingHeadId] = useState<string | null>(null);
+  const [openActionsId, setOpenActionsId] = useState<string | null>(null);
 
   const memberIds = useMemo(() => new Set(members.map((m) => m.id)), [members]);
 
@@ -64,6 +72,7 @@ export const MembersTab = ({
   const handleRemove = useCallback(
     async (studentId: string) => {
       setError(null);
+      setOpenActionsId(null);
       setPendingRemoveId(studentId);
       try {
         await removeStudents({
@@ -80,6 +89,40 @@ export const MembersTab = ({
     [groupId, onRefetch, removeStudents]
   );
 
+  const handleAssignHead = useCallback(
+    async (headId: string) => {
+      setError(null);
+      setOpenActionsId(null);
+      setPendingHeadId(headId);
+      try {
+        await assignHeadStudent({
+          groupId,
+          headId
+        }).unwrap();
+        await onRefetch();
+      } catch {
+        setError("Не удалось назначить старосту группы.");
+      } finally {
+        setPendingHeadId(null);
+      }
+    },
+    [assignHeadStudent, groupId, onRefetch]
+  );
+
+  const handleRemoveHead = useCallback(async () => {
+    setError(null);
+    setOpenActionsId(null);
+    setPendingHeadId(headStudentId ?? groupId);
+    try {
+      await removeHeadStudent(groupId).unwrap();
+      await onRefetch();
+    } catch {
+      setError("Не удалось снять старосту группы.");
+    } finally {
+      setPendingHeadId(null);
+    }
+  }, [groupId, headStudentId, onRefetch, removeHeadStudent]);
+
   const searchResults = searchState.data ?? [];
   const showResults =
     debouncedQuery.length >= MIN_QUERY_LEN && !searchState.isFetching;
@@ -92,26 +135,76 @@ export const MembersTab = ({
         <p className={styles.emptyHint}>Пока никого нет в списке.</p>
       ) : (
         <ul className={styles.memberList}>
-          {members.map((m) => (
-            <li key={m.id} className={styles.memberCard}>
-              <div className={styles.memberMain}>
-                <p className={styles.memberName}>
-                  {m.fullName?.trim() || "Без имени"}
-                </p>
-                {m.email && <p className={styles.memberEmail}>{m.email}</p>}
-              </div>
-              {canManage && (
-                <button
-                  type="button"
-                  className={styles.removeButton}
-                  disabled={pendingRemoveId !== null || isAdding}
-                  onClick={() => void handleRemove(m.id)}
-                >
-                  {pendingRemoveId === m.id ? "…" : "Исключить"}
-                </button>
-              )}
-            </li>
-          ))}
+          {members.map((m) => {
+            const isHeadman = m.isHeadman || m.id === headStudentId;
+            const isHeadActionPending =
+              pendingHeadId === m.id ||
+              (isHeadman && pendingHeadId === groupId);
+            const actionsDisabled =
+              pendingRemoveId !== null || isAdding || pendingHeadId !== null;
+            const isActionsOpen = openActionsId === m.id;
+
+            return (
+              <li key={m.id} className={styles.memberCard}>
+                <div className={styles.memberMain}>
+                  <div className={styles.memberTitleRow}>
+                    <p className={styles.memberName}>
+                      {m.fullName?.trim() || "Без имени"}
+                    </p>
+                    {isHeadman && (
+                      <span className={styles.headBadge}>Староста</span>
+                    )}
+                  </div>
+                  {m.email && <p className={styles.memberEmail}>{m.email}</p>}
+                </div>
+                {canManage && (
+                  <div className={styles.memberActions}>
+                    <button
+                      type="button"
+                      className={styles.actionsToggle}
+                      aria-haspopup="menu"
+                      aria-expanded={isActionsOpen}
+                      aria-label={`Действия с участником ${m.fullName?.trim() || m.email || ""}`}
+                      disabled={actionsDisabled}
+                      onClick={() =>
+                        setOpenActionsId((current) =>
+                          current === m.id ? null : m.id
+                        )
+                      }
+                    >
+                      {isHeadActionPending || pendingRemoveId === m.id
+                        ? "…"
+                        : "..."}
+                    </button>
+                    {isActionsOpen && (
+                      <div className={styles.actionsDropdown} role="menu">
+                        <button
+                          type="button"
+                          className={styles.menuItem}
+                          role="menuitem"
+                          onClick={() =>
+                            isHeadman
+                              ? void handleRemoveHead()
+                              : void handleAssignHead(m.id)
+                          }
+                        >
+                          {isHeadman ? "Снять старосту" : "Назначить старостой"}
+                        </button>
+                        <button
+                          type="button"
+                          className={`${styles.menuItem} ${styles.dangerMenuItem}`}
+                          role="menuitem"
+                          onClick={() => void handleRemove(m.id)}
+                        >
+                          Исключить
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
 

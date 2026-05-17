@@ -57,6 +57,7 @@ export interface GroupMember {
   id: string;
   fullName: string | null;
   email: string | null;
+  isHeadman?: boolean;
 }
 
 export interface GroupDetails {
@@ -79,6 +80,11 @@ export interface AddStudentsToGroupRequest {
 }
 
 export type RemoveStudentsFromGroupRequest = AddStudentsToGroupRequest;
+
+export interface AssignHeadStudentRequest {
+  groupId: string;
+  headId: string;
+}
 
 export const groupApi = createApi({
   reducerPath: "groupApi",
@@ -168,6 +174,30 @@ export const groupApi = createApi({
         { type: "Group", id: groupId },
         { type: "Group", id: "LIST" }
       ]
+    }),
+
+    assignHeadStudent: builder.mutation<void, AssignHeadStudentRequest>({
+      query: (body) => ({
+        url: "/Group/groups/head-student",
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body
+      }),
+      invalidatesTags: (_result, _error, { groupId }) => [
+        { type: "Group", id: groupId },
+        { type: "Group", id: "LIST" }
+      ]
+    }),
+
+    removeHeadStudent: builder.mutation<void, string>({
+      query: (groupId) => ({
+        url: `/Group/${groupId}/head-student`,
+        method: "DELETE"
+      }),
+      invalidatesTags: (_result, _error, groupId) => [
+        { type: "Group", id: groupId },
+        { type: "Group", id: "LIST" }
+      ]
     })
   })
 });
@@ -179,5 +209,7 @@ export const {
   useUpdateGroupMutation,
   useGetGroupByIdQuery,
   useAddStudentsToGroupMutation,
-  useRemoveStudentsFromGroupMutation
+  useRemoveStudentsFromGroupMutation,
+  useAssignHeadStudentMutation,
+  useRemoveHeadStudentMutation
 } = groupApi;

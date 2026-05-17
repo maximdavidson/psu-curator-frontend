@@ -78,6 +78,7 @@ export const GroupDetailPage = () => {
           <MembersTab
             groupId={group.id}
             members={group.students ?? []}
+            headStudentId={group.headStudentId}
             onRefetch={refetch}
             canManage={canManageGroups}
           />
