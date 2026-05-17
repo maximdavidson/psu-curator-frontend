@@ -13,9 +13,15 @@ interface Props {
   groupId: string;
   members: GroupMember[];
   onRefetch: () => void;
+  canManage: boolean;
 }
 
-export const MembersTab = ({ groupId, members, onRefetch }: Props) => {
+export const MembersTab = ({
+  groupId,
+  members,
+  onRefetch,
+  canManage
+}: Props) => {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [searchUsers, searchState] = useLazySearchUsersByNameQuery();
@@ -49,7 +55,7 @@ export const MembersTab = ({ groupId, members, onRefetch }: Props) => {
         }).unwrap();
         await onRefetch();
       } catch {
-        setError("Не удалось добавить студента. Проверьте права и данные.");
+        setError("Не удалось добавить участника. Проверьте права и данные.");
       }
     },
     [addStudents, groupId, onRefetch]
@@ -66,7 +72,7 @@ export const MembersTab = ({ groupId, members, onRefetch }: Props) => {
         }).unwrap();
         await onRefetch();
       } catch {
-        setError("Не удалось исключить студента из группы.");
+        setError("Не удалось исключить участника из группы.");
       } finally {
         setPendingRemoveId(null);
       }
@@ -94,52 +100,60 @@ export const MembersTab = ({ groupId, members, onRefetch }: Props) => {
                 </p>
                 {m.email && <p className={styles.memberEmail}>{m.email}</p>}
               </div>
-              <button
-                type="button"
-                className={styles.removeButton}
-                disabled={pendingRemoveId !== null || isAdding}
-                onClick={() => void handleRemove(m.id)}
-              >
-                {pendingRemoveId === m.id ? "…" : "Исключить"}
-              </button>
+              {canManage && (
+                <button
+                  type="button"
+                  className={styles.removeButton}
+                  disabled={pendingRemoveId !== null || isAdding}
+                  onClick={() => void handleRemove(m.id)}
+                >
+                  {pendingRemoveId === m.id ? "…" : "Исключить"}
+                </button>
+              )}
             </li>
           ))}
         </ul>
       )}
 
-      <h2 className={styles.sectionTitle}>Добавить студента</h2>
-      <div className={styles.searchBlock}>
-        <label className={styles.searchLabel} htmlFor="student-search">
-          Поиск по имени или почте
-        </label>
-        <input
-          id="student-search"
-          className={styles.searchInput}
-          type="search"
-          autoComplete="off"
-          placeholder="Например, Иванов или ivanov@"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <p className={styles.searchHint}>
-          Введите не менее {MIN_QUERY_LEN} символов — покажем подходящих
-          пользователей.
-        </p>
-      </div>
-
-      {searchState.isFetching && debouncedQuery.length >= MIN_QUERY_LEN && (
-        <p className={styles.loadingText}>Поиск…</p>
+      {canManage && (
+        <>
+          <h2 className={styles.sectionTitle}>Добавить участника</h2>
+          <div className={styles.searchBlock}>
+            <label className={styles.searchLabel} htmlFor="student-search">
+              Поиск по имени или почте
+            </label>
+            <input
+              id="student-search"
+              className={styles.searchInput}
+              type="search"
+              autoComplete="off"
+              placeholder="Например, Иванов или ivanov@"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+            <p className={styles.searchHint}>
+              Введите не менее {MIN_QUERY_LEN} символов — покажем подходящих
+              пользователей.
+            </p>
+          </div>
+        </>
       )}
+
+      {canManage &&
+        searchState.isFetching &&
+        debouncedQuery.length >= MIN_QUERY_LEN && (
+          <p className={styles.loadingText}>Поиск…</p>
+        )}
 
       {error && <p className={styles.errorText}>{error}</p>}
 
-      {showResults && filteredResults.length === 0 && (
+      {canManage && showResults && filteredResults.length === 0 && (
         <p className={styles.noResults}>
           Ничего не найдено или все уже в группе.
         </p>
       )}
 
-      {showResults && filteredResults.length > 0 && (
+      {canManage && showResults && filteredResults.length > 0 && (
         <div className={styles.results}>
           {filteredResults.map((u) => (
             <div key={u.id} className={styles.resultRow}>

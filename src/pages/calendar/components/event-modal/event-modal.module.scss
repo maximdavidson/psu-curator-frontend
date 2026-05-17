@@ -13,7 +13,9 @@
   color: var(--color-text);
   border-radius: 12px;
   padding: 24px;
-  width: 420px;
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  overflow: auto;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -93,21 +95,40 @@
 
 .inviteChip {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  padding: 8px 10px;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 8px 8px 10px;
   border: 1px solid var(--color-card-border);
   border-radius: 10px;
   background: var(--color-btn-soft-bg);
   color: var(--color-btn-soft-text);
-  cursor: pointer;
   font-weight: 600;
 
   span {
+    display: block;
     color: var(--color-text-muted);
     font-size: 12px;
     font-weight: 400;
+  }
+}
+
+.inviteChipRemove {
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: var(--color-btn-secondary-hover);
+    color: var(--color-text);
   }
 }
 
@@ -149,6 +170,60 @@
 
   &:hover {
     border-color: var(--color-accent);
+  }
+}
+
+.groupInviteBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.groupInviteTitle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.groupInviteList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.groupInviteOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-card-border);
+  border-radius: 999px;
+  background: var(--color-feed-surface);
+  font-size: 13px;
+  color: var(--color-text);
+  cursor: pointer;
+  max-width: 220px;
+
+  input {
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    accent-color: var(--color-accent);
+    flex-shrink: 0;
+  }
+
+  span {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  small {
+    color: var(--color-text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 

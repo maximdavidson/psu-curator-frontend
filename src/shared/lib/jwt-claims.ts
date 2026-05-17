@@ -52,9 +52,15 @@ export function getUserIdFromAccessToken(
   return null;
 }
 
-/** Кураторы, деканат, преподаватели, админ — могут управлять группами на уровне UI. */
+/** Кураторы, деканат и админ — могут управлять группами на уровне UI. */
 export function roleCanManageStudentGroups(role: string | null): boolean {
   if (!role) return false;
   const r = role.trim().toLowerCase();
-  return r !== "student" && r !== "headman";
+  return ["curator", "dean", "deputydean", "admin"].includes(r);
+}
+
+export function roleCanCreateGroupFeedItems(role: string | null): boolean {
+  if (!role) return false;
+  const r = role.trim().toLowerCase();
+  return !["student", "headman"].includes(r);
 }

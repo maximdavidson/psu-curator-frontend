@@ -4,6 +4,8 @@ import {
   useLazySearchUsersByNameQuery,
   type UserFullName
 } from "@/services/user.api";
+import { useGetGroupsQuery } from "@/pages/groups/group.api";
+import type { CalendarEventInvitedUser } from "@/services/calendar.api";
 
 const MIN_QUERY_LEN = 2;
 
@@ -15,16 +17,19 @@ interface Props {
     start: Date;
     end: Date;
     isCreator?: boolean;
+    invitedUsers: CalendarEventInvitedUser[];
   } | null;
   slot?: {
     start: Date;
     end: Date;
   } | null;
+  canInviteParticipants: boolean;
   onClose: () => void;
   onSave: (
     title: string,
     description: string,
-    emails: string[],
+    users: CalendarEventInvitedUser[],
+    groupIds: string[],
     start: Date,
     end: Date
   ) => void;
@@ -46,6 +51,7 @@ const buildDateTime = (date: string, time: string): Date =>
 export const EventModal = ({
   event,
   slot,
+  canInviteParticipants,
   onClose,
   onSave,
   onDelete
@@ -63,8 +69,14 @@ export const EventModal = ({
   const [error, setError] = useState<string | null>(null);
   const [inviteQuery, setInviteQuery] = useState("");
   const [debouncedInviteQuery, setDebouncedInviteQuery] = useState("");
-  const [selectedInvitees, setSelectedInvitees] = useState<UserFullName[]>([]);
+  const [selectedInvitees, setSelectedInvitees] = useState<
+    CalendarEventInvitedUser[]
+  >(event?.invitedUsers ?? []);
+  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
   const [searchUsers, searchState] = useLazySearchUsersByNameQuery();
+  const { data: groups = [] } = useGetGroupsQuery();
+  const canEditParticipants =
+    canInviteParticipants && (!event || Boolean(event.isCreator));
 
   useEffect(() => {
     const timeout = window.setTimeout(
@@ -75,35 +87,49 @@ export const EventModal = ({
   }, [inviteQuery]);
 
   useEffect(() => {
-    if (event || debouncedInviteQuery.length < MIN_QUERY_LEN) return;
+    if (!canEditParticipants || debouncedInviteQuery.length < MIN_QUERY_LEN)
+      return;
     void searchUsers(debouncedInviteQuery, true);
-  }, [debouncedInviteQuery, event, searchUsers]);
+  }, [canEditParticipants, debouncedInviteQuery, searchUsers]);
 
-  const selectedEmails = useMemo(
-    () => new Set(selectedInvitees.map((user) => user.email).filter(Boolean)),
+  const selectedUserIds = useMemo(
+    () => new Set(selectedInvitees.map((user) => user.id)),
     [selectedInvitees]
   );
 
   const suggestedInvitees = (searchState.data ?? []).filter(
-    (user) => user.email && !selectedEmails.has(user.email)
+    (user) => user.email && !selectedUserIds.has(user.id)
   );
 
   const showSuggestions =
-    !event &&
+    canEditParticipants &&
     debouncedInviteQuery.length >= MIN_QUERY_LEN &&
     !searchState.isFetching;
 
   const handleAddInvitee = (user: UserFullName) => {
-    if (!user.email || selectedEmails.has(user.email)) return;
-    setSelectedInvitees((current) => [...current, user]);
+    if (!user.email || selectedUserIds.has(user.id)) return;
+    const email = user.email;
+    setSelectedInvitees((current) => [
+      ...current,
+      {
+        id: user.id,
+        fullName: user.fullName ?? "",
+        email
+      }
+    ]);
     setInviteQuery("");
     setDebouncedInviteQuery("");
   };
 
-  const handleRemoveInvitee = (email: string | null) => {
-    if (!email) return;
-    setSelectedInvitees((current) =>
-      current.filter((user) => user.email !== email)
+  const handleRemoveInvitee = (id: string) => {
+    setSelectedInvitees((current) => current.filter((user) => user.id !== id));
+  };
+
+  const handleToggleGroup = (groupId: string) => {
+    setSelectedGroupIds((current) =>
+      current.includes(groupId)
+        ? current.filter((id) => id !== groupId)
+        : [...current, groupId]
     );
   };
 
@@ -119,11 +145,7 @@ export const EventModal = ({
       return;
     }
 
-    const parsedEmails = selectedInvitees
-      .map((user) => user.email)
-      .filter((email): email is string => Boolean(email));
-
-    onSave(title, description, parsedEmails, start, end);
+    onSave(title, description, selectedInvitees, selectedGroupIds, start, end);
   };
 
   const handleDelete = () => {
@@ -186,7 +208,7 @@ export const EventModal = ({
           </label>
         </div>
 
-        {!event && (
+        {canEditParticipants && (
           <div className={styles.inviteBlock}>
             <label className={styles.inviteLabel} htmlFor="event-invite-search">
               Участники
@@ -195,15 +217,20 @@ export const EventModal = ({
             {selectedInvitees.length > 0 && (
               <div className={styles.inviteChips}>
                 {selectedInvitees.map((user) => (
-                  <button
-                    key={user.id}
-                    type="button"
-                    className={styles.inviteChip}
-                    onClick={() => handleRemoveInvitee(user.email)}
-                  >
-                    {user.fullName?.trim() || user.email}
-                    <span>{user.email}</span>
-                  </button>
+                  <div key={user.id} className={styles.inviteChip}>
+                    <div>
+                      {user.fullName?.trim() || user.email}
+                      <span>{user.email}</span>
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.inviteChipRemove}
+                      aria-label="Удалить участника"
+                      onClick={() => handleRemoveInvitee(user.id)}
+                    >
+                      ×
+                    </button>
+                  </div>
                 ))}
               </div>
             )}
@@ -217,6 +244,27 @@ export const EventModal = ({
               value={inviteQuery}
               onChange={(e) => setInviteQuery(e.target.value)}
             />
+
+            {groups.length > 0 && (
+              <div className={styles.groupInviteBlock}>
+                <p className={styles.groupInviteTitle}>Пригласить группу</p>
+                <div className={styles.groupInviteList}>
+                  {groups.map((group) => (
+                    <label key={group.id} className={styles.groupInviteOption}>
+                      <input
+                        type="checkbox"
+                        checked={selectedGroupIds.includes(group.id)}
+                        onChange={() => handleToggleGroup(group.id)}
+                      />
+                      <span>
+                        {group.name}
+                        <small>{group.faculty}</small>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {searchState.isFetching &&
               debouncedInviteQuery.length >= MIN_QUERY_LEN && (

@@ -4,10 +4,20 @@ import styles from "./group-detail.module.scss";
 import { FeedTab } from "./components/feed-tab/feed-tab.component";
 import { MembersTab } from "./components/members-tab/members-tab.component";
 import { useGetGroupByIdQuery } from "../groups/group.api";
+import { useCanManageGroups } from "@/hooks/use-can-manage-groups";
+import {
+  getRoleStringFromAccessToken,
+  roleCanCreateGroupFeedItems
+} from "@/shared/lib/jwt-claims";
 
 export const GroupDetailPage = () => {
   const { groupId } = useParams<{ groupId: string }>();
   const [activeTab, setActiveTab] = useState<"feed" | "members">("feed");
+  const canManageGroups = useCanManageGroups();
+  const currentRole = getRoleStringFromAccessToken(
+    localStorage.getItem("token")
+  );
+  const canCreateFeedItems = roleCanCreateGroupFeedItems(currentRole);
 
   const {
     data: group,
@@ -60,6 +70,7 @@ export const GroupDetailPage = () => {
             groupId={group.id}
             feed={group.feedItems}
             onRefetch={refetch} // 👈 передаём refetch
+            canCreate={canCreateFeedItems}
           />
         )}
 
@@ -68,6 +79,7 @@ export const GroupDetailPage = () => {
             groupId={group.id}
             members={group.students ?? []}
             onRefetch={refetch}
+            canManage={canManageGroups}
           />
         )}
       </div>

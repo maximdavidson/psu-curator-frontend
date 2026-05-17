@@ -16,6 +16,7 @@ interface Props {
   groupId: string;
   feed: FeedItem[];
   onRefetch: () => void;
+  canCreate: boolean;
 }
 
 const getInitials = (name: string): string => {
@@ -88,7 +89,7 @@ const editContentTypeFromItem = (
   return "message";
 };
 
-export const FeedTab = ({ groupId, feed, onRefetch }: Props) => {
+export const FeedTab = ({ groupId, feed, onRefetch, canCreate }: Props) => {
   const [createFeedItem] = useCreateFeedItemMutation();
   const [updateFeedItem] = useUpdateFeedItemMutation();
   const [deleteFeedItem] = useDeleteFeedItemMutation();
@@ -271,9 +272,11 @@ export const FeedTab = ({ groupId, feed, onRefetch }: Props) => {
 
   return (
     <div className={styles.feedTab}>
-      <button className={styles.addButton} onClick={handleOpenCreateModal}>
-        + Добавить запись
-      </button>
+      {canCreate && (
+        <button className={styles.addButton} onClick={handleOpenCreateModal}>
+          + Добавить запись
+        </button>
+      )}
 
       {feedActionError && (
         <div className={styles.feedActionError} role="alert">
@@ -370,20 +373,22 @@ export const FeedTab = ({ groupId, feed, onRefetch }: Props) => {
                 )}
               </div>
 
-              <div className={styles.feedItemActions}>
-                <button
-                  className={`${styles.actionButton} ${styles.editButton}`}
-                  onClick={() => handleEditClick(item)}
-                >
-                  Редактировать
-                </button>
-                <button
-                  className={`${styles.actionButton} ${styles.deleteButton}`}
-                  onClick={() => void handleDelete(item.id)}
-                >
-                  Удалить
-                </button>
-              </div>
+              {canCreate && (
+                <div className={styles.feedItemActions}>
+                  <button
+                    className={`${styles.actionButton} ${styles.editButton}`}
+                    onClick={() => handleEditClick(item)}
+                  >
+                    Редактировать
+                  </button>
+                  <button
+                    className={`${styles.actionButton} ${styles.deleteButton}`}
+                    onClick={() => void handleDelete(item.id)}
+                  >
+                    Удалить
+                  </button>
+                </div>
+              )}
             </div>
           );
         })}

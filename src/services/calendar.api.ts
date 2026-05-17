@@ -8,6 +8,13 @@ export interface CalendarEvent {
   title: string;
   description?: string;
   isCreator?: boolean;
+  invitedUsers: CalendarEventInvitedUser[];
+}
+
+export interface CalendarEventInvitedUser {
+  id: string;
+  fullName: string;
+  email: string;
 }
 
 export interface CalendarEventDetails {
@@ -18,6 +25,7 @@ export interface CalendarEventDetails {
   description: string;
   creatorFullName: string;
   invitedUserEmails: string[];
+  invitedUsers: CalendarEventInvitedUser[];
   isCreator: boolean;
 }
 
@@ -26,7 +34,9 @@ export interface CreateCalendarEventRequest {
   endDateOfEvent?: string | null;
   title: string;
   description?: string;
+  invitedUsersIds?: string[];
   invitedUserEmails: string[];
+  invitedGroupIds?: string[];
 }
 
 export interface UpdateCalendarEventRequest {
@@ -34,6 +44,10 @@ export interface UpdateCalendarEventRequest {
   newEndDateOfEvent?: string | null;
   newTitle?: string;
   newDescription?: string;
+  userForDelete?: string[];
+  newUsers?: string[];
+  newUserEmails?: string[];
+  newGroupIds?: string[];
 }
 
 export const calendarApi = createApi({

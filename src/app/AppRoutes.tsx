@@ -64,10 +64,6 @@ export const router = createBrowserRouter([
                 element: <CalendarPage />
               },
               {
-                path: "/teachers",
-                element: <TeachersPage />
-              },
-              {
                 path: "/groups/:groupId",
                 element: <GroupDetailPage />
               },
@@ -82,6 +78,10 @@ export const router = createBrowserRouter([
                   />
                 ),
                 children: [
+                  {
+                    path: "/teachers",
+                    element: <TeachersPage />
+                  },
                   {
                     path: "/users",
                     element: <UserManagementPage />

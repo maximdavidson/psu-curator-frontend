@@ -19,7 +19,8 @@ export const menuData: IMenuItem[] = [
   {
     to: "/teachers",
     label: "Преподаватели",
-    icon: TeachesrIcon
+    icon: TeachesrIcon,
+    visibleTo: ["Dean", "DeputyDean", "Admin"]
   },
   {
     to: "/surveys",

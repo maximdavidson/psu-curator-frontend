@@ -13,11 +13,13 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 
 import { EventModal } from "./components/event-modal/event-modal.component";
 import {
+  type CalendarEventInvitedUser,
   useCreateEventMutation,
   useDeleteEventMutation,
   useGetEventsQuery,
   useUpdateEventMutation
 } from "@/services/calendar.api";
+import { getRoleStringFromAccessToken } from "@/shared/lib/jwt-claims";
 
 const localizer = momentLocalizer(moment);
 
@@ -26,6 +28,7 @@ interface CalendarEventUI {
   title: string;
   description?: string;
   isCreator?: boolean;
+  invitedUsers: CalendarEventInvitedUser[];
   start: Date;
   end: Date;
 }
@@ -86,6 +89,11 @@ export const CalendarPage = () => {
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
+  const currentRole = getRoleStringFromAccessToken(
+    localStorage.getItem("token")
+  );
+  const canInviteParticipants =
+    currentRole !== "Student" && currentRole !== "Headman";
 
   const mappedEvents: CalendarEventUI[] = useMemo(
     () =>
@@ -94,6 +102,7 @@ export const CalendarPage = () => {
         title: e.title,
         description: e.description,
         isCreator: e.isCreator,
+        invitedUsers: e.invitedUsers ?? [],
         start: new Date(e.dateOfEvent),
         end: e.endDateOfEvent
           ? new Date(e.endDateOfEvent)
@@ -132,18 +141,31 @@ export const CalendarPage = () => {
   const handleSaveEvent = async (
     title: string,
     description: string,
-    invitedEmails: string[],
+    invitedUsers: CalendarEventInvitedUser[],
+    invitedGroupIds: string[],
     start: Date,
     end: Date
   ) => {
     if (editingEvent?.id) {
+      const currentUserIds = new Set(
+        editingEvent.invitedUsers.map((user) => user.id)
+      );
+      const nextUserIds = new Set(invitedUsers.map((user) => user.id));
+      const userForDelete = [...currentUserIds].filter(
+        (id) => !nextUserIds.has(id)
+      );
+      const newUsers = [...nextUserIds].filter((id) => !currentUserIds.has(id));
+
       await updateEvent({
         id: editingEvent.id,
         body: {
           newTitle: title,
           newDescription: description,
           newDateOfEvent: start.toISOString(),
-          newEndDateOfEvent: end.toISOString()
+          newEndDateOfEvent: end.toISOString(),
+          userForDelete,
+          newUsers,
+          newGroupIds: invitedGroupIds
         }
       }).unwrap();
 
@@ -157,14 +179,10 @@ export const CalendarPage = () => {
       description,
       dateOfEvent: start.toISOString(),
       endDateOfEvent: end.toISOString(),
-      invitedUserEmails: invitedEmails
+      invitedUsersIds: invitedUsers.map((user) => user.id),
+      invitedUserEmails: [],
+      invitedGroupIds
     }).unwrap();
-
-    // Если invitedEmails не пустой — показываем уведомление
-    if (invitedEmails.length > 0) {
-      // Уведомление создастся на бэкенде автоматически
-      // или можно инвалидировать тег Notification
-    }
 
     setIsModalOpen(false);
     setSlot(null);
@@ -218,6 +236,7 @@ export const CalendarPage = () => {
           key={editingEvent?.id ?? "create"}
           event={editingEvent}
           slot={slot}
+          canInviteParticipants={canInviteParticipants}
           onClose={handleCloseModal}
           onSave={handleSaveEvent}
           onDelete={handleDeleteEvent}
