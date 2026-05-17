@@ -30,5 +30,11 @@ export const menuData: IMenuItem[] = [
     to: "/documents",
     label: "Документы",
     icon: DocumentsIcon
+  },
+  {
+    to: "/users",
+    label: "Пользователи",
+    icon: TeachesrIcon,
+    visibleTo: ["Dean", "DeputyDean", "Admin"]
   }
 ];

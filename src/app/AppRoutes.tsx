@@ -13,6 +13,7 @@ import { CalendarPage } from "@/pages/calendar/calendar.component";
 import { GroupDetailPage } from "@/pages/group-detail/group-detail.page";
 import { TeachersPage } from "@/pages/teachers/teachers.page";
 import { SettingsPage } from "@/pages/settings";
+import { UserManagementPage } from "@/pages/user-management/user-management.page";
 
 export const router = createBrowserRouter([
   {
@@ -73,6 +74,19 @@ export const router = createBrowserRouter([
               {
                 path: "/settings",
                 element: <SettingsPage />
+              },
+              {
+                element: (
+                  <ProtectedRoutes
+                    allowedRoles={["Dean", "DeputyDean", "Admin"]}
+                  />
+                ),
+                children: [
+                  {
+                    path: "/users",
+                    element: <UserManagementPage />
+                  }
+                ]
               }
             ]
           },

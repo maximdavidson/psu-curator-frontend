@@ -14,6 +14,25 @@ export interface UserFullInformation {
   lastName: string;
   surname?: string | null;
   phoneNumber?: string;
+  faculty?: string | null;
+  department?: string | null;
+}
+
+export interface UserListItem extends UserFullInformation {
+  role: number;
+  accountStatus: number;
+  createdAt: string;
+}
+
+export interface CreateStaffUserRequest {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  surname?: string;
+  faculty?: string;
+  department?: string;
+  role: number;
 }
 
 export const userApi = createApi({
@@ -30,8 +49,33 @@ export const userApi = createApi({
         url: "/User/names",
         params: { name }
       })
+    }),
+    getUsers: builder.query<UserListItem[], void>({
+      query: () => "/User",
+      providesTags: ["User"]
+    }),
+    createStaffUser: builder.mutation<UserListItem, CreateStaffUserRequest>({
+      query: (body) => ({
+        url: "/User/staff",
+        method: "POST",
+        body
+      }),
+      invalidatesTags: ["User"]
+    }),
+    deleteUser: builder.mutation<void, string>({
+      query: (userId) => ({
+        url: `/User/${userId}`,
+        method: "DELETE"
+      }),
+      invalidatesTags: ["User"]
     })
   })
 });
 
-export const { useGetUserByIdQuery, useLazySearchUsersByNameQuery } = userApi;
+export const {
+  useGetUserByIdQuery,
+  useLazySearchUsersByNameQuery,
+  useGetUsersQuery,
+  useCreateStaffUserMutation,
+  useDeleteUserMutation
+} = userApi;

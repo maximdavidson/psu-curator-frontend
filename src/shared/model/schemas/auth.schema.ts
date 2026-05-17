@@ -17,7 +17,7 @@ export const loginSchema = yup.object({
     .required("Пароль обязателен")
 });
 
-// Схема для регистрации (только email, password, role)
+// Публичная регистрация теперь только для студентов, роль сервер назначает сам.
 export const registerSchema = yup.object({
   email: yup
     .string()
@@ -31,12 +31,7 @@ export const registerSchema = yup.object({
       /[!@#$%^&*(),.?":{}|<>]/,
       "Пароль должен содержать хотя бы один спецсимвол"
     )
-    .required("Пароль обязателен"),
-  role: yup
-    .number()
-    .min(1, "Роль должна быть от 1 до 7")
-    .max(7, "Роль должна быть от 1 до 7")
-    .required("Роль обязательна")
+    .required("Пароль обязателен")
 });
 
 // Оставляем для обратной совместимости
