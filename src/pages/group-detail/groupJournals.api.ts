@@ -134,6 +134,14 @@ export const groupJournalsApi = createApi({
       invalidatesTags: (_result, _error, { journalId }) => [
         { type: "GroupJournal", id: journalId }
       ]
+    }),
+
+    downloadGroupJournalExcel: builder.mutation<Blob, string>({
+      query: (journalId) => ({
+        url: `/GroupJournals/${journalId}/export/excel`,
+        method: "GET",
+        responseHandler: (response) => response.blob()
+      })
     })
   })
 });
@@ -144,5 +152,6 @@ export const {
   useCreateGroupJournalMutation,
   useUpdateGroupJournalMutation,
   useDeleteGroupJournalMutation,
-  useSaveGroupJournalEntriesMutation
+  useSaveGroupJournalEntriesMutation,
+  useDownloadGroupJournalExcelMutation
 } = groupJournalsApi;

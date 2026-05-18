@@ -6,6 +6,7 @@ import {
   type GroupJournalListItem,
   useCreateGroupJournalMutation,
   useDeleteGroupJournalMutation,
+  useDownloadGroupJournalExcelMutation,
   useGetGroupJournalQuery,
   useGetGroupJournalsQuery,
   useSaveGroupJournalEntriesMutation,
@@ -42,6 +43,10 @@ const formatFullDate = (value: string) => {
 
 const toApiDate = (value: string) => `${value}T00:00:00.000Z`;
 
+const sanitizeFileName = (value: string) => {
+  return value.replace(/[\\/:*?"<>|]/g, "_").trim() || "journal";
+};
+
 const cellKey = (userId: string, date: string) =>
   `${userId}:${date.slice(0, 10)}`;
 
@@ -68,6 +73,8 @@ const JournalDetail = ({
   const { data, isLoading, isError } = useGetGroupJournalQuery(journalId);
   const [saveEntries, { isLoading: isSaving }] =
     useSaveGroupJournalEntriesMutation();
+  const [downloadExcel, { isLoading: isDownloading }] =
+    useDownloadGroupJournalExcelMutation();
   const [cells, setCells] = useState<Record<string, AttendanceStatus | "">>({});
   const [dirtyJournalId, setDirtyJournalId] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -126,6 +133,27 @@ const JournalDetail = ({
     }
   };
 
+  const handleDownloadExcel = async () => {
+    if (!data) return;
+    setError("");
+
+    try {
+      const blob = await downloadExcel(data.id).unwrap();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${sanitizeFileName(data.groupName)}-${sanitizeFileName(
+        data.title
+      )}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      setError("Не удалось скачать Excel-файл.");
+    }
+  };
+
   if (isLoading) {
     return <p className={styles.status}>Загрузка журнала...</p>;
   }
@@ -147,16 +175,26 @@ const JournalDetail = ({
             {formatFullDate(data.endDate)}
           </p>
         </div>
-        {data.canEditEntries && (
+        <div className={styles.detailActions}>
           <button
             type="button"
-            className={styles.primaryButton}
-            disabled={isSaving}
-            onClick={handleSave}
+            className={styles.secondaryButton}
+            disabled={isDownloading}
+            onClick={handleDownloadExcel}
           >
-            {isSaving ? "Сохранение..." : "Сохранить"}
+            {isDownloading ? "Скачивание..." : "Скачать Excel"}
           </button>
-        )}
+          {data.canEditEntries && (
+            <button
+              type="button"
+              className={styles.primaryButton}
+              disabled={isSaving}
+              onClick={handleSave}
+            >
+              {isSaving ? "Сохранение..." : "Сохранить"}
+            </button>
+          )}
+        </div>
       </div>
 
       {error && <p className={styles.error}>{error}</p>}
