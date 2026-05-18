@@ -1,5 +1,10 @@
+import { useState } from "react";
 import styles from "./survey-statistics-modal.module.scss";
-import { useGetSurveyStatisticsQuery } from "../../survey.api";
+import {
+  type SurveyStatisticsExportFormat,
+  useDownloadSurveyStatisticsMutation,
+  useGetSurveyStatisticsQuery
+} from "../../survey.api";
 
 interface SurveyStatisticsModalProps {
   isOpen: boolean;
@@ -15,6 +20,26 @@ export const SurveyStatisticsModal = ({
   const { data, isLoading, isError } = useGetSurveyStatisticsQuery(surveyId, {
     skip: !isOpen || !surveyId
   });
+  const [downloadError, setDownloadError] = useState("");
+  const [downloadStatistics, { isLoading: isDownloading }] =
+    useDownloadSurveyStatisticsMutation();
+
+  const handleDownload = async (format: SurveyStatisticsExportFormat) => {
+    try {
+      setDownloadError("");
+      const blob = await downloadStatistics({ surveyId, format }).unwrap();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `survey-${surveyId}-statistics.${format}`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      setDownloadError("Не удалось скачать файл со статистикой.");
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -38,6 +63,28 @@ export const SurveyStatisticsModal = ({
             <p className={styles.summary}>
               Всего ответов: <strong>{data.totalResponses}</strong>
             </p>
+
+            <div className={styles.exportActions}>
+              <button
+                type="button"
+                className={styles.exportBtn}
+                disabled={isDownloading}
+                onClick={() => handleDownload("docx")}
+              >
+                Скачать Word
+              </button>
+              <button
+                type="button"
+                className={styles.exportBtn}
+                disabled={isDownloading}
+                onClick={() => handleDownload("pdf")}
+              >
+                Скачать PDF
+              </button>
+            </div>
+            {downloadError && (
+              <p className={styles.downloadError}>{downloadError}</p>
+            )}
 
             {data.questions.map((question, idx) => (
               <section

@@ -3,21 +3,26 @@ import { useParams } from "react-router-dom";
 import styles from "./group-detail.module.scss";
 import { FeedTab } from "./components/feed-tab/feed-tab.component";
 import { MembersTab } from "./components/members-tab/members-tab.component";
+import { JournalsTab } from "./components/journals-tab/journals-tab.component";
 import { useGetGroupByIdQuery } from "../groups/group.api";
 import { useCanManageGroups } from "@/hooks/use-can-manage-groups";
 import {
   getRoleStringFromAccessToken,
-  roleCanCreateGroupFeedItems
+  roleCanCreateGroupFeedItems,
+  roleCanViewGroupJournals
 } from "@/shared/lib/jwt-claims";
 
 export const GroupDetailPage = () => {
   const { groupId } = useParams<{ groupId: string }>();
-  const [activeTab, setActiveTab] = useState<"feed" | "members">("feed");
+  const [activeTab, setActiveTab] = useState<"feed" | "members" | "journals">(
+    "feed"
+  );
   const canManageGroups = useCanManageGroups();
   const currentRole = getRoleStringFromAccessToken(
     localStorage.getItem("token")
   );
   const canCreateFeedItems = roleCanCreateGroupFeedItems(currentRole);
+  const canViewJournals = roleCanViewGroupJournals(currentRole);
 
   const {
     data: group,
@@ -62,6 +67,17 @@ export const GroupDetailPage = () => {
         >
           Участники
         </button>
+
+        {canViewJournals && (
+          <button
+            className={`${styles.tab} ${
+              activeTab === "journals" ? styles.active : ""
+            }`}
+            onClick={() => setActiveTab("journals")}
+          >
+            Журналы
+          </button>
+        )}
       </div>
 
       <div className={styles.tabContent}>
@@ -82,6 +98,10 @@ export const GroupDetailPage = () => {
             onRefetch={refetch}
             canManage={canManageGroups}
           />
+        )}
+
+        {activeTab === "journals" && canViewJournals && (
+          <JournalsTab groupId={group.id} canManage={canManageGroups} />
         )}
       </div>
     </div>

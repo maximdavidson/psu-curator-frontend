@@ -17,6 +17,8 @@ export interface CreateSurveyRequest {
   }[];
 }
 
+export type SurveyStatisticsExportFormat = "docx" | "pdf";
+
 export const surveyApi = createApi({
   reducerPath: "surveyApi",
   baseQuery: baseQueryWithReauth,
@@ -71,6 +73,17 @@ export const surveyApi = createApi({
       providesTags: (_result, _error, surveyId) => [
         { type: "Survey", id: `${surveyId}-stats` }
       ]
+    }),
+
+    downloadSurveyStatistics: builder.mutation<
+      Blob,
+      { surveyId: string; format: SurveyStatisticsExportFormat }
+    >({
+      query: ({ surveyId, format }) => ({
+        url: `/Survey/${surveyId}/statistics/export/${format}`,
+        method: "GET",
+        responseHandler: (response) => response.blob()
+      })
     })
   })
 });
@@ -81,5 +94,6 @@ export const {
   useCreateSurveyMutation,
   useDeleteSurveyMutation,
   useSubmitSurveyResponseMutation,
-  useGetSurveyStatisticsQuery
+  useGetSurveyStatisticsQuery,
+  useDownloadSurveyStatisticsMutation
 } = surveyApi;

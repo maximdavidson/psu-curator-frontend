@@ -1,0 +1,270 @@
+.journalsTab,
+.detail {
+  color: var(--color-text);
+}
+
+.headerRow,
+.detailHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+
+  h2 {
+    margin: 0 0 6px;
+    font-size: 22px;
+  }
+
+  p {
+    margin: 0;
+    color: var(--color-text-muted);
+  }
+}
+
+.primaryButton,
+.secondaryButton,
+.backButton {
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 10px 16px;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+  }
+}
+
+.primaryButton {
+  background: var(--color-btn-soft-bg);
+  color: var(--color-btn-soft-text);
+
+  &:hover:not(:disabled) {
+    background: var(--color-btn-soft-hover);
+  }
+}
+
+.secondaryButton,
+.backButton {
+  background: var(--color-feed-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.backButton {
+  margin-bottom: 10px;
+}
+
+.journalList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.journalCard {
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.cardMain {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  padding: 18px;
+
+  h3 {
+    margin: 0 0 8px;
+    font-size: 17px;
+  }
+
+  p,
+  span {
+    display: block;
+    margin: 0 0 6px;
+    color: var(--color-text-muted);
+    font-size: 14px;
+  }
+}
+
+.cardActions {
+  display: flex;
+  gap: 8px;
+  padding: 0 18px 16px;
+
+  button {
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-feed-surface);
+    color: var(--color-text);
+    cursor: pointer;
+    padding: 8px 10px;
+  }
+}
+
+.dangerButton {
+  color: var(--color-error-text, #b91c1c) !important;
+}
+
+.empty,
+.status,
+.error {
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.empty,
+.status {
+  background: var(--color-feed-surface);
+  color: var(--color-text-muted);
+}
+
+.error {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+  border: 1px solid var(--color-border);
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--color-card-border);
+  border-radius: 16px;
+  background: var(--color-card-bg);
+  box-shadow: var(--shadow-card);
+}
+
+.journalTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+
+  th,
+  td {
+    border-bottom: 1px solid var(--color-border);
+    border-right: 1px solid var(--color-border);
+    padding: 10px;
+    vertical-align: middle;
+  }
+
+  th {
+    background: var(--color-feed-surface);
+    font-size: 13px;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  select {
+    width: 150px;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    background: var(--color-card-bg);
+    color: var(--color-text);
+  }
+}
+
+.participantCell {
+  min-width: 220px;
+
+  span,
+  small {
+    display: block;
+  }
+
+  small {
+    margin-top: 4px;
+    color: var(--color-text-muted);
+  }
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--color-modal-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  width: min(460px, calc(100vw - 32px));
+  background: var(--color-card-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-card-border);
+  border-radius: 20px;
+  box-shadow: var(--shadow-modal);
+  padding: 22px;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+
+  h3 {
+    margin: 0;
+  }
+}
+
+.closeButton {
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+
+  span {
+    color: var(--color-text-muted);
+    font-size: 14px;
+  }
+
+  input {
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-card-bg);
+    color: var(--color-text);
+    padding: 10px 12px;
+  }
+}
+
+.dateGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+@media (max-width: 640px) {
+  .headerRow,
+  .detailHeader {
+    flex-direction: column;
+  }
+
+  .dateGrid {
+    grid-template-columns: 1fr;
+  }
+}

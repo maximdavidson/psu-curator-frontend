@@ -9,6 +9,7 @@ import { groupApi } from "@/pages/groups/group.api";
 import { combineReducers } from "@reduxjs/toolkit";
 import { calendarApi } from "@/services/calendar.api";
 import { groupFeedApi } from "@/pages/group-detail/groupFeed.api";
+import { groupJournalsApi } from "@/pages/group-detail/groupJournals.api";
 import { documentsApi } from "@/pages/documents/documents.api";
 import { notificationApi } from "@/services/notification.api";
 import { userApi } from "@/services/user.api";
@@ -23,6 +24,7 @@ const rootReducer = combineReducers({
   [groupApi.reducerPath]: groupApi.reducer,
   [calendarApi.reducerPath]: calendarApi.reducer,
   [groupFeedApi.reducerPath]: groupFeedApi.reducer,
+  [groupJournalsApi.reducerPath]: groupJournalsApi.reducer,
   [documentsApi.reducerPath]: documentsApi.reducer,
   [notificationApi.reducerPath]: notificationApi.reducer,
   [userApi.reducerPath]: userApi.reducer,
@@ -50,6 +52,7 @@ export const store = configureStore({
       groupApi.middleware,
       calendarApi.middleware,
       groupFeedApi.middleware,
+      groupJournalsApi.middleware,
       documentsApi.middleware,
       notificationApi.middleware,
       userApi.middleware,

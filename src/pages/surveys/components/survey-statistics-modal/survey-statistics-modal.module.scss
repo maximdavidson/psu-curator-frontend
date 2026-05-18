@@ -54,6 +54,34 @@
   color: var(--color-text-muted);
 }
 
+.exportActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.exportBtn {
+  border: none;
+  border-radius: 10px;
+  background: var(--color-primary, #4f46e5);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 10px 14px;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.downloadError {
+  margin: -6px 0 18px;
+  color: var(--color-error, #dc2626);
+  font-size: 0.875rem;
+}
+
 .status {
   padding: 24px;
   text-align: center;
