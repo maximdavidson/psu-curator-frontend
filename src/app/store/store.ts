@@ -12,6 +12,7 @@ import { groupFeedApi } from "@/pages/group-detail/groupFeed.api";
 import { documentsApi } from "@/pages/documents/documents.api";
 import { notificationApi } from "@/services/notification.api";
 import { userApi } from "@/services/user.api";
+import { chatApi } from "@/services/chat.api";
 import { authCacheListener } from "./auth-cache-listener.middleware";
 
 const rootReducer = combineReducers({
@@ -24,7 +25,8 @@ const rootReducer = combineReducers({
   [groupFeedApi.reducerPath]: groupFeedApi.reducer,
   [documentsApi.reducerPath]: documentsApi.reducer,
   [notificationApi.reducerPath]: notificationApi.reducer,
-  [userApi.reducerPath]: userApi.reducer
+  [userApi.reducerPath]: userApi.reducer,
+  [chatApi.reducerPath]: chatApi.reducer
 });
 
 const persistConfig = {
@@ -51,6 +53,7 @@ export const store = configureStore({
       documentsApi.middleware,
       notificationApi.middleware,
       userApi.middleware,
+      chatApi.middleware,
       authCacheListener.middleware
     )
 });

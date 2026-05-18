@@ -5,23 +5,75 @@ $sidebar-padding-top: 32px;
 @mixin sidebar-item {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   color: $color-text;
   font-size: $font-size-md;
-  padding: 13px 0px 11px 14px;
+  padding: 13px 14px 11px 14px;
   line-height: 100%;
 }
 
 .sidebar-menu {
   grid-area: sidebar-menu;
+  position: sticky;
+  top: $header-height;
+  width: 361px;
+  flex: 0 0 361px;
+  align-self: flex-start;
   padding-top: $sidebar-padding-top;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 95vh;
+  height: calc(100vh - #{$header-height});
+  max-height: calc(100vh - #{$header-height});
   background-color: var(--color-sidebar-bg);
   border-top-left-radius: $radius-large;
   border-top-right-radius: $radius-large;
+  transition:
+    flex-basis 0.2s ease,
+    width 0.2s ease;
+
+  &--collapsed {
+    width: 84px;
+    flex-basis: 84px;
+
+    .sidebar-menu__navigation {
+      padding-right: 0;
+
+      &-item {
+        a,
+        button {
+          justify-content: center;
+          padding-right: 0;
+          padding-left: 0;
+        }
+      }
+    }
+
+    .sidebar-menu__navigation-badge {
+      position: absolute;
+      top: 6px;
+      right: 12px;
+      min-width: 18px;
+      padding: 2px 5px;
+      font-size: 10px;
+    }
+  }
+
+  &__collapse-button {
+    position: absolute;
+    top: 12px;
+    right: 10px;
+    z-index: 1;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 999px;
+    background: var(--color-btn-soft-bg);
+    color: var(--color-btn-soft-text);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+  }
 
   &__navigation {
     flex: 1;
@@ -31,20 +83,49 @@ $sidebar-padding-top: 32px;
     overflow-y: auto;
     padding-right: 4px;
     &-item {
-      width: 333px;
+      position: relative;
+      width: 100%;
+      min-width: 0;
 
       a {
         @include sidebar-item;
+        min-width: 0;
       }
 
       button {
         @include sidebar-item;
+        width: 100%;
+        min-width: 0;
+        border: none;
+        background: transparent;
+        cursor: pointer;
       }
 
       img {
         height: 28px;
         width: 28px;
         filter: var(--color-icon-filter);
+      }
+
+      .sidebar-menu__navigation-label {
+        flex: 0 0 auto;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .sidebar-menu__navigation-badge {
+        min-width: 22px;
+        margin-left: 2px;
+        padding: 3px 7px;
+        border-radius: 999px;
+        background: var(--color-badge-accent-bg);
+        color: var(--color-badge-accent-text);
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
       }
 
       &--active {

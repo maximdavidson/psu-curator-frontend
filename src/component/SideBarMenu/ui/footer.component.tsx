@@ -4,9 +4,10 @@ import SettingIcon from "@/assets/settings-icon.svg";
 import styles from "../side-bar-menu.module.scss";
 interface IFooterProps {
   pathname: string;
+  isCollapsed: boolean;
 }
 
-export const Footer = ({ pathname }: IFooterProps) => {
+export const Footer = ({ pathname, isCollapsed }: IFooterProps) => {
   return (
     <footer className={styles["sidebar-menu__footer"]}>
       <ul>
@@ -15,8 +16,9 @@ export const Footer = ({ pathname }: IFooterProps) => {
           to={"/settings"}
           icon={SettingIcon}
           isActive={pathname === "/settings"}
+          isCollapsed={isCollapsed}
         />
-        <LogoutButton />
+        <LogoutButton isCollapsed={isCollapsed} />
       </ul>
     </footer>
   );

@@ -7,6 +7,7 @@ import { calendarApi } from "@/services/calendar.api";
 import { documentsApi } from "@/pages/documents/documents.api";
 import { notificationApi } from "@/services/notification.api";
 import { userApi } from "@/services/user.api";
+import { chatApi } from "@/services/chat.api";
 
 /** При смене пользователя сбрасываем кэш RTK Query, иначе студент может увидеть список групп предыдущей сессии. */
 export const authCacheListener = createListenerMiddleware();
@@ -21,5 +22,6 @@ authCacheListener.startListening({
     api.dispatch(documentsApi.util.resetApiState());
     api.dispatch(notificationApi.util.resetApiState());
     api.dispatch(userApi.util.resetApiState());
+    api.dispatch(chatApi.util.resetApiState());
   }
 });

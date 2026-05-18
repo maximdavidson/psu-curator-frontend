@@ -1,24 +1,91 @@
 import { useDispatch, useSelector } from "react-redux";
+import type { ChangeEvent } from "react";
 import {
   selectIsDarkTheme,
   setTheme,
   type ThemeMode
 } from "@/stores/theme.store";
 import { ThemeToggle } from "./components/theme-toggle.component";
+import {
+  useGetUserByIdQuery,
+  useUploadCurrentUserAvatarMutation
+} from "@/services/user.api";
+import { selectToken } from "@/stores/auth.store";
+import { getUserIdFromAccessToken } from "@/shared/lib/jwt-claims";
+import { resolveAvatarUrl } from "@/shared/lib/resolve-avatar-url";
 import styles from "./settings.module.scss";
 
 export const SettingsPage = () => {
   const dispatch = useDispatch();
   const isDark = useSelector(selectIsDarkTheme);
+  const token = useSelector(selectToken);
+  const currentUserId = getUserIdFromAccessToken(token);
+  const { data: currentUser } = useGetUserByIdQuery(currentUserId ?? "", {
+    skip: !currentUserId
+  });
+  const avatarUrl = resolveAvatarUrl(currentUser?.avatarUrl);
+  const [uploadAvatar, { isLoading: isUploadingAvatar }] =
+    useUploadCurrentUserAvatarMutation();
 
   const handleThemeChange = (dark: boolean) => {
     const mode: ThemeMode = dark ? "dark" : "light";
     dispatch(setTheme(mode));
   };
 
+  const handleAvatarChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    await uploadAvatar(file).unwrap();
+    event.target.value = "";
+  };
+
   return (
     <div className={styles.page}>
       <h1 className={styles.title}>Настройки</h1>
+
+      <section className={styles.section} aria-labelledby="profile-heading">
+        <h2 id="profile-heading" className={styles.sectionTitle}>
+          Профиль
+        </h2>
+        <p className={styles.sectionHint}>
+          Настройте аватарку, которая будет отображаться в интерфейсе.
+        </p>
+
+        <div className={styles.avatarRow}>
+          <div className={styles.avatarPreview}>
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="Аватар пользователя" />
+            ) : (
+              <span>
+                {(
+                  currentUser?.firstName?.[0] ??
+                  currentUser?.email?.[0] ??
+                  "?"
+                ).toUpperCase()}
+              </span>
+            )}
+          </div>
+
+          <div className={styles.avatarInfo}>
+            <span className={styles.rowLabel}>Аватарка пользователя</span>
+            <span className={styles.rowDescription}>
+              Поддерживаются JPG, PNG и WEBP до 5 МБ.
+            </span>
+            <label className={styles.avatarUploadButton}>
+              {isUploadingAvatar ? "Загрузка..." : "Выбрать изображение"}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                disabled={isUploadingAvatar}
+                onChange={handleAvatarChange}
+              />
+            </label>
+          </div>
+        </div>
+      </section>
 
       <section className={styles.section} aria-labelledby="appearance-heading">
         <h2 id="appearance-heading" className={styles.sectionTitle}>

@@ -4,6 +4,7 @@ import HomeIcon from "../../assets/groups-icon.svg";
 import TeachesrIcon from "../../assets/teachers-icon.svg";
 import PoolsIcon from "../../assets/polls-icon.svg";
 import DocumentsIcon from "../../assets/documents-icon.svg";
+import ChatIcon from "../../assets/chat.svg";
 
 export const menuData: IMenuItem[] = [
   {
@@ -17,10 +18,9 @@ export const menuData: IMenuItem[] = [
     icon: CalendarIcon
   },
   {
-    to: "/teachers",
-    label: "Преподаватели",
-    icon: TeachesrIcon,
-    visibleTo: ["Dean", "DeputyDean", "Admin"]
+    to: "/chat",
+    label: "Мессенджер",
+    icon: ChatIcon
   },
   {
     to: "/surveys",

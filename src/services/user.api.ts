@@ -5,6 +5,7 @@ export interface UserFullName {
   id: string;
   fullName: string | null;
   email: string | null;
+  avatarUrl?: string | null;
 }
 
 export interface UserFullInformation {
@@ -16,6 +17,7 @@ export interface UserFullInformation {
   phoneNumber?: string;
   faculty?: string | null;
   department?: string | null;
+  avatarUrl?: string | null;
 }
 
 export interface UserListItem extends UserFullInformation {
@@ -42,7 +44,10 @@ export const userApi = createApi({
   endpoints: (builder) => ({
     getUserById: builder.query<UserFullInformation, string>({
       query: (userId) => `/User/${userId}`,
-      providesTags: (_result, _error, userId) => [{ type: "User", id: userId }]
+      providesTags: (_result, _error, userId) => [
+        { type: "User", id: userId },
+        "User"
+      ]
     }),
     searchUsersByName: builder.query<UserFullName[], string>({
       query: (name) => ({
@@ -68,6 +73,19 @@ export const userApi = createApi({
         method: "DELETE"
       }),
       invalidatesTags: ["User"]
+    }),
+    uploadCurrentUserAvatar: builder.mutation<UserFullInformation, File>({
+      query: (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        return {
+          url: "/User/me/avatar",
+          method: "POST",
+          body: formData
+        };
+      },
+      invalidatesTags: ["User"]
     })
   })
 });
@@ -77,5 +95,6 @@ export const {
   useLazySearchUsersByNameQuery,
   useGetUsersQuery,
   useCreateStaffUserMutation,
-  useDeleteUserMutation
+  useDeleteUserMutation,
+  useUploadCurrentUserAvatarMutation
 } = userApi;

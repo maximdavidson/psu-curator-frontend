@@ -11,9 +11,9 @@ import { SurveysPage } from "@/pages/surveys/surveys.component";
 import { DocumentsPage } from "@/pages/documents/";
 import { CalendarPage } from "@/pages/calendar/calendar.component";
 import { GroupDetailPage } from "@/pages/group-detail/group-detail.page";
-import { TeachersPage } from "@/pages/teachers/teachers.page";
 import { SettingsPage } from "@/pages/settings";
 import { UserManagementPage } from "@/pages/user-management/user-management.page";
+import { ChatPage } from "@/pages/chat/chat.page";
 
 export const router = createBrowserRouter([
   {
@@ -64,6 +64,10 @@ export const router = createBrowserRouter([
                 element: <CalendarPage />
               },
               {
+                path: "/chat",
+                element: <ChatPage />
+              },
+              {
                 path: "/groups/:groupId",
                 element: <GroupDetailPage />
               },
@@ -78,10 +82,6 @@ export const router = createBrowserRouter([
                   />
                 ),
                 children: [
-                  {
-                    path: "/teachers",
-                    element: <TeachersPage />
-                  },
                   {
                     path: "/users",
                     element: <UserManagementPage />

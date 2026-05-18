@@ -4,10 +4,11 @@
   grid-template-areas:
     "header header"
     "sidebar-menu main";
-  grid-template-columns: 361px 1fr;
+  grid-template-columns: auto minmax(0, 1fr);
   grid-template-rows: $header-height 1fr;
 }
 
 .main {
   grid-area: main;
+  min-width: 0;
 }
