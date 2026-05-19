@@ -8,7 +8,8 @@ import {
   useGetGroupsQuery,
   useCreateGroupMutation,
   useDeleteGroupMutation,
-  useUpdateGroupMutation
+  useUpdateGroupMutation,
+  type CreateGroupRequest
 } from "@/pages/groups/group.api";
 import { getSearchText, subscribeToSearch } from "@/app/store/searchStore";
 import { useCanManageGroups } from "@/hooks/use-can-manage-groups";
@@ -41,20 +42,21 @@ export default function GroupsPageCreate() {
   };
   const handleCreateGroup = async (data: CreateGroupFormData) => {
     try {
-      const payload = {
+      const payload: CreateGroupRequest = {
         name: data.groupName,
         faculty: data.faculty,
         courseNumber: data.courseNumber,
-        curatorEmail: data.curatorEmail,
-        ...(data.headStudentEmail &&
-          data.headStudentEmail.trim() !== "" && {
-            headStudentEmail: data.headStudentEmail
-          })
+        ...(data.department && { department: data.department }),
+        ...(data.curatorEmail && { curatorEmail: data.curatorEmail }),
+        ...(data.headStudentEmail && {
+          headStudentEmail: data.headStudentEmail
+        })
       };
       await createGroup(payload).unwrap();
       setIsOpen(false);
     } catch (err) {
       console.error("Ошибка при создании группы:", err);
+      throw err;
     }
   };
   const handleUpdateGroup = async (data: EditGroupData) => {
@@ -63,14 +65,16 @@ export default function GroupsPageCreate() {
         id: data.id,
         name: data.name,
         faculty: data.faculty,
+        department: data.department,
         courseNumber: data.courseNumber,
-        curatorEmail: data.curatorEmail!,
-        headEmail: data.headStudentEmail
+        curatorEmail: data.curatorEmail ?? "",
+        headEmail: data.headStudentEmail ?? ""
       }).unwrap();
       setIsOpen(false);
       setSelectedGroup(null);
     } catch (err) {
       console.error("Ошибка при обновлении группы:", err);
+      throw err;
     }
   };
   const handleDeleteGroup = async (groupId: string) => {
@@ -108,9 +112,10 @@ export default function GroupsPageCreate() {
               curator={formatCuratorName(group)}
               numberStudents={group.countOfstudents}
               faculty={group.faculty}
-              courseNumber={1}
-              curatorEmail={group.curatorEmail}
-              headStudentEmail={group.headStudentEmail}
+              department={group.department ?? undefined}
+              courseNumber={group.courseNumber}
+              curatorEmail={group.curatorEmail ?? ""}
+              headStudentEmail={group.headStudentEmail ?? undefined}
               onEdit={openEditModal}
               onDelete={handleDeleteGroup}
               showStaffActions={canManageGroups}

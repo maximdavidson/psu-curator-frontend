@@ -10,8 +10,9 @@ interface GroupCardProps {
   numberStudents: number;
   groupId: string;
   faculty: string;
+  department?: string;
   courseNumber: number;
-  curatorEmail: string;
+  curatorEmail?: string;
   headStudentEmail?: string;
   onEdit: (group: EditGroupData) => void;
   onDelete: (groupId: string) => void;
@@ -31,6 +32,7 @@ export const GroupCard = ({
   numberStudents,
   groupId,
   faculty,
+  department,
   courseNumber,
   curatorEmail,
   headStudentEmail,
@@ -71,6 +73,7 @@ export const GroupCard = ({
       id: groupId,
       name: groupName,
       faculty,
+      department,
       courseNumber,
       curatorEmail,
       headStudentEmail

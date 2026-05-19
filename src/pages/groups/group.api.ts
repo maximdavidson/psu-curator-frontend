@@ -4,26 +4,30 @@ export interface Group {
   id: string;
   name: string;
   faculty: string;
+  department?: string | null;
+  courseNumber: number;
   countOfstudents: number;
   firstName: string;
   lastName: string;
   surname: string;
-  curatorEmail: string;
-  headStudentEmail?: string;
+  curatorEmail?: string | null;
+  headStudentEmail?: string | null;
 }
 export interface CreateGroupRequest {
   name: string;
   faculty: string;
+  department?: string;
   courseNumber: number;
-  curatorEmail: string;
+  curatorEmail?: string;
   headStudentEmail?: string;
 }
 export interface UpdateGroupRequest {
   id: string;
   name: string;
   faculty: string;
+  department?: string;
   courseNumber: number;
-  curatorEmail: string;
+  curatorEmail?: string;
   headEmail?: string;
 }
 export interface FeedItem {
@@ -56,6 +60,7 @@ export interface GroupDetails {
   id: string;
   name: string;
   faculty: string;
+  department?: string | null;
   courseNumber: number;
   curatorId: string;
   curatorFullName: string;

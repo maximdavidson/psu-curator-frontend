@@ -147,6 +147,12 @@ select {
   color: var(--color-error);
 }
 
+.FieldHint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
 .AddBtn {
   position: fixed;
   right: 24px;
