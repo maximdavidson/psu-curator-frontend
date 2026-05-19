@@ -1,16 +1,22 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useCallback, useEffect, useMemo } from "react";
+import {
+  startTransition,
+  useState,
+  useCallback,
+  useEffect,
+  useMemo
+} from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   Calendar,
   momentLocalizer,
   Views,
-  type SlotInfo
+  type SlotInfo,
+  type ToolbarProps,
+  type View
 } from "react-big-calendar";
 import moment from "moment";
 import styles from "./calendar.module.scss";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-
 import { EventModal } from "./components/event-modal/event-modal.component";
 import {
   type CalendarEventInvitedUser,
@@ -20,9 +26,7 @@ import {
   useUpdateEventMutation
 } from "@/services/calendar.api";
 import { getRoleStringFromAccessToken } from "@/shared/lib/jwt-claims";
-
 const localizer = momentLocalizer(moment);
-
 interface CalendarEventUI {
   id: string;
   title: string;
@@ -32,8 +36,12 @@ interface CalendarEventUI {
   start: Date;
   end: Date;
 }
-
-const CustomToolbar = ({ date, onNavigate, onView, view }: any) => {
+const CustomToolbar = ({
+  date,
+  onNavigate,
+  onView,
+  view
+}: ToolbarProps<CalendarEventUI>) => {
   return (
     <div className={styles.toolbar}>
       <div className={styles.toolbarLeft}>
@@ -74,14 +82,12 @@ const CustomToolbar = ({ date, onNavigate, onView, view }: any) => {
     </div>
   );
 };
-
 export const CalendarPage = () => {
   const { data: events = [] } = useGetEventsQuery();
   const [createEvent] = useCreateEventMutation();
   const [deleteEvent] = useDeleteEventMutation();
   const [updateEvent] = useUpdateEventMutation();
-
-  const [view, setView] = useState(Views.MONTH);
+  const [view, setView] = useState<View>(Views.MONTH);
   const [date, setDate] = useState(new Date());
   const [slot, setSlot] = useState<SlotInfo | null>(null);
   const [editingEvent, setEditingEvent] = useState<CalendarEventUI | null>(
@@ -94,7 +100,6 @@ export const CalendarPage = () => {
   );
   const canInviteParticipants =
     currentRole !== "Student" && currentRole !== "Headman";
-
   const mappedEvents: CalendarEventUI[] = useMemo(
     () =>
       events.map((e) => ({
@@ -110,34 +115,29 @@ export const CalendarPage = () => {
       })),
     [events]
   );
-
   const handleSelectSlot = (slotInfo: SlotInfo) => {
     setSlot(slotInfo);
     setEditingEvent(null);
     setIsModalOpen(true);
   };
-
   const handleSelectEvent = (event: CalendarEventUI) => {
     setEditingEvent(event);
     setSlot(null);
     setIsModalOpen(true);
   };
-
   useEffect(() => {
     const eventId = searchParams.get("eventId");
     if (!eventId || events.length === 0) return;
-
     const event = mappedEvents.find((item) => item.id === eventId);
     if (!event) return;
-
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setDate(event.start);
-    setEditingEvent(event);
-    setSlot(null);
-    setIsModalOpen(true);
-    setSearchParams({}, { replace: true });
+    startTransition(() => {
+      setDate(event.start);
+      setEditingEvent(event);
+      setSlot(null);
+      setIsModalOpen(true);
+      setSearchParams({}, { replace: true });
+    });
   }, [events.length, mappedEvents, searchParams, setSearchParams]);
-
   const handleSaveEvent = async (
     title: string,
     description: string,
@@ -155,7 +155,6 @@ export const CalendarPage = () => {
         (id) => !nextUserIds.has(id)
       );
       const newUsers = [...nextUserIds].filter((id) => !currentUserIds.has(id));
-
       await updateEvent({
         id: editingEvent.id,
         body: {
@@ -168,12 +167,10 @@ export const CalendarPage = () => {
           newGroupIds: invitedGroupIds
         }
       }).unwrap();
-
       setIsModalOpen(false);
       setEditingEvent(null);
       return;
     }
-
     await createEvent({
       title,
       description,
@@ -183,31 +180,25 @@ export const CalendarPage = () => {
       invitedUserEmails: [],
       invitedGroupIds
     }).unwrap();
-
     setIsModalOpen(false);
     setSlot(null);
   };
-
   const handleDeleteEvent = async (id: string) => {
     await deleteEvent(id);
     setIsModalOpen(false);
     setEditingEvent(null);
   };
-
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingEvent(null);
     setSlot(null);
   };
-
   const handleNavigate = useCallback((newDate: Date) => {
     setDate(newDate);
   }, []);
-
-  const handleView = useCallback((newView: any) => {
+  const handleView = useCallback((newView: View) => {
     setView(newView);
   }, []);
-
   return (
     <div className={styles.page}>
       <div className={styles.calendarWrapper}>

@@ -4,27 +4,24 @@ import { nanoid } from "nanoid";
 import * as yup from "yup";
 import { surveySchema } from "@/shared/model/schemas/create-survey-modal.schema";
 import type { Question, QuestionType } from "../../survey.types";
-
 export interface CreateSurveyPayload {
   title: string;
   description: string;
+  isAnonymous: boolean;
   questions: {
     text: string;
     type: QuestionType;
     options: string[];
   }[];
 }
-
 export interface SurveyData extends CreateSurveyPayload {
   questions: Question[];
 }
-
 interface Props {
   onClose: () => void;
   onCreate: (data: CreateSurveyPayload) => void | Promise<void>;
   isLoading?: boolean;
 }
-
 export const CreateSurveyModal = ({
   onClose,
   onCreate,
@@ -32,6 +29,7 @@ export const CreateSurveyModal = ({
 }: Props) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([
     { id: nanoid(), text: "", type: "single", options: ["", ""] }
   ]);
@@ -39,12 +37,11 @@ export const CreateSurveyModal = ({
   const [isValid, setIsValid] = useState(false);
   const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
   const [authError, setAuthError] = useState<string>("");
-
   useEffect(() => {
     const validate = async () => {
       try {
         await surveySchema.validate(
-          { title, description, questions },
+          { title, description, isAnonymous, questions },
           { abortEarly: false }
         );
         setErrors({});
@@ -64,8 +61,7 @@ export const CreateSurveyModal = ({
       }
     };
     validate();
-  }, [title, description, questions]);
-
+  }, [title, description, isAnonymous, questions]);
   const handleQuestionChange = (
     id: string,
     field: keyof Question,
@@ -75,7 +71,6 @@ export const CreateSurveyModal = ({
       prev.map((q) => (q.id === id ? { ...q, [field]: value } : q))
     );
   };
-
   const handleOptionChange = (
     questionId: string,
     index: number,
@@ -92,7 +87,6 @@ export const CreateSurveyModal = ({
       )
     );
   };
-
   const addOption = (questionId: string) => {
     setQuestions((prev) =>
       prev.map((q) =>
@@ -100,37 +94,30 @@ export const CreateSurveyModal = ({
       )
     );
   };
-
   const addQuestion = () => {
     setQuestions((prev) => [
       ...prev,
       { id: nanoid(), text: "", type: "single", options: ["", ""] }
     ]);
   };
-
   const removeQuestion = (id: string) => {
     setQuestions((prev) => prev.filter((q) => q.id !== id));
   };
-
   const handleFieldTouch = (field: string) => {
     setTouchedFields((prev) => new Set(prev).add(field));
   };
-
   const getError = (path: string) =>
     touchedFields.has(path) ? errors[path] : undefined;
-
   const shouldShowFieldError = (path: string) =>
     touchedFields.has(path) && errors[path];
-
   const handleSubmit = async () => {
     if (!isValid || isLoading) return;
-
     setAuthError("");
-
     try {
       const payload: CreateSurveyPayload = {
         title,
         description,
+        isAnonymous,
         questions: questions.map((q) => ({
           text: q.text,
           type: q.type,
@@ -140,13 +127,10 @@ export const CreateSurveyModal = ({
               : q.options.filter((opt) => opt.trim() !== "")
         }))
       };
-
-      console.log("Отправляемые данные:", payload);
-
       await onCreate(payload);
-
       setTitle("");
       setDescription("");
+      setIsAnonymous(false);
       setQuestions([
         { id: nanoid(), text: "", type: "single", options: ["", ""] }
       ]);
@@ -157,7 +141,6 @@ export const CreateSurveyModal = ({
       setTimeout(() => setAuthError(""), 3000);
     }
   };
-
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
@@ -189,6 +172,20 @@ export const CreateSurveyModal = ({
           {getError("description") && (
             <span className={styles.errorText}>{getError("description")}</span>
           )}
+        </div>
+
+        <div className={styles.field}>
+          <label className={styles.checkboxRow}>
+            <input
+              type="checkbox"
+              checked={isAnonymous}
+              onChange={(e) => setIsAnonymous(e.target.checked)}
+            />
+            <span>
+              Анонимный опрос (в статистике не будут видны ФИО и ответы по
+              каждому участнику)
+            </span>
+          </label>
         </div>
 
         <hr />

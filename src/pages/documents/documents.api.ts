@@ -1,6 +1,5 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { createAppBaseQuery } from "@/shared/api/base-query";
-
 export interface IFileResponse {
   id: string;
   fileName: string;
@@ -10,11 +9,7 @@ export interface IFileResponse {
   downloadUrl: string;
   uploadedByName: string;
 }
-
-const filesApiBaseUrl = `${(
-  (import.meta.env.VITE_API_URL as string | undefined) ?? "/api"
-).replace(/\/$/, "")}/Files`;
-
+const filesApiBaseUrl = `${((import.meta.env.VITE_API_URL as string | undefined) ?? "/api").replace(/\/$/, "")}/Files`;
 export const documentsApi = createApi({
   reducerPath: "documentsApi",
   baseQuery: createAppBaseQuery(filesApiBaseUrl),
@@ -24,15 +19,19 @@ export const documentsApi = createApi({
       query: () => "/users/files",
       providesTags: ["Files"]
     }),
-
-    uploadFile: builder.mutation<void, { file: File; description?: string }>({
+    uploadFile: builder.mutation<
+      void,
+      {
+        file: File;
+        description?: string;
+      }
+    >({
       query: ({ file, description }) => {
         const formData = new FormData();
         formData.append("file", file);
         if (description) {
           formData.append("description", description);
         }
-
         return {
           url: "/upload",
           method: "POST",
@@ -41,7 +40,6 @@ export const documentsApi = createApi({
       },
       invalidatesTags: ["Files"]
     }),
-
     deleteFile: builder.mutation<void, string>({
       query: (fileId) => ({
         url: `/${fileId}`,
@@ -49,14 +47,12 @@ export const documentsApi = createApi({
       }),
       invalidatesTags: ["Files"]
     }),
-
     getFileById: builder.query<Blob, string>({
       query: (fileId) => ({
         url: `/${fileId}`,
         responseHandler: (response) => response.blob()
       })
     }),
-
     downloadFile: builder.query<Blob, string>({
       query: (fileId) => ({
         url: `/download/${fileId}`,
@@ -65,7 +61,6 @@ export const documentsApi = createApi({
     })
   })
 });
-
 export const {
   useGetUserFilesQuery,
   useUploadFileMutation,

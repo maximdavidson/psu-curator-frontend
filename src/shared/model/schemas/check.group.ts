@@ -1,5 +1,4 @@
 import * as yup from "yup";
-
 export const groupSchema = yup.object({
   groupName: yup
     .string()

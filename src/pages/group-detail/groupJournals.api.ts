@@ -1,9 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauth } from "@/shared/api/base-query";
-
 export type GroupJournalType = 1;
 export type AttendanceStatus = 1 | 2 | 3 | 4;
-
 export interface GroupJournalListItem {
   id: string;
   groupId: string;
@@ -15,14 +13,12 @@ export interface GroupJournalListItem {
   createdByName: string;
   entriesCount: number;
 }
-
 export interface GroupJournalEntry {
   id?: string | null;
   date: string;
   status?: AttendanceStatus | null;
   comment?: string | null;
 }
-
 export interface GroupJournalParticipant {
   userId: string;
   fullName: string;
@@ -30,7 +26,6 @@ export interface GroupJournalParticipant {
   isHeadman: boolean;
   entries: GroupJournalEntry[];
 }
-
 export interface GroupJournalDetail {
   id: string;
   groupId: string;
@@ -44,22 +39,18 @@ export interface GroupJournalDetail {
   canEditEntries: boolean;
   participants: GroupJournalParticipant[];
 }
-
 export interface CreateGroupJournalRequest {
   title: string;
   startDate: string;
   endDate: string;
 }
-
 export type UpdateGroupJournalRequest = CreateGroupJournalRequest;
-
 export interface SaveGroupJournalEntryRequest {
   userId: string;
   date: string;
   status: AttendanceStatus;
   comment?: string | null;
 }
-
 export const groupJournalsApi = createApi({
   reducerPath: "groupJournalsApi",
   baseQuery: baseQueryWithReauth,
@@ -71,17 +62,18 @@ export const groupJournalsApi = createApi({
         { type: "GroupJournal", id: `GROUP-${groupId}` }
       ]
     }),
-
     getGroupJournal: builder.query<GroupJournalDetail, string>({
       query: (journalId) => `/GroupJournals/${journalId}`,
       providesTags: (_result, _error, journalId) => [
         { type: "GroupJournal", id: journalId }
       ]
     }),
-
     createGroupJournal: builder.mutation<
       string,
-      { groupId: string; body: CreateGroupJournalRequest }
+      {
+        groupId: string;
+        body: CreateGroupJournalRequest;
+      }
     >({
       query: ({ groupId, body }) => ({
         url: `/Group/${groupId}/journals`,
@@ -92,10 +84,13 @@ export const groupJournalsApi = createApi({
         { type: "GroupJournal", id: `GROUP-${groupId}` }
       ]
     }),
-
     updateGroupJournal: builder.mutation<
       void,
-      { journalId: string; groupId: string; body: UpdateGroupJournalRequest }
+      {
+        journalId: string;
+        groupId: string;
+        body: UpdateGroupJournalRequest;
+      }
     >({
       query: ({ journalId, body }) => ({
         url: `/GroupJournals/${journalId}`,
@@ -107,10 +102,12 @@ export const groupJournalsApi = createApi({
         { type: "GroupJournal", id: `GROUP-${groupId}` }
       ]
     }),
-
     deleteGroupJournal: builder.mutation<
       void,
-      { journalId: string; groupId: string }
+      {
+        journalId: string;
+        groupId: string;
+      }
     >({
       query: ({ journalId }) => ({
         url: `/GroupJournals/${journalId}`,
@@ -121,10 +118,12 @@ export const groupJournalsApi = createApi({
         { type: "GroupJournal", id: `GROUP-${groupId}` }
       ]
     }),
-
     saveGroupJournalEntries: builder.mutation<
       void,
-      { journalId: string; entries: SaveGroupJournalEntryRequest[] }
+      {
+        journalId: string;
+        entries: SaveGroupJournalEntryRequest[];
+      }
     >({
       query: ({ journalId, entries }) => ({
         url: `/GroupJournals/${journalId}/entries`,
@@ -135,7 +134,6 @@ export const groupJournalsApi = createApi({
         { type: "GroupJournal", id: journalId }
       ]
     }),
-
     downloadGroupJournalExcel: builder.mutation<Blob, string>({
       query: (journalId) => ({
         url: `/GroupJournals/${journalId}/export/excel`,
@@ -145,7 +143,6 @@ export const groupJournalsApi = createApi({
     })
   })
 });
-
 export const {
   useGetGroupJournalsQuery,
   useGetGroupJournalQuery,

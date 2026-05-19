@@ -3,7 +3,6 @@ import styles from "./event-form-modal.module.scss";
 import { useGetUserFilesQuery } from "@/pages/documents/documents.api";
 import { useGetUserSurveysQuery } from "@/pages/surveys/survey.api";
 import { getUserIdFromAccessToken } from "@/shared/lib/jwt-claims";
-
 interface Props {
   onClose: () => void;
   onCreate: (item: {
@@ -22,7 +21,6 @@ interface Props {
   };
   mode?: "create" | "edit";
 }
-
 export const EventFormModal = ({
   onClose,
   onCreate,
@@ -30,7 +28,6 @@ export const EventFormModal = ({
   mode = "create"
 }: Props) => {
   const userId = getUserIdFromAccessToken(localStorage.getItem("token")) ?? "";
-
   const [title, setTitle] = useState(initialData?.title || "");
   const [description, setDescription] = useState(
     initialData?.description || ""
@@ -38,14 +35,10 @@ export const EventFormModal = ({
   const [contentType, setContentType] = useState<"message" | "poll" | "file">(
     initialData?.contentType || "message"
   );
-
-  // Файлы
   const { data: userFiles, isLoading: isFilesLoading } = useGetUserFilesQuery();
   const [selectedFileId, setSelectedFileId] = useState<string | null>(
     initialData?.selectedFileId ?? null
   );
-
-  // Опросы
   const { data: surveys, isLoading: isSurveysLoading } = useGetUserSurveysQuery(
     userId,
     { skip: !userId }
@@ -53,20 +46,16 @@ export const EventFormModal = ({
   const [selectedSurveyId, setSelectedSurveyId] = useState<string | null>(
     initialData?.selectedSurveyId ?? null
   );
-
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const formatFileSize = (bytes: number): string => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
-
   const getFileExtension = (fileName: string): string => {
     return fileName.split(".").pop()?.toUpperCase() || "";
   };
-
   const getFileIcon = (contentType: string): string => {
     if (contentType.startsWith("image/")) return "🖼️";
     if (contentType === "application/pdf") return "📕";
@@ -74,17 +63,14 @@ export const EventFormModal = ({
       return "📝";
     return "📄";
   };
-
   const getQuestionCountText = (count: number): string => {
     if (!count || count === 0) return "0 вопросов";
     if (count === 1) return "1 вопрос";
     if (count >= 2 && count <= 4) return `${count} вопроса`;
     return `${count} вопросов`;
   };
-
   const safeSurveys = surveys || [];
   const safeFiles = userFiles || [];
-
   const handleSubmit = async () => {
     setSubmitError(null);
     if (!title.trim()) {
@@ -99,7 +85,6 @@ export const EventFormModal = ({
       setSubmitError("Выберите файл из списка");
       return;
     }
-
     setIsSubmitting(true);
     try {
       await Promise.resolve(
@@ -125,7 +110,6 @@ export const EventFormModal = ({
       setIsSubmitting(false);
     }
   };
-
   const handleContentTypeChange = (type: "message" | "poll" | "file") => {
     setSubmitError(null);
     setContentType(type);
@@ -133,7 +117,6 @@ export const EventFormModal = ({
     setSelectedFileId(null);
     setSelectedSurveyId(null);
   };
-
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -141,35 +124,27 @@ export const EventFormModal = ({
           {mode === "edit" ? "Редактировать запись" : "Создать запись"}
         </h2>
 
-        {/* Выбор типа контента */}
         <div className={styles.contentTypeSelector}>
           <button
-            className={`${styles.typeButton} ${
-              contentType === "message" ? styles.active : ""
-            }`}
+            className={`${styles.typeButton} ${contentType === "message" ? styles.active : ""}`}
             onClick={() => handleContentTypeChange("message")}
           >
             Сообщение
           </button>
           <button
-            className={`${styles.typeButton} ${
-              contentType === "poll" ? styles.active : ""
-            }`}
+            className={`${styles.typeButton} ${contentType === "poll" ? styles.active : ""}`}
             onClick={() => handleContentTypeChange("poll")}
           >
             Опрос
           </button>
           <button
-            className={`${styles.typeButton} ${
-              contentType === "file" ? styles.active : ""
-            }`}
+            className={`${styles.typeButton} ${contentType === "file" ? styles.active : ""}`}
             onClick={() => handleContentTypeChange("file")}
           >
             Файл
           </button>
         </div>
 
-        {/* Заголовок */}
         <div className={styles.field}>
           <label className={styles.label}>Заголовок</label>
           <input
@@ -188,7 +163,6 @@ export const EventFormModal = ({
           />
         </div>
 
-        {/* Описание - только для сообщений */}
         {contentType === "message" && (
           <div className={styles.field}>
             <label className={styles.label}>Описание</label>
@@ -202,7 +176,6 @@ export const EventFormModal = ({
           </div>
         )}
 
-        {/* Выбор опроса */}
         {contentType === "poll" && (
           <div className={styles.fileSection}>
             <label className={styles.label}>Выберите опрос</label>
@@ -225,22 +198,17 @@ export const EventFormModal = ({
                 {safeSurveys.map((survey) => {
                   const isSelected = selectedSurveyId === survey.id;
                   const questionsCount = survey.questionCount ?? 0;
-
                   return (
                     <div
                       key={survey.id}
-                      className={`${styles.fileItem} ${
-                        isSelected ? styles.fileItemSelected : ""
-                      }`}
+                      className={`${styles.fileItem} ${isSelected ? styles.fileItemSelected : ""}`}
                       onClick={() =>
                         setSelectedSurveyId(isSelected ? null : survey.id)
                       }
                     >
                       <div className={styles.radioButton}>
                         <div
-                          className={`${styles.radioCircle} ${
-                            isSelected ? styles.radioSelected : ""
-                          }`}
+                          className={`${styles.radioCircle} ${isSelected ? styles.radioSelected : ""}`}
                         />
                       </div>
 
@@ -263,7 +231,6 @@ export const EventFormModal = ({
           </div>
         )}
 
-        {/* Выбор файла */}
         {contentType === "file" && (
           <div className={styles.fileSection}>
             <label className={styles.label}>Выберите файл</label>
@@ -285,22 +252,17 @@ export const EventFormModal = ({
               <div className={styles.fileList}>
                 {safeFiles.map((file) => {
                   const isSelected = selectedFileId === file.id;
-
                   return (
                     <div
                       key={file.id}
-                      className={`${styles.fileItem} ${
-                        isSelected ? styles.fileItemSelected : ""
-                      }`}
+                      className={`${styles.fileItem} ${isSelected ? styles.fileItemSelected : ""}`}
                       onClick={() =>
                         setSelectedFileId(isSelected ? null : file.id)
                       }
                     >
                       <div className={styles.radioButton}>
                         <div
-                          className={`${styles.radioCircle} ${
-                            isSelected ? styles.radioSelected : ""
-                          }`}
+                          className={`${styles.radioCircle} ${isSelected ? styles.radioSelected : ""}`}
                         />
                       </div>
 
@@ -325,7 +287,6 @@ export const EventFormModal = ({
           </div>
         )}
 
-        {/* Кнопки */}
         <div className={styles.actions}>
           {submitError && (
             <p className={styles.submitError} role="alert">

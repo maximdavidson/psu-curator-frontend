@@ -1,5 +1,4 @@
 import type { IAuthButtonProps } from "./auth-button.component";
-
 export const getButtonContent = ({
   isLoading,
   error,

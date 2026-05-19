@@ -1,14 +1,11 @@
-/** Значения роли в JWT от бэкенда (UserRoles.ToString()). */
 const ROLE_CLAIM_KEYS = [
   "role",
   "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
 ] as const;
-
 const USER_ID_CLAIM_KEYS = [
   "sub",
   "http://schemas.microsoft.com/ws/2008/06/identity/claims/primarysid"
 ] as const;
-
 export function decodeJwtPayload(
   accessToken: string
 ): Record<string, unknown> | null {
@@ -24,7 +21,6 @@ export function decodeJwtPayload(
     return null;
   }
 }
-
 export function getRoleStringFromAccessToken(
   accessToken: string | null
 ): string | null {
@@ -38,7 +34,6 @@ export function getRoleStringFromAccessToken(
   }
   return null;
 }
-
 export function getUserIdFromAccessToken(
   accessToken: string | null
 ): string | null {
@@ -51,20 +46,16 @@ export function getUserIdFromAccessToken(
   }
   return null;
 }
-
-/** Кураторы, деканат и админ — могут управлять группами на уровне UI. */
 export function roleCanManageStudentGroups(role: string | null): boolean {
   if (!role) return false;
   const r = role.trim().toLowerCase();
   return ["curator", "dean", "deputydean", "admin"].includes(r);
 }
-
 export function roleCanCreateGroupFeedItems(role: string | null): boolean {
   if (!role) return false;
   const r = role.trim().toLowerCase();
   return !["student", "headman"].includes(r);
 }
-
 export function roleCanViewGroupJournals(role: string | null): boolean {
   if (!role) return false;
   const r = role.trim().toLowerCase();

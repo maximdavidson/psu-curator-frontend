@@ -1,9 +1,13 @@
 import { useEffect } from "react";
 import styles from "./modal.module.scss";
-import { useForm, type SubmitHandler } from "react-hook-form";
+import {
+  useForm,
+  useWatch,
+  type Resolver,
+  type SubmitHandler
+} from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-
 export interface CreateGroupFormData {
   groupName: string;
   faculty: string;
@@ -11,7 +15,6 @@ export interface CreateGroupFormData {
   curatorEmail: string;
   headStudentEmail?: string;
 }
-
 export interface EditGroupData {
   id: string;
   name: string;
@@ -20,7 +23,6 @@ export interface EditGroupData {
   curatorEmail?: string;
   headStudentEmail?: string;
 }
-
 interface CreateGroupModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -29,26 +31,20 @@ interface CreateGroupModalProps {
   initialData?: EditGroupData | null;
   mode: "create" | "edit";
 }
-
 const groupSchema = yup.object({
   groupName: yup
     .string()
     .required("Название группы обязательно")
     .max(50, "Максимум 50 символов"),
-
   faculty: yup.string().required("Выберите факультет"),
-
   courseNumber: yup
     .number()
     .min(1, "Курс от 1 до 6")
     .max(6, "Курс от 1 до 6")
     .required("Укажите курс"),
-
   curatorEmail: yup.string().email("Введите корректный email").optional(),
-
   headStudentEmail: yup.string().email("Введите корректный email").optional()
 });
-
 const CreateGroupModal = ({
   isOpen,
   onClose,
@@ -61,11 +57,10 @@ const CreateGroupModal = ({
     register,
     handleSubmit,
     reset,
-    watch,
+    control,
     formState: { errors }
   } = useForm<CreateGroupFormData>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: yupResolver(groupSchema) as any,
+    resolver: yupResolver(groupSchema) as Resolver<CreateGroupFormData>,
     defaultValues: {
       groupName: "",
       faculty: "",
@@ -74,9 +69,7 @@ const CreateGroupModal = ({
       headStudentEmail: undefined
     }
   });
-
-  const groupNameValue = watch("groupName");
-
+  const groupNameValue = useWatch({ control, name: "groupName" }) ?? "";
   useEffect(() => {
     if (isOpen && mode === "edit" && initialData) {
       reset({
@@ -87,7 +80,6 @@ const CreateGroupModal = ({
         headStudentEmail: initialData.headStudentEmail ?? undefined
       });
     }
-
     if (!isOpen) {
       reset({
         groupName: "",
@@ -98,7 +90,6 @@ const CreateGroupModal = ({
       });
     }
   }, [isOpen, mode, initialData, reset]);
-
   const onSubmit: SubmitHandler<CreateGroupFormData> = (data) => {
     if (mode === "edit" && initialData) {
       onUpdate({
@@ -112,13 +103,10 @@ const CreateGroupModal = ({
     } else {
       onCreate(data);
     }
-
     onClose();
     reset();
   };
-
   if (!isOpen) return null;
-
   return (
     <div className={styles.ModalOverlay}>
       <div className={styles.Modal}>
@@ -221,5 +209,4 @@ const CreateGroupModal = ({
     </div>
   );
 };
-
 export default CreateGroupModal;

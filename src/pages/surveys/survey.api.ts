@@ -6,19 +6,17 @@ import type {
   SubmitSurveyPayload,
   SurveyStatistics
 } from "./survey.types";
-
 export interface CreateSurveyRequest {
   title: string;
   description: string;
+  isAnonymous: boolean;
   questions: {
     text: string;
     type: string;
     options: string[];
   }[];
 }
-
 export type SurveyStatisticsExportFormat = "docx" | "pdf";
-
 export const surveyApi = createApi({
   reducerPath: "surveyApi",
   baseQuery: baseQueryWithReauth,
@@ -28,14 +26,12 @@ export const surveyApi = createApi({
       query: (userId) => `/Survey/users/${userId}`,
       providesTags: ["Survey"]
     }),
-
     getSurveyById: builder.query<SurveyDetail, string>({
       query: (surveyId) => `/Survey/${surveyId}`,
       providesTags: (_result, _error, surveyId) => [
         { type: "Survey", id: surveyId }
       ]
     }),
-
     createSurvey: builder.mutation<void, CreateSurveyRequest>({
       query: (data) => ({
         url: "/Survey",
@@ -44,7 +40,6 @@ export const surveyApi = createApi({
       }),
       invalidatesTags: ["Survey"]
     }),
-
     deleteSurvey: builder.mutation<void, string>({
       query: (surveyId) => ({
         url: `/Survey/${surveyId}`,
@@ -52,10 +47,12 @@ export const surveyApi = createApi({
       }),
       invalidatesTags: ["Survey"]
     }),
-
     submitSurveyResponse: builder.mutation<
       void,
-      { surveyId: string; body: SubmitSurveyPayload }
+      {
+        surveyId: string;
+        body: SubmitSurveyPayload;
+      }
     >({
       query: ({ surveyId, body }) => ({
         url: `/Survey/${surveyId}/responses`,
@@ -67,17 +64,18 @@ export const surveyApi = createApi({
         "Survey"
       ]
     }),
-
     getSurveyStatistics: builder.query<SurveyStatistics, string>({
       query: (surveyId) => `/Survey/${surveyId}/statistics`,
       providesTags: (_result, _error, surveyId) => [
         { type: "Survey", id: `${surveyId}-stats` }
       ]
     }),
-
     downloadSurveyStatistics: builder.mutation<
       Blob,
-      { surveyId: string; format: SurveyStatisticsExportFormat }
+      {
+        surveyId: string;
+        format: SurveyStatisticsExportFormat;
+      }
     >({
       query: ({ surveyId, format }) => ({
         url: `/Survey/${surveyId}/statistics/export/${format}`,
@@ -87,7 +85,6 @@ export const surveyApi = createApi({
     })
   })
 });
-
 export const {
   useGetUserSurveysQuery,
   useGetSurveyByIdQuery,

@@ -1,6 +1,5 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauth } from "@/shared/api/base-query";
-
 export interface CalendarEvent {
   id: string;
   dateOfEvent: string;
@@ -10,13 +9,11 @@ export interface CalendarEvent {
   isCreator?: boolean;
   invitedUsers: CalendarEventInvitedUser[];
 }
-
 export interface CalendarEventInvitedUser {
   id: string;
   fullName: string;
   email: string;
 }
-
 export interface CalendarEventDetails {
   id: string;
   dateOfEvent: string;
@@ -28,7 +25,6 @@ export interface CalendarEventDetails {
   invitedUsers: CalendarEventInvitedUser[];
   isCreator: boolean;
 }
-
 export interface CreateCalendarEventRequest {
   dateOfEvent: string;
   endDateOfEvent?: string | null;
@@ -38,7 +34,6 @@ export interface CreateCalendarEventRequest {
   invitedUserEmails: string[];
   invitedGroupIds?: string[];
 }
-
 export interface UpdateCalendarEventRequest {
   newDateOfEvent?: string;
   newEndDateOfEvent?: string | null;
@@ -49,7 +44,6 @@ export interface UpdateCalendarEventRequest {
   newUserEmails?: string[];
   newGroupIds?: string[];
 }
-
 export const calendarApi = createApi({
   reducerPath: "calendarApi",
   baseQuery: baseQueryWithReauth,
@@ -68,7 +62,6 @@ export const calendarApi = createApi({
             ]
           : [{ type: "CalendarEvent", id: "LIST" }]
     }),
-
     createEvent: builder.mutation<CalendarEvent, CreateCalendarEventRequest>({
       query: (body) => ({
         url: "/CalendarEvent/events",
@@ -77,7 +70,6 @@ export const calendarApi = createApi({
       }),
       invalidatesTags: [{ type: "CalendarEvent", id: "LIST" }]
     }),
-
     deleteEvent: builder.mutation<void, string>({
       query: (id) => ({
         url: `/CalendarEvent/events/${id}`,
@@ -85,10 +77,12 @@ export const calendarApi = createApi({
       }),
       invalidatesTags: [{ type: "CalendarEvent", id: "LIST" }]
     }),
-
     updateEvent: builder.mutation<
       void,
-      { id: string; body: UpdateCalendarEventRequest }
+      {
+        id: string;
+        body: UpdateCalendarEventRequest;
+      }
     >({
       query: ({ id, body }) => ({
         url: `/CalendarEvent/events/${id}`,
@@ -102,7 +96,6 @@ export const calendarApi = createApi({
     })
   })
 });
-
 export const {
   useGetEventsQuery,
   useCreateEventMutation,

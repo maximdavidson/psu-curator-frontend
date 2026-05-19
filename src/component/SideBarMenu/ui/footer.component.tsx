@@ -6,7 +6,6 @@ interface IFooterProps {
   pathname: string;
   isCollapsed: boolean;
 }
-
 export const Footer = ({ pathname, isCollapsed }: IFooterProps) => {
   return (
     <footer className={styles["sidebar-menu__footer"]}>

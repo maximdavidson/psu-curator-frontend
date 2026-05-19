@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { Provider } from "react-redux";
 import { persistor, store } from "../store/store";
 import { PersistGate } from "redux-persist/integration/react";
-
 interface IProps {
   children: ReactNode;
 }

@@ -12,7 +12,6 @@ import {
 } from "@/shared/";
 import { authSchema, type TAuthFormDto } from "@/shared";
 import { useRegister } from "../../model/use-register";
-
 export const RegistrationForm = () => {
   const {
     register,
@@ -21,9 +20,7 @@ export const RegistrationForm = () => {
   } = useForm<TAuthFormDto>({
     resolver: yupResolver(authSchema)
   });
-
   const { onHandleSubmit, isLoading, errorMessage } = useRegister();
-
   return (
     <AuthFormLayout
       onSubmit={handleSubmit(onHandleSubmit)}

@@ -5,7 +5,6 @@ import TeachesrIcon from "../../assets/teachers-icon.svg";
 import PoolsIcon from "../../assets/polls-icon.svg";
 import DocumentsIcon from "../../assets/documents-icon.svg";
 import ChatIcon from "../../assets/chat.svg";
-
 export const menuData: IMenuItem[] = [
   {
     to: "/groups",

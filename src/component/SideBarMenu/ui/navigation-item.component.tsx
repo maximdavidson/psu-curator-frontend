@@ -6,7 +6,6 @@ type TNavigationItemProps = IMenuItem & {
   badgeCount?: number;
   isCollapsed?: boolean;
 };
-
 export const NavigationItem = ({
   to,
   icon,
@@ -17,7 +16,7 @@ export const NavigationItem = ({
 }: TNavigationItemProps) => {
   return (
     <li
-      className={`${styles["sidebar-menu__navigation-item"]} ${isActive ? styles["sidebar-menu__navigation-item--active"] : ""}`} // TODO:  add clsx
+      className={`${styles["sidebar-menu__navigation-item"]} ${isActive ? styles["sidebar-menu__navigation-item--active"] : ""}`}
     >
       <Link to={to} title={isCollapsed ? label : undefined}>
         <img src={icon} alt="icon" />

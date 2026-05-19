@@ -6,7 +6,6 @@ import {
   parseAuthTokens,
   type ParsedAuthTokens
 } from "@/shared/lib/parse-auth-response";
-
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: baseQueryWithReauth,
@@ -44,5 +43,4 @@ export const authApi = createApi({
     })
   })
 });
-
 export const { useRegisterMutation, useLoginMutation } = authApi;

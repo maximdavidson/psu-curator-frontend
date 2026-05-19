@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import styles from "./registration.styles.module.scss";
-
 export const RegistrationFooter = () => {
   return (
     <div className={styles.footer}>

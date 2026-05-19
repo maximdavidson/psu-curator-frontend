@@ -1,5 +1,4 @@
 import styles from "./FilesList.module.scss";
-
 type TProps = {
   id: string;
   name: string;
@@ -8,7 +7,6 @@ type TProps = {
   handleDownload: () => void;
   handleDelete: (id?: string) => void;
 };
-
 export const FilesItem = ({
   id,
   name,

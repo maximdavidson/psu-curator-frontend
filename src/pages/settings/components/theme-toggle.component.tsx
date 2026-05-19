@@ -1,11 +1,9 @@
 import styles from "../settings.module.scss";
-
 interface ThemeToggleProps {
   checked: boolean;
   onChange: (checked: boolean) => void;
   disabled?: boolean;
 }
-
 export const ThemeToggle = ({
   checked,
   onChange,

@@ -1,5 +1,4 @@
-/* eslint-disable */
-import { useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useSelector } from "react-redux";
 import {
@@ -17,9 +16,7 @@ import { getUserIdFromAccessToken } from "@/shared/lib/jwt-claims";
 import { useChatRealtime } from "@/hooks/use-chat-realtime";
 import { selectToken } from "@/stores/auth.store";
 import styles from "./chat.module.scss";
-
 const MIN_SEARCH_LENGTH = 2;
-
 const formatTime = (dateString: string): string => {
   return new Date(dateString).toLocaleString("ru-RU", {
     day: "2-digit",
@@ -28,15 +25,12 @@ const formatTime = (dateString: string): string => {
     minute: "2-digit"
   });
 };
-
 const getUserTitle = (user: ChatUser): string =>
   user.fullName?.trim() || user.email || "Пользователь";
-
 const getDialogTitle = (
   user: ChatUser,
   currentUserId: string | null
 ): string => (user.id === currentUserId ? "Избранное" : getUserTitle(user));
-
 const getReadState = (
   isOwnMessage: boolean,
   isFavoriteDialog: boolean,
@@ -45,17 +39,13 @@ const getReadState = (
   if (!isOwnMessage) {
     return null;
   }
-
   if (isFavoriteDialog) {
     return "saved";
   }
-
   return readAt ? "read" : "unread";
 };
-
 export const ChatPage = () => {
   useChatRealtime();
-
   const token = useSelector(selectToken);
   const currentUserId = getUserIdFromAccessToken(token);
   const [selectedUser, setSelectedUser] = useState<ChatUser | null>(null);
@@ -69,7 +59,6 @@ export const ChatPage = () => {
   );
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-
   const { data: dialogs = [], isLoading: isDialogsLoading } =
     useGetDialogsQuery();
   const messagesQueryArg = selectedUser
@@ -84,40 +73,35 @@ export const ChatPage = () => {
   const [updateMessage, { isLoading: isUpdating }] = useUpdateMessageMutation();
   const [deleteMessage] = useDeleteMessageMutation();
   const [deleteDialog] = useDeleteDialogMutation();
-
   useEffect(() => {
     const query = search.trim();
     if (query.length < MIN_SEARCH_LENGTH) {
       return;
     }
-
     const timeoutId = window.setTimeout(() => {
       void searchUsers(query, true);
     }, 300);
-
     return () => window.clearTimeout(timeoutId);
   }, [search, searchUsers]);
-
   useEffect(() => {
-    setSelectedUser(null);
-    setSearch("");
-    setMessageText("");
-    setEditingMessageId(null);
-    setEditingText("");
-    setOpenDialogMenuId(null);
-    setOpenMessageMenuId(null);
-    setError(null);
+    startTransition(() => {
+      setSelectedUser(null);
+      setSearch("");
+      setMessageText("");
+      setEditingMessageId(null);
+      setEditingText("");
+      setOpenDialogMenuId(null);
+      setOpenMessageMenuId(null);
+      setError(null);
+    });
   }, [currentUserId]);
-
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length, selectedUser?.id, currentUserId]);
-
   const favoriteUser = useMemo<ChatUser | null>(() => {
     if (!currentUserId) {
       return null;
     }
-
     return {
       id: currentUserId,
       fullName: "Избранное",
@@ -138,23 +122,19 @@ export const ChatPage = () => {
         })),
     [currentUserId, dialogs]
   );
-
   const searchResults = searchState.data ?? [];
   const isSearching = search.trim().length >= MIN_SEARCH_LENGTH;
   const searchResultUsers = searchResults.filter(
     (user) => !dialogs.some((dialog) => dialog.userId === user.id)
   );
-
   const handleSelectUser = (user: ChatUser) => {
     setSelectedUser(user);
     setError(null);
   };
-
   const submitMessage = async () => {
     if (!selectedUser || !messageText.trim()) {
       return;
     }
-
     setError(null);
     try {
       await sendMessage({
@@ -164,28 +144,28 @@ export const ChatPage = () => {
       setMessageText("");
       setSearch("");
     } catch (requestError) {
-      const apiError = requestError as { data?: { error?: string } };
+      const apiError = requestError as {
+        data?: {
+          error?: string;
+        };
+      };
       setError(apiError.data?.error ?? "Не удалось отправить сообщение.");
     }
   };
-
   const startEditing = (messageId: string, text: string) => {
     setEditingMessageId(messageId);
     setEditingText(text);
     setOpenMessageMenuId(null);
     setError(null);
   };
-
   const cancelEditing = () => {
     setEditingMessageId(null);
     setEditingText("");
   };
-
   const submitEdit = async () => {
     if (!editingMessageId || !editingText.trim()) {
       return;
     }
-
     setError(null);
     try {
       await updateMessage({
@@ -194,16 +174,18 @@ export const ChatPage = () => {
       }).unwrap();
       cancelEditing();
     } catch (requestError) {
-      const apiError = requestError as { data?: { error?: string } };
+      const apiError = requestError as {
+        data?: {
+          error?: string;
+        };
+      };
       setError(apiError.data?.error ?? "Не удалось изменить сообщение.");
     }
   };
-
   const handleDeleteMessage = async (messageId: string) => {
     if (!window.confirm("Удалить сообщение?")) {
       return;
     }
-
     setError(null);
     try {
       await deleteMessage(messageId).unwrap();
@@ -212,18 +194,20 @@ export const ChatPage = () => {
       }
       setOpenMessageMenuId(null);
     } catch (requestError) {
-      const apiError = requestError as { data?: { error?: string } };
+      const apiError = requestError as {
+        data?: {
+          error?: string;
+        };
+      };
       setError(apiError.data?.error ?? "Не удалось удалить сообщение.");
     }
   };
-
   const handleDeleteDialog = async (user: ChatUser) => {
     if (
       !window.confirm(`Удалить чат "${getDialogTitle(user, currentUserId)}"?`)
     ) {
       return;
     }
-
     setError(null);
     try {
       await deleteDialog(user.id).unwrap();
@@ -233,16 +217,18 @@ export const ChatPage = () => {
       }
       setOpenDialogMenuId(null);
     } catch (requestError) {
-      const apiError = requestError as { data?: { error?: string } };
+      const apiError = requestError as {
+        data?: {
+          error?: string;
+        };
+      };
       setError(apiError.data?.error ?? "Не удалось удалить чат.");
     }
   };
-
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     void submitMessage();
   };
-
   return (
     <div className={styles.page}>
       <aside className={styles.sidebar}>
@@ -267,9 +253,7 @@ export const ChatPage = () => {
             <div
               role="button"
               tabIndex={0}
-              className={`${styles.dialogItem} ${
-                selectedUser?.id === favoriteUser.id ? styles.activeDialog : ""
-              }`}
+              className={`${styles.dialogItem} ${selectedUser?.id === favoriteUser.id ? styles.activeDialog : ""}`}
               onClick={() => handleSelectUser(favoriteUser)}
               onKeyDown={(event) => {
                 if (event.key === "Enter" || event.key === " ") {
@@ -295,15 +279,12 @@ export const ChatPage = () => {
           {dialogUsers.map((user) => {
             const dialog = dialogs.find((item) => item.userId === user.id);
             const isActive = selectedUser?.id === user.id;
-
             return (
               <div
                 key={user.id}
                 role="button"
                 tabIndex={0}
-                className={`${styles.dialogItem} ${
-                  isActive ? styles.activeDialog : ""
-                }`}
+                className={`${styles.dialogItem} ${isActive ? styles.activeDialog : ""}`}
                 onClick={() => handleSelectUser(user)}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") {
@@ -376,14 +357,11 @@ export const ChatPage = () => {
 
               {searchResultUsers.map((user) => {
                 const isActive = selectedUser?.id === user.id;
-
                 return (
                   <button
                     key={user.id}
                     type="button"
-                    className={`${styles.dialogItem} ${
-                      isActive ? styles.activeDialog : ""
-                    }`}
+                    className={`${styles.dialogItem} ${isActive ? styles.activeDialog : ""}`}
                     onClick={() => handleSelectUser(user)}
                   >
                     <span className={styles.avatar}>
@@ -441,18 +419,13 @@ export const ChatPage = () => {
                   isFavoriteDialog,
                   message.readAt
                 );
-
                 return (
                   <div
                     key={message.id}
-                    className={`${styles.messageRow} ${
-                      isOwn ? styles.ownMessageRow : ""
-                    }`}
+                    className={`${styles.messageRow} ${isOwn ? styles.ownMessageRow : ""}`}
                   >
                     <div
-                      className={`${styles.messageBubble} ${
-                        isOwn ? styles.ownMessage : ""
-                      }`}
+                      className={`${styles.messageBubble} ${isOwn ? styles.ownMessage : ""}`}
                     >
                       {isEditing ? (
                         <div className={styles.editMessageForm}>
@@ -469,7 +442,6 @@ export const ChatPage = () => {
                                 event.preventDefault();
                                 void submitEdit();
                               }
-
                               if (event.key === "Escape") {
                                 cancelEditing();
                               }

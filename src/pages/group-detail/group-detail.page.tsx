@@ -11,9 +11,10 @@ import {
   roleCanCreateGroupFeedItems,
   roleCanViewGroupJournals
 } from "@/shared/lib/jwt-claims";
-
 export const GroupDetailPage = () => {
-  const { groupId } = useParams<{ groupId: string }>();
+  const { groupId } = useParams<{
+    groupId: string;
+  }>();
   const [activeTab, setActiveTab] = useState<"feed" | "members" | "journals">(
     "feed"
   );
@@ -23,7 +24,6 @@ export const GroupDetailPage = () => {
   );
   const canCreateFeedItems = roleCanCreateGroupFeedItems(currentRole);
   const canViewJournals = roleCanViewGroupJournals(currentRole);
-
   const {
     data: group,
     isLoading,
@@ -32,37 +32,29 @@ export const GroupDetailPage = () => {
   } = useGetGroupByIdQuery(groupId!, {
     skip: !groupId
   });
-
   if (!groupId) {
     return <div className={styles.page}>Некорректный ID группы</div>;
   }
-
   if (isLoading) {
     return <div className={styles.page}>Загрузка...</div>;
   }
-
   if (isError || !group) {
     return <div className={styles.page}>Группа не найдена</div>;
   }
-
   return (
     <div className={styles.page}>
       <h1 className={styles.title}>{group.name}</h1>
 
       <div className={styles.tabs}>
         <button
-          className={`${styles.tab} ${
-            activeTab === "feed" ? styles.active : ""
-          }`}
+          className={`${styles.tab} ${activeTab === "feed" ? styles.active : ""}`}
           onClick={() => setActiveTab("feed")}
         >
           Лента
         </button>
 
         <button
-          className={`${styles.tab} ${
-            activeTab === "members" ? styles.active : ""
-          }`}
+          className={`${styles.tab} ${activeTab === "members" ? styles.active : ""}`}
           onClick={() => setActiveTab("members")}
         >
           Участники
@@ -70,9 +62,7 @@ export const GroupDetailPage = () => {
 
         {canViewJournals && (
           <button
-            className={`${styles.tab} ${
-              activeTab === "journals" ? styles.active : ""
-            }`}
+            className={`${styles.tab} ${activeTab === "journals" ? styles.active : ""}`}
             onClick={() => setActiveTab("journals")}
           >
             Журналы
@@ -85,7 +75,7 @@ export const GroupDetailPage = () => {
           <FeedTab
             groupId={group.id}
             feed={group.feedItems}
-            onRefetch={refetch} // 👈 передаём refetch
+            onRefetch={refetch}
             canCreate={canCreateFeedItems}
           />
         )}

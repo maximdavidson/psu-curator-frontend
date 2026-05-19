@@ -10,18 +10,15 @@ import { UserRole, UserRoleLabels, type UserRoleType } from "@/shared";
 import { getSearchText, subscribeToSearch } from "@/app/store/searchStore";
 import { getRoleStringFromAccessToken } from "@/shared/lib/jwt-claims";
 import styles from "./user-management.module.scss";
-
 const staffRoleOptions = [
   { value: UserRole.Teacher, label: UserRoleLabels[UserRole.Teacher] },
   { value: UserRole.Curator, label: UserRoleLabels[UserRole.Curator] }
 ];
-
 const adminRoleOptions = [
   ...staffRoleOptions,
   { value: UserRole.Dean, label: UserRoleLabels[UserRole.Dean] },
   { value: UserRole.DeputyDean, label: UserRoleLabels[UserRole.DeputyDean] }
 ];
-
 const getRoleLabel = (role: UserRoleType | string | number): string => {
   if (typeof role === "string") {
     const found = Object.entries(UserRole).find(
@@ -30,21 +27,28 @@ const getRoleLabel = (role: UserRoleType | string | number): string => {
     if (found) return UserRoleLabels[found[1] as UserRoleType];
     return role;
   }
-
   return UserRoleLabels[role as UserRoleType] ?? `Роль ${role}`;
 };
-
 const getApiErrorMessage = (error: unknown): string | null => {
   if (typeof error !== "object" || error === null) return null;
-  const data = "data" in error ? (error as { data?: unknown }).data : null;
+  const data =
+    "data" in error
+      ? (
+          error as {
+            data?: unknown;
+          }
+        ).data
+      : null;
   if (typeof data === "string") return data;
   if (typeof data !== "object" || data === null) return null;
-  const payload = data as { error?: unknown; message?: unknown };
+  const payload = data as {
+    error?: unknown;
+    message?: unknown;
+  };
   if (typeof payload.error === "string") return payload.error;
   if (typeof payload.message === "string") return payload.message;
   return null;
 };
-
 export const UserManagementPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -57,7 +61,6 @@ export const UserManagementPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState(getSearchText());
   const [selectedUser, setSelectedUser] = useState<UserListItem | null>(null);
-
   const { data: users = [], isLoading } = useGetUsersQuery();
   const [createStaffUser, { isLoading: isCreating }] =
     useCreateStaffUserMutation();
@@ -67,12 +70,10 @@ export const UserManagementPage = () => {
   );
   const isAdmin = currentRole === "Admin";
   const roleOptions = isAdmin ? adminRoleOptions : staffRoleOptions;
-
   useEffect(() => {
     const unsubscribe = subscribeToSearch(setSearch);
     return unsubscribe;
   }, []);
-
   const filteredUsers = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return users;
@@ -91,11 +92,9 @@ export const UserManagementPage = () => {
         .includes(q)
     );
   }, [search, users]);
-
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
-
     try {
       await createStaffUser({
         email,
@@ -122,11 +121,9 @@ export const UserManagementPage = () => {
       );
     }
   };
-
   const handleDeleteSelectedUser = async () => {
     if (!selectedUser) return;
     if (!confirm(`Удалить пользователя ${selectedUser.email}?`)) return;
-
     try {
       await deleteUser(selectedUser.id).unwrap();
       setSelectedUser(null);
@@ -134,7 +131,6 @@ export const UserManagementPage = () => {
       setError(getApiErrorMessage(err) ?? "Не удалось удалить пользователя.");
     }
   };
-
   return (
     <div className={styles.page}>
       <div className={styles.header}>

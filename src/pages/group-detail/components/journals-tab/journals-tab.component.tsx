@@ -13,26 +13,22 @@ import {
   useUpdateGroupJournalMutation
 } from "../../groupJournals.api";
 import { JournalFormModal } from "./journal-form-modal.component";
-
 interface Props {
   groupId: string;
   canManage: boolean;
 }
-
 const STATUS_LABELS: Record<AttendanceStatus, string> = {
   1: "Присутствовал",
   2: "Отсутствовал",
   3: "Опоздал",
   4: "Уважительная"
 };
-
 const formatDate = (value: string) => {
   return new Date(value).toLocaleDateString("ru-RU", {
     day: "2-digit",
     month: "2-digit"
   });
 };
-
 const formatFullDate = (value: string) => {
   return new Date(value).toLocaleDateString("ru-RU", {
     day: "2-digit",
@@ -40,29 +36,22 @@ const formatFullDate = (value: string) => {
     year: "numeric"
   });
 };
-
 const toApiDate = (value: string) => `${value}T00:00:00.000Z`;
-
 const sanitizeFileName = (value: string) => {
   return value.replace(/[\\/:*?"<>|]/g, "_").trim() || "journal";
 };
-
 const cellKey = (userId: string, date: string) =>
   `${userId}:${date.slice(0, 10)}`;
-
 const buildInitialCells = (journal?: GroupJournalDetail) => {
   const result: Record<string, AttendanceStatus | ""> = {};
   if (!journal) return result;
-
   for (const participant of journal.participants) {
     for (const entry of participant.entries) {
       result[cellKey(participant.userId, entry.date)] = entry.status ?? "";
     }
   }
-
   return result;
 };
-
 const JournalDetail = ({
   journalId,
   onBack
@@ -78,7 +67,6 @@ const JournalDetail = ({
   const [cells, setCells] = useState<Record<string, AttendanceStatus | "">>({});
   const [dirtyJournalId, setDirtyJournalId] = useState<string | null>(null);
   const [error, setError] = useState("");
-
   const effectiveCells = useMemo(() => {
     if (!data) return cells;
     if (dirtyJournalId !== data.id) {
@@ -86,7 +74,6 @@ const JournalDetail = ({
     }
     return cells;
   }, [cells, data, dirtyJournalId]);
-
   const handleCellChange = (
     userId: string,
     date: string,
@@ -101,11 +88,9 @@ const JournalDetail = ({
       [cellKey(userId, date)]: status
     });
   };
-
   const handleSave = async () => {
     if (!data) return;
     setError("");
-
     const entries = data.participants.flatMap((participant) =>
       data.dates
         .map((date) => ({
@@ -123,7 +108,6 @@ const JournalDetail = ({
           } => entry.status !== ""
         )
     );
-
     try {
       await saveEntries({ journalId: data.id, entries }).unwrap();
       setDirtyJournalId(null);
@@ -132,19 +116,15 @@ const JournalDetail = ({
       setError("Не удалось сохранить посещаемость.");
     }
   };
-
   const handleDownloadExcel = async () => {
     if (!data) return;
     setError("");
-
     try {
       const blob = await downloadExcel(data.id).unwrap();
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${sanitizeFileName(data.groupName)}-${sanitizeFileName(
-        data.title
-      )}.xlsx`;
+      link.download = `${sanitizeFileName(data.groupName)}-${sanitizeFileName(data.title)}.xlsx`;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -153,15 +133,12 @@ const JournalDetail = ({
       setError("Не удалось скачать Excel-файл.");
     }
   };
-
   if (isLoading) {
     return <p className={styles.status}>Загрузка журнала...</p>;
   }
-
   if (isError || !data) {
     return <p className={styles.status}>Не удалось загрузить журнал.</p>;
   }
-
   return (
     <div className={styles.detail}>
       <div className={styles.detailHeader}>
@@ -219,7 +196,6 @@ const JournalDetail = ({
                 {data.dates.map((date) => {
                   const key = cellKey(participant.userId, date);
                   const value = effectiveCells[key] ?? "";
-
                   return (
                     <td key={key}>
                       <select
@@ -255,7 +231,6 @@ const JournalDetail = ({
     </div>
   );
 };
-
 export const JournalsTab = ({ groupId, canManage }: Props) => {
   const {
     data: journals = [],
@@ -274,23 +249,19 @@ export const JournalsTab = ({ groupId, canManage }: Props) => {
   const [editingJournal, setEditingJournal] =
     useState<GroupJournalListItem | null>(null);
   const [error, setError] = useState("");
-
   const handleCreateClick = () => {
     setError("");
     setEditingJournal(null);
     setIsFormOpen(true);
   };
-
   const handleEditClick = (journal: GroupJournalListItem) => {
     setError("");
     setEditingJournal(journal);
     setIsFormOpen(true);
   };
-
   const handleDelete = async (journal: GroupJournalListItem) => {
     if (!confirm("Удалить журнал посещаемости?")) return;
     setError("");
-
     try {
       await deleteJournal({ journalId: journal.id, groupId }).unwrap();
       if (selectedJournalId === journal.id) {
@@ -300,7 +271,6 @@ export const JournalsTab = ({ groupId, canManage }: Props) => {
       setError("Не удалось удалить журнал.");
     }
   };
-
   const handleSubmit = async (values: {
     title: string;
     startDate: string;
@@ -326,11 +296,9 @@ export const JournalsTab = ({ groupId, canManage }: Props) => {
         }
       }).unwrap();
     }
-
     setIsFormOpen(false);
     setEditingJournal(null);
   };
-
   if (selectedJournalId) {
     return (
       <JournalDetail
@@ -339,7 +307,6 @@ export const JournalsTab = ({ groupId, canManage }: Props) => {
       />
     );
   }
-
   return (
     <div className={styles.journalsTab}>
       <div className={styles.headerRow}>
@@ -403,6 +370,7 @@ export const JournalsTab = ({ groupId, canManage }: Props) => {
 
       {isFormOpen && (
         <JournalFormModal
+          key={editingJournal?.id ?? "create"}
           journal={editingJournal}
           isSubmitting={isCreating || isUpdating}
           onClose={() => {

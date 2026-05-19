@@ -9,10 +9,7 @@ import { documentsApi } from "@/pages/documents/documents.api";
 import { notificationApi } from "@/services/notification.api";
 import { userApi } from "@/services/user.api";
 import { chatApi } from "@/services/chat.api";
-
-/** При смене пользователя сбрасываем кэш RTK Query, иначе студент может увидеть список групп предыдущей сессии. */
 export const authCacheListener = createListenerMiddleware();
-
 authCacheListener.startListening({
   matcher: isAnyOf(setTokens, setToken, removeToken),
   effect: (_action, api) => {

@@ -6,9 +6,7 @@ import {
 } from "@/services/user.api";
 import { useGetGroupsQuery } from "@/pages/groups/group.api";
 import type { CalendarEventInvitedUser } from "@/services/calendar.api";
-
 const MIN_QUERY_LEN = 2;
-
 interface Props {
   event?: {
     id?: string;
@@ -35,19 +33,15 @@ interface Props {
   ) => void;
   onDelete: (id: string) => void;
 }
-
 const toDateInput = (date: Date): string => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 };
-
 const toTimeInput = (date: Date): string => date.toTimeString().slice(0, 5);
-
 const buildDateTime = (date: string, time: string): Date =>
   new Date(`${date}T${time || "00:00"}`);
-
 export const EventModal = ({
   event,
   slot,
@@ -77,7 +71,6 @@ export const EventModal = ({
   const { data: groups = [] } = useGetGroupsQuery();
   const canEditParticipants =
     canInviteParticipants && (!event || Boolean(event.isCreator));
-
   useEffect(() => {
     const timeout = window.setTimeout(
       () => setDebouncedInviteQuery(inviteQuery.trim()),
@@ -85,27 +78,22 @@ export const EventModal = ({
     );
     return () => window.clearTimeout(timeout);
   }, [inviteQuery]);
-
   useEffect(() => {
     if (!canEditParticipants || debouncedInviteQuery.length < MIN_QUERY_LEN)
       return;
     void searchUsers(debouncedInviteQuery, true);
   }, [canEditParticipants, debouncedInviteQuery, searchUsers]);
-
   const selectedUserIds = useMemo(
     () => new Set(selectedInvitees.map((user) => user.id)),
     [selectedInvitees]
   );
-
   const suggestedInvitees = (searchState.data ?? []).filter(
     (user) => user.email && !selectedUserIds.has(user.id)
   );
-
   const showSuggestions =
     canEditParticipants &&
     debouncedInviteQuery.length >= MIN_QUERY_LEN &&
     !searchState.isFetching;
-
   const handleAddInvitee = (user: UserFullName) => {
     if (!user.email || selectedUserIds.has(user.id)) return;
     const email = user.email;
@@ -120,11 +108,9 @@ export const EventModal = ({
     setInviteQuery("");
     setDebouncedInviteQuery("");
   };
-
   const handleRemoveInvitee = (id: string) => {
     setSelectedInvitees((current) => current.filter((user) => user.id !== id));
   };
-
   const handleToggleGroup = (groupId: string) => {
     setSelectedGroupIds((current) =>
       current.includes(groupId)
@@ -132,31 +118,23 @@ export const EventModal = ({
         : [...current, groupId]
     );
   };
-
   const handleSubmit = () => {
     setError(null);
     if (!title.trim()) return;
-
     const start = buildDateTime(date, startTime);
     const end = buildDateTime(date, endTime);
-
     if (end <= start) {
       setError("Время окончания должно быть позже времени начала.");
       return;
     }
-
     onSave(title, description, selectedInvitees, selectedGroupIds, start, end);
   };
-
   const handleDelete = () => {
     if (!event?.id) return;
-
     const confirmDelete = confirm("Удалить событие?");
     if (!confirmDelete) return;
-
     onDelete(event.id);
   };
-
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>

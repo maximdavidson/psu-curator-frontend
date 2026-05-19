@@ -14,7 +14,6 @@ import { selectToken } from "@/stores/auth.store";
 import { getUserIdFromAccessToken } from "@/shared/lib/jwt-claims";
 import { resolveAvatarUrl } from "@/shared/lib/resolve-avatar-url";
 import styles from "./settings.module.scss";
-
 export const SettingsPage = () => {
   const dispatch = useDispatch();
   const isDark = useSelector(selectIsDarkTheme);
@@ -26,22 +25,18 @@ export const SettingsPage = () => {
   const avatarUrl = resolveAvatarUrl(currentUser?.avatarUrl);
   const [uploadAvatar, { isLoading: isUploadingAvatar }] =
     useUploadCurrentUserAvatarMutation();
-
   const handleThemeChange = (dark: boolean) => {
     const mode: ThemeMode = dark ? "dark" : "light";
     dispatch(setTheme(mode));
   };
-
   const handleAvatarChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {
       return;
     }
-
     await uploadAvatar(file).unwrap();
     event.target.value = "";
   };
-
   return (
     <div className={styles.page}>
       <h1 className={styles.title}>Настройки</h1>

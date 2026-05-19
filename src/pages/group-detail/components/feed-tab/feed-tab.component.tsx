@@ -11,14 +11,12 @@ import { useLazyDownloadFileQuery } from "@/pages/documents/documents.api";
 import { useGetUserFilesQuery } from "@/pages/documents/documents.api";
 import type { FeedItem } from "@/pages/groups/group.api";
 import { SurveyViewModal } from "./survey-view-modal/survey-view-modal.component";
-
 interface Props {
   groupId: string;
   feed: FeedItem[];
   onRefetch: () => void;
   canCreate: boolean;
 }
-
 const getInitials = (name: string): string => {
   const n = name?.trim() || "?";
   const parts = n.split(/\s+/).filter(Boolean);
@@ -29,7 +27,6 @@ const getInitials = (name: string): string => {
     .toUpperCase()
     .slice(0, 2);
 };
-
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
   const now = new Date();
@@ -37,12 +34,10 @@ const formatDate = (dateString: string): string => {
   const minutes = Math.floor(diff / 60000);
   const hours = Math.floor(diff / 3600000);
   const days = Math.floor(diff / 86400000);
-
   if (minutes < 1) return "Только что";
   if (minutes < 60) return `${minutes} мин. назад`;
   if (hours < 24) return `${hours} ч. назад`;
   if (days < 7) return `${days} дн. назад`;
-
   return date.toLocaleDateString("ru-RU", {
     day: "numeric",
     month: "long",
@@ -51,13 +46,11 @@ const formatDate = (dateString: string): string => {
     minute: "2-digit"
   });
 };
-
 const formatFileSize = (bytes: number): string => {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
-
 const getFileIcon = (contentType: string): string => {
   if (contentType.startsWith("image/")) return "🖼️";
   if (contentType === "application/pdf") return "📕";
@@ -66,10 +59,13 @@ const getFileIcon = (contentType: string): string => {
   if (contentType.includes("text/")) return "📃";
   return "📄";
 };
-
 type FeedKind = "message" | "poll" | "document";
-
-const getFeedKind = (item: FeedItem): { kind: FeedKind; label: string } => {
+const getFeedKind = (
+  item: FeedItem
+): {
+  kind: FeedKind;
+  label: string;
+} => {
   const t = item.type;
   if ((item.attachments?.length ?? 0) > 0 || t === FeedItemType.Document) {
     return { kind: "document", label: "Документ" };
@@ -79,7 +75,6 @@ const getFeedKind = (item: FeedItem): { kind: FeedKind; label: string } => {
   }
   return { kind: "message", label: "Сообщение" };
 };
-
 const editContentTypeFromItem = (
   item: FeedItem
 ): "message" | "poll" | "file" => {
@@ -88,22 +83,16 @@ const editContentTypeFromItem = (
   if (k === "poll") return "poll";
   return "message";
 };
-
 export const FeedTab = ({ groupId, feed, onRefetch, canCreate }: Props) => {
   const [createFeedItem] = useCreateFeedItemMutation();
   const [updateFeedItem] = useUpdateFeedItemMutation();
   const [deleteFeedItem] = useDeleteFeedItemMutation();
   const [downloadFile] = useLazyDownloadFileQuery();
   const { data: userFiles = [] } = useGetUserFilesQuery();
-
   const [feedActionError, setFeedActionError] = useState<string | null>(null);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<FeedItem | null>(null);
-
-  // Для просмотра опроса
   const [viewingSurveyId, setViewingSurveyId] = useState<string | null>(null);
-
   const buildAttachmentFilesFromLibrary = async (
     fileIds: string[]
   ): Promise<File[]> => {
@@ -128,7 +117,6 @@ export const FeedTab = ({ groupId, feed, onRefetch, canCreate }: Props) => {
     }
     return files;
   };
-
   const handleCreate = async (item: {
     title: string;
     description?: string;
@@ -141,14 +129,12 @@ export const FeedTab = ({ groupId, feed, onRefetch, canCreate }: Props) => {
       let feedType: FeedItemType = FeedItemType.Message;
       if (item.contentType === "file") feedType = FeedItemType.Document;
       if (item.contentType === "poll") feedType = FeedItemType.Poll;
-
       let attachmentFiles: File[] | undefined;
       if (item.contentType === "file" && item.selectedFileIds?.length) {
         attachmentFiles = await buildAttachmentFilesFromLibrary(
           item.selectedFileIds
         );
       }
-
       await createFeedItem({
         title: item.title,
         description: item.description ?? "",
@@ -158,7 +144,6 @@ export const FeedTab = ({ groupId, feed, onRefetch, canCreate }: Props) => {
           item.contentType === "poll" ? item.selectedSurveyId : undefined,
         attachmentFiles
       }).unwrap();
-
       await onRefetch();
       setIsModalOpen(false);
       setEditingItem(null);
@@ -170,7 +155,6 @@ export const FeedTab = ({ groupId, feed, onRefetch, canCreate }: Props) => {
       throw err;
     }
   };
-
   const handleUpdate = async (item: {
     title: string;
     description?: string;
@@ -179,13 +163,11 @@ export const FeedTab = ({ groupId, feed, onRefetch, canCreate }: Props) => {
     selectedSurveyId?: string;
   }) => {
     if (!editingItem) return;
-
     setFeedActionError(null);
     try {
       let feedType: FeedItemType = FeedItemType.Message;
       if (item.contentType === "file") feedType = FeedItemType.Document;
       if (item.contentType === "poll") feedType = FeedItemType.Poll;
-
       const surveyId =
         item.contentType === "poll" ? (item.selectedSurveyId ?? null) : null;
       const documentId =
@@ -194,7 +176,6 @@ export const FeedTab = ({ groupId, feed, onRefetch, canCreate }: Props) => {
             editingItem.attachments?.[0]?.id ??
             null)
           : null;
-
       await updateFeedItem({
         id: editingItem.id,
         body: {
@@ -206,7 +187,6 @@ export const FeedTab = ({ groupId, feed, onRefetch, canCreate }: Props) => {
           documentId
         }
       }).unwrap();
-
       await onRefetch();
       setEditingItem(null);
       setIsModalOpen(false);
@@ -216,40 +196,33 @@ export const FeedTab = ({ groupId, feed, onRefetch, canCreate }: Props) => {
       throw err;
     }
   };
-
   const handleDelete = async (feedItemId: string) => {
     if (!confirm("Удалить запись?")) return;
-
     try {
       await deleteFeedItem({
         id: feedItemId,
         groupId
       }).unwrap();
-
       onRefetch();
     } catch (err) {
       console.error("Ошибка удаления:", err);
     }
   };
-
   const handleEditClick = (item: FeedItem) => {
     setFeedActionError(null);
     setEditingItem(item);
     setIsModalOpen(true);
   };
-
   const handleModalClose = () => {
     setFeedActionError(null);
     setIsModalOpen(false);
     setEditingItem(null);
   };
-
   const handleOpenCreateModal = () => {
     setFeedActionError(null);
     setEditingItem(null);
     setIsModalOpen(true);
   };
-
   const handleFileDownload = async (file: {
     id: string;
     fileName: string;
@@ -269,7 +242,6 @@ export const FeedTab = ({ groupId, feed, onRefetch, canCreate }: Props) => {
       console.error("Ошибка скачивания:", err);
     }
   };
-
   return (
     <div className={styles.feedTab}>
       {canCreate && (

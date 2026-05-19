@@ -12,7 +12,6 @@ import {
 } from "@/pages/groups/group.api";
 import { getSearchText, subscribeToSearch } from "@/app/store/searchStore";
 import { useCanManageGroups } from "@/hooks/use-can-manage-groups";
-
 export default function GroupsPageCreate() {
   const canManageGroups = useCanManageGroups();
   const [isOpen, setIsOpen] = useState(false);
@@ -21,31 +20,25 @@ export default function GroupsPageCreate() {
     null
   );
   const [search, setSearch] = useState(getSearchText());
-
   const { data: groups = [] } = useGetGroupsQuery(undefined, {
     refetchOnMountOrArgChange: true
   });
   const [createGroup] = useCreateGroupMutation();
   const [deleteGroup] = useDeleteGroupMutation();
   const [updateGroup] = useUpdateGroupMutation();
-
   useEffect(() => {
     const unsubscribe = subscribeToSearch(setSearch);
     return unsubscribe;
   }, []);
-
   const filteredGroups = groups.filter((group) =>
     group.name.toLowerCase().includes(search.toLowerCase())
   );
-
   const formatCuratorName = (group: (typeof groups)[number]) => {
     const parts = [group.lastName, group.firstName, group.surname].filter((p) =>
       p?.trim()
     );
     return parts.join(" ").trim();
   };
-
-  // CREATE
   const handleCreateGroup = async (data: CreateGroupFormData) => {
     try {
       const payload = {
@@ -58,15 +51,12 @@ export default function GroupsPageCreate() {
             headStudentEmail: data.headStudentEmail
           })
       };
-
       await createGroup(payload).unwrap();
       setIsOpen(false);
     } catch (err) {
       console.error("Ошибка при создании группы:", err);
     }
   };
-
-  // UPDATE
   const handleUpdateGroup = async (data: EditGroupData) => {
     try {
       await updateGroup({
@@ -77,15 +67,12 @@ export default function GroupsPageCreate() {
         curatorEmail: data.curatorEmail!,
         headEmail: data.headStudentEmail
       }).unwrap();
-
       setIsOpen(false);
       setSelectedGroup(null);
     } catch (err) {
       console.error("Ошибка при обновлении группы:", err);
     }
   };
-
-  // DELETE
   const handleDeleteGroup = async (groupId: string) => {
     try {
       await deleteGroup(groupId).unwrap();
@@ -93,21 +80,16 @@ export default function GroupsPageCreate() {
       console.error("Ошибка при удалении группы:", err);
     }
   };
-
-  // OPEN CREATE
   const openCreateModal = () => {
     setMode("create");
     setSelectedGroup(null);
     setIsOpen(true);
   };
-
-  // OPEN EDIT
   const openEditModal = (group: EditGroupData) => {
     setMode("edit");
     setSelectedGroup(group);
     setIsOpen(true);
   };
-
   return (
     <>
       <div className={pageStyles.grid}>

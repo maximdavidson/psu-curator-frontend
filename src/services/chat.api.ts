@@ -1,6 +1,5 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauth } from "@/shared/api/base-query";
-
 export interface ChatMessage {
   id: string;
   senderId: string;
@@ -11,7 +10,6 @@ export interface ChatMessage {
   createdAt: string;
   readAt?: string | null;
 }
-
 export interface ChatDialog {
   userId: string;
   userFullName: string;
@@ -19,28 +17,23 @@ export interface ChatDialog {
   lastMessage: ChatMessage;
   unreadCount: number;
 }
-
 export interface ChatUser {
   id: string;
   fullName: string;
   email: string;
 }
-
 export interface SendChatMessageRequest {
   recipientId: string;
   text: string;
 }
-
 export interface UpdateChatMessageRequest {
   messageId: string;
   text: string;
 }
-
 export interface ChatMessagesQueryArg {
   interlocutorId: string;
   scope: string;
 }
-
 export const buildChatMessagesQueryArg = (
   currentUserId: string | null,
   interlocutorId: string
@@ -48,7 +41,6 @@ export const buildChatMessagesQueryArg = (
   interlocutorId,
   scope: currentUserId ?? "anonymous"
 });
-
 export const chatApi = createApi({
   reducerPath: "chatApi",
   baseQuery: baseQueryWithReauth,
@@ -58,7 +50,6 @@ export const chatApi = createApi({
       query: () => "/Chat/dialogs",
       providesTags: [{ type: "ChatDialogs", id: "LIST" }]
     }),
-
     getMessages: builder.query<ChatMessage[], ChatMessagesQueryArg>({
       query: ({ interlocutorId }) => `/Chat/${interlocutorId}/messages`,
       providesTags: (_result, _error, { interlocutorId, scope }) => [
@@ -72,18 +63,16 @@ export const chatApi = createApi({
             chatApi.util.invalidateTags([{ type: "ChatDialogs", id: "LIST" }])
           );
         } catch {
-          // ignore
+          void 0;
         }
       }
     }),
-
     searchChatUsers: builder.query<ChatUser[], string>({
       query: (name) => ({
         url: "/Chat/users",
         params: { name }
       })
     }),
-
     sendMessage: builder.mutation<ChatMessage, SendChatMessageRequest>({
       query: (body) => ({
         url: "/Chat/messages",
@@ -97,7 +86,6 @@ export const chatApi = createApi({
         { type: "ChatDialogs", id: "LIST" }
       ]
     }),
-
     updateMessage: builder.mutation<ChatMessage, UpdateChatMessageRequest>({
       query: ({ messageId, text }) => ({
         url: `/Chat/messages/${messageId}`,
@@ -110,7 +98,6 @@ export const chatApi = createApi({
         { type: "ChatDialogs", id: "LIST" }
       ]
     }),
-
     deleteMessage: builder.mutation<void, string>({
       query: (messageId) => ({
         url: `/Chat/messages/${messageId}`,
@@ -121,7 +108,6 @@ export const chatApi = createApi({
         { type: "ChatDialogs", id: "LIST" }
       ]
     }),
-
     deleteDialog: builder.mutation<void, string>({
       query: (userId) => ({
         url: `/Chat/dialogs/${userId}`,
@@ -134,7 +120,6 @@ export const chatApi = createApi({
     })
   })
 });
-
 export const {
   useGetDialogsQuery,
   useGetMessagesQuery,

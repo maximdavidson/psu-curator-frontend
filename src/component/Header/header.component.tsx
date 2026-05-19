@@ -1,5 +1,4 @@
-/* eslint-disable */
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import styles from "./header.module.scss";
@@ -9,11 +8,9 @@ import { selectToken } from "@/stores/auth.store";
 import { getUserIdFromAccessToken } from "@/shared/lib/jwt-claims";
 import { resolveAvatarUrl } from "@/shared/lib/resolve-avatar-url";
 import { useGetUserByIdQuery } from "@/services/user.api";
-
 const getUserEmail = (): string => {
   return localStorage.getItem("email") || "";
 };
-
 const getInitialsFromEmail = (email: string): string => {
   if (!email) return "??";
   const namePart = email.split("@")[0];
@@ -23,7 +20,6 @@ const getInitialsFromEmail = (email: string): string => {
   }
   return namePart.slice(0, 2).toUpperCase();
 };
-
 const getPlaceholderByPath = (path: string): string => {
   if (path === "/groups") {
     return "Поиск по группам...";
@@ -36,11 +32,9 @@ const getPlaceholderByPath = (path: string): string => {
   }
   return "Поиск...";
 };
-
 const shouldShowSearch = (path: string): boolean => {
   return path === "/groups" || path === "/surveys" || path === "/users";
 };
-
 export const Header = () => {
   const [text, setText] = useState<string>("");
   const location = useLocation();
@@ -49,23 +43,21 @@ export const Header = () => {
   const { data: currentUser } = useGetUserByIdQuery(currentUserId ?? "", {
     skip: !currentUserId
   });
-
   const email = getUserEmail();
   const initials = getInitialsFromEmail(email);
   const placeholder = getPlaceholderByPath(location.pathname);
   const showSearch = shouldShowSearch(location.pathname);
   const avatarUrl = resolveAvatarUrl(currentUser?.avatarUrl);
-
   useEffect(() => {
-    setText("");
-    setSearchText("");
+    startTransition(() => {
+      setText("");
+      setSearchText("");
+    });
   }, [location.pathname]);
-
   const handleSearch = (value: string) => {
     setText(value);
     setSearchText(value);
   };
-
   return (
     <header className={styles.header}>
       <div className={styles.left}>

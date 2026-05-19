@@ -1,13 +1,11 @@
 import type { BaseSyntheticEvent, ReactNode } from "react";
 import styles from "./auth-form-layout.module.scss";
-
 interface IAuthFormLayoutProps {
   title: string;
   children: ReactNode;
   footer: ReactNode;
   onSubmit: (e?: BaseSyntheticEvent<object>) => Promise<void>;
 }
-
 export const AuthFormLayout = ({
   title,
   children,

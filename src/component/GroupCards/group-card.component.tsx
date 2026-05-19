@@ -4,7 +4,6 @@ import styles from "./group-card.module.scss";
 import HatIcon from "../../assets/hat-icon.svg";
 import MoreIcon from "../../assets/more-icon.svg";
 import type { EditGroupData } from "../CreateGroupModal/CreateGroupModal";
-
 interface GroupCardProps {
   curator: string;
   groupName: string;
@@ -18,7 +17,6 @@ interface GroupCardProps {
   onDelete: (groupId: string) => void;
   showStaffActions?: boolean;
 }
-
 function formatStudentsCount(count: number): string {
   const n = Math.abs(count) % 100;
   const n1 = n % 10;
@@ -27,7 +25,6 @@ function formatStudentsCount(count: number): string {
   if (n1 === 1) return `${count} студент`;
   return `${count} студентов`;
 }
-
 export const GroupCard = ({
   curator,
   groupName,
@@ -44,9 +41,7 @@ export const GroupCard = ({
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-
   const curatorLabel = curator.replace(/\s+/g, " ").trim() || "Не назначен";
-
   useEffect(() => {
     if (!isOpen) return;
     const handleClickOutside = (e: MouseEvent) => {
@@ -57,22 +52,18 @@ export const GroupCard = ({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
-
   const handleNavigate = () => {
     navigate(`/groups/${groupId}`);
   };
-
   const toggleMenu = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsOpen((prev) => !prev);
   };
-
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!confirm("Удалить группу?")) return;
     onDelete(groupId);
   };
-
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsOpen(false);
@@ -85,7 +76,6 @@ export const GroupCard = ({
       headStudentEmail
     });
   };
-
   return (
     <article className={styles.card} onClick={handleNavigate}>
       <div className={styles.accentBar} aria-hidden />

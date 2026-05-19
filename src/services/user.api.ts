@@ -1,13 +1,11 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauth } from "@/shared/api/base-query";
-
 export interface UserFullName {
   id: string;
   fullName: string | null;
   email: string | null;
   avatarUrl?: string | null;
 }
-
 export interface UserFullInformation {
   id: string;
   email: string;
@@ -19,13 +17,11 @@ export interface UserFullInformation {
   department?: string | null;
   avatarUrl?: string | null;
 }
-
 export interface UserListItem extends UserFullInformation {
   role: number;
   accountStatus: number;
   createdAt: string;
 }
-
 export interface CreateStaffUserRequest {
   email: string;
   password: string;
@@ -36,7 +32,6 @@ export interface CreateStaffUserRequest {
   department?: string;
   role: number;
 }
-
 export const userApi = createApi({
   reducerPath: "userApi",
   baseQuery: baseQueryWithReauth,
@@ -78,7 +73,6 @@ export const userApi = createApi({
       query: (file) => {
         const formData = new FormData();
         formData.append("file", file);
-
         return {
           url: "/User/me/avatar",
           method: "POST",
@@ -89,7 +83,6 @@ export const userApi = createApi({
     })
   })
 });
-
 export const {
   useGetUserByIdQuery,
   useLazySearchUsersByNameQuery,

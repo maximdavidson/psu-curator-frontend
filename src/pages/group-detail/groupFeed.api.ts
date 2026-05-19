@@ -1,14 +1,11 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauth } from "@/shared/api/base-query";
-
 export const FeedItemType = {
   Message: 0,
   Poll: 1,
   Document: 2
 } as const;
-
 export type FeedItemType = (typeof FeedItemType)[keyof typeof FeedItemType];
-
 export interface GroupFeedItem {
   id: string;
   title: string;
@@ -20,17 +17,14 @@ export interface GroupFeedItem {
   createdAt: string;
   authorEmail: string;
 }
-
 export interface CreateFeedItemRequest {
   title: string;
   description: string;
   type: FeedItemType;
   groupId: string;
   surveyId?: string;
-  /** Файлы в multipart-поле Attachments (контракт OpenAPI: array binary). */
   attachmentFiles?: File[];
 }
-
 export interface UpdateFeedItemRequest {
   title: string;
   description: string;
@@ -39,7 +33,6 @@ export interface UpdateFeedItemRequest {
   surveyId?: string | null;
   documentId?: string | null;
 }
-
 export const groupFeedApi = createApi({
   reducerPath: "groupFeedApi",
   baseQuery: baseQueryWithReauth,
@@ -56,10 +49,8 @@ export const groupFeedApi = createApi({
           formData.append("SurveyId", body.surveyId);
         }
         for (const file of body.attachmentFiles ?? []) {
-          // Третий аргумент — имя файла для multipart (важно для IFormFile на сервере).
           formData.append("Attachments", file, file.name);
         }
-
         return {
           url: `/GroupFeedItem`,
           method: "POST",
@@ -71,10 +62,12 @@ export const groupFeedApi = createApi({
         { type: "Group", id: arg.groupId }
       ]
     }),
-
     updateFeedItem: builder.mutation<
       void,
-      { id: string; body: UpdateFeedItemRequest }
+      {
+        id: string;
+        body: UpdateFeedItemRequest;
+      }
     >({
       query: ({ id, body }) => ({
         url: `/GroupFeedItem/${id}`,
@@ -96,8 +89,13 @@ export const groupFeedApi = createApi({
         { type: "Group", id: arg.body.groupId }
       ]
     }),
-
-    deleteFeedItem: builder.mutation<void, { id: string; groupId: string }>({
+    deleteFeedItem: builder.mutation<
+      void,
+      {
+        id: string;
+        groupId: string;
+      }
+    >({
       query: ({ id }) => ({
         url: `/GroupFeedItem/${id}`,
         method: "DELETE"
@@ -109,7 +107,6 @@ export const groupFeedApi = createApi({
     })
   })
 });
-
 export const {
   useCreateFeedItemMutation,
   useDeleteFeedItemMutation,

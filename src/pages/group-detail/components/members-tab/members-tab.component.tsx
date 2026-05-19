@@ -8,9 +8,7 @@ import {
   type GroupMember
 } from "@/pages/groups/group.api";
 import { useLazySearchUsersByNameQuery } from "@/services/user.api";
-
 const MIN_QUERY_LEN = 2;
-
 interface Props {
   groupId: string;
   members: GroupMember[];
@@ -18,7 +16,6 @@ interface Props {
   onRefetch: () => void;
   canManage: boolean;
 }
-
 export const MembersTab = ({
   groupId,
   members,
@@ -38,21 +35,17 @@ export const MembersTab = ({
   const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
   const [pendingHeadId, setPendingHeadId] = useState<string | null>(null);
   const [openActionsId, setOpenActionsId] = useState<string | null>(null);
-
   const memberIds = useMemo(() => new Set(members.map((m) => m.id)), [members]);
-
   useEffect(() => {
     const t = window.setTimeout(() => setDebouncedQuery(query.trim()), 350);
     return () => window.clearTimeout(t);
   }, [query]);
-
   useEffect(() => {
     if (debouncedQuery.length < MIN_QUERY_LEN) {
       return;
     }
     void searchUsers(debouncedQuery, true);
   }, [debouncedQuery, searchUsers]);
-
   const handleAdd = useCallback(
     async (studentId: string) => {
       setError(null);
@@ -68,7 +61,6 @@ export const MembersTab = ({
     },
     [addStudents, groupId, onRefetch]
   );
-
   const handleRemove = useCallback(
     async (studentId: string) => {
       setError(null);
@@ -88,7 +80,6 @@ export const MembersTab = ({
     },
     [groupId, onRefetch, removeStudents]
   );
-
   const handleAssignHead = useCallback(
     async (headId: string) => {
       setError(null);
@@ -108,7 +99,6 @@ export const MembersTab = ({
     },
     [assignHeadStudent, groupId, onRefetch]
   );
-
   const handleRemoveHead = useCallback(async () => {
     setError(null);
     setOpenActionsId(null);
@@ -122,12 +112,10 @@ export const MembersTab = ({
       setPendingHeadId(null);
     }
   }, [groupId, headStudentId, onRefetch, removeHeadStudent]);
-
   const searchResults = searchState.data ?? [];
   const showResults =
     debouncedQuery.length >= MIN_QUERY_LEN && !searchState.isFetching;
   const filteredResults = searchResults.filter((u) => !memberIds.has(u.id));
-
   return (
     <div className={styles.membersTab}>
       <h2 className={styles.sectionTitle}>Участники группы</h2>
@@ -143,7 +131,6 @@ export const MembersTab = ({
             const actionsDisabled =
               pendingRemoveId !== null || isAdding || pendingHeadId !== null;
             const isActionsOpen = openActionsId === m.id;
-
             return (
               <li key={m.id} className={styles.memberCard}>
                 <div className={styles.memberMain}>

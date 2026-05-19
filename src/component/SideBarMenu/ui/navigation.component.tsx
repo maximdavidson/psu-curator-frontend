@@ -3,12 +3,10 @@ import { NavigationItem } from "./navigation-item.component";
 import styles from "../side-bar-menu.module.scss";
 import { getRoleStringFromAccessToken } from "@/shared/lib/jwt-claims";
 import { useGetDialogsQuery } from "@/services/chat.api";
-
 interface INavigationProps {
   pathname: string;
   isCollapsed: boolean;
 }
-
 export const Navigation = ({ pathname, isCollapsed }: INavigationProps) => {
   const token = localStorage.getItem("token");
   const role = getRoleStringFromAccessToken(token);
@@ -22,7 +20,6 @@ export const Navigation = ({ pathname, isCollapsed }: INavigationProps) => {
   const visibleMenu = menuData.filter(
     (item) => !item.visibleTo || (role && item.visibleTo.includes(role))
   );
-
   return (
     <nav>
       <ul className={styles["sidebar-menu__navigation"]}>

@@ -4,7 +4,6 @@ import { useState, type ReactNode } from "react";
 import type { InputType } from "@/shared/";
 import EyesOpen from "@/assets/eyes-open.svg";
 import EyesClosed from "@/assets/eyes-closed.svg";
-
 interface IAuthFieldProps<T extends FieldValues> {
   label: string;
   name: Path<T>;
@@ -14,7 +13,6 @@ interface IAuthFieldProps<T extends FieldValues> {
   placeholder: string;
   type: InputType;
 }
-
 export const AuthField = <T extends FieldValues>({
   name,
   register,
@@ -25,7 +23,6 @@ export const AuthField = <T extends FieldValues>({
   type
 }: IAuthFieldProps<T>) => {
   const [showPassword, setShowPassword] = useState(false);
-
   return (
     <div>
       <label className={styles.label}>{label}</label>

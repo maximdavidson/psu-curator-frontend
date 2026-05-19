@@ -6,7 +6,6 @@ import {
   getDisplayNameFromEmail
 } from "@/shared/lib/format-user-name";
 import { useGetUserByIdQuery } from "@/services/user.api";
-
 export function useCurrentUserDisplayName(): {
   displayName: string;
   isLoading: boolean;
@@ -15,7 +14,6 @@ export function useCurrentUserDisplayName(): {
   const userId = getUserIdFromAccessToken(token);
   const email =
     typeof window !== "undefined" ? localStorage.getItem("email") : null;
-
   const {
     data: user,
     isLoading,
@@ -23,10 +21,8 @@ export function useCurrentUserDisplayName(): {
   } = useGetUserByIdQuery(userId ?? "", {
     skip: !userId
   });
-
   const fullName = user ? formatFullName(user) : "";
   const fallback = getDisplayNameFromEmail(email) || "пользователь";
-
   return {
     displayName: fullName || fallback,
     isLoading: Boolean(userId) && (isLoading || isFetching) && !fullName

@@ -5,20 +5,16 @@ import {
 } from "../../documents.api";
 import styles from "./FilesList.module.scss";
 import { FilesItem } from "./FilesItem";
-
 export const FilesList = () => {
   const { data: files, isLoading } = useGetUserFilesQuery();
   const [deleteFile] = useDeleteFileMutation();
   const [downloadFile] = useLazyDownloadFileQuery();
-
   const handleDelete = async (id?: string) => {
     if (!id) return;
     await deleteFile(id);
   };
-
   const handleDownload = async (fileId: string, fileName: string) => {
     const result = await downloadFile(fileId).unwrap();
-
     const url = URL.createObjectURL(result);
     const link = document.createElement("a");
     link.href = url;
@@ -26,9 +22,7 @@ export const FilesList = () => {
     link.click();
     URL.revokeObjectURL(url);
   };
-
   if (isLoading) return <div>Загрузка...</div>;
-
   return (
     <div className={styles.container}>
       <h3 className={styles.title}>Загруженные файлы ({files?.length ?? 0})</h3>

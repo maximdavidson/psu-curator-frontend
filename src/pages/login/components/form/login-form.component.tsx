@@ -10,7 +10,6 @@ import {
   loginSchema,
   type TLoginFormDto
 } from "@/shared/model/schemas/auth.schema";
-
 export const LoginForm = () => {
   const {
     register,
@@ -19,14 +18,11 @@ export const LoginForm = () => {
   } = useForm<TLoginFormDto>({
     resolver: yupResolver(loginSchema)
   });
-
   const { onHandleSubmit, isLoading, errorMessage } = useLogin();
-
   const onSubmit = (data: TLoginFormDto) => {
     console.log("Form submitted:", data);
     onHandleSubmit(data);
   };
-
   return (
     <AuthFormLayout
       onSubmit={handleSubmit(onSubmit)}

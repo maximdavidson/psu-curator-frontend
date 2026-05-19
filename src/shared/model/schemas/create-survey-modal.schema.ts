@@ -1,5 +1,4 @@
 import * as yup from "yup";
-
 export const questionSchema = yup.object({
   text: yup.string().required("Текст вопроса обязателен"),
   type: yup
@@ -19,10 +18,10 @@ export const questionSchema = yup.object({
       }
     )
 });
-
 export const surveySchema = yup.object({
   title: yup.string().required("Название опроса обязательно"),
   description: yup.string(),
+  isAnonymous: yup.boolean().default(false),
   questions: yup
     .array()
     .of(questionSchema)

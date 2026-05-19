@@ -1,15 +1,12 @@
 import { STORE_NAMESPACE } from "@/shared/model/constants/store.namespace";
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { ParsedAuthTokens } from "@/shared/lib/parse-auth-response";
-
 interface IAuthState {
   token: string | null;
 }
-
 const initialState: IAuthState = {
   token: localStorage.getItem("token")
 };
-
 export const authSlice = createSlice({
   name: STORE_NAMESPACE.AUTH,
   initialState,
@@ -35,8 +32,6 @@ export const authSlice = createSlice({
     }
   }
 });
-
 export const selectToken = (state: { [STORE_NAMESPACE.AUTH]?: IAuthState }) =>
   state[STORE_NAMESPACE.AUTH]?.token ?? null;
-
 export const { setToken, setTokens, removeToken } = authSlice.actions;

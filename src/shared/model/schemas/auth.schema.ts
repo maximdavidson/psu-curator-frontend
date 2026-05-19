@@ -1,6 +1,4 @@
 import * as yup from "yup";
-
-// Схема для логина (без role)
 export const loginSchema = yup.object({
   email: yup
     .string()
@@ -16,8 +14,6 @@ export const loginSchema = yup.object({
     )
     .required("Пароль обязателен")
 });
-
-// Публичная регистрация теперь только для студентов, роль сервер назначает сам.
 export const registerSchema = yup.object({
   email: yup
     .string()
@@ -33,10 +29,7 @@ export const registerSchema = yup.object({
     )
     .required("Пароль обязателен")
 });
-
-// Оставляем для обратной совместимости
 export const authSchema = registerSchema;
-
 export type TLoginFormDto = yup.InferType<typeof loginSchema>;
 export type TRegisterFormDto = yup.InferType<typeof registerSchema>;
 export type TAuthFormDto = TRegisterFormDto;

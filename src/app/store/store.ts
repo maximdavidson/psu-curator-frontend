@@ -15,7 +15,6 @@ import { notificationApi } from "@/services/notification.api";
 import { userApi } from "@/services/user.api";
 import { chatApi } from "@/services/chat.api";
 import { authCacheListener } from "./auth-cache-listener.middleware";
-
 const rootReducer = combineReducers({
   [authSlice.name]: authSlice.reducer,
   [themeSlice.name]: themeSlice.reducer,
@@ -30,15 +29,12 @@ const rootReducer = combineReducers({
   [userApi.reducerPath]: userApi.reducer,
   [chatApi.reducerPath]: chatApi.reducer
 });
-
 const persistConfig = {
   key: "root",
   storage,
   whitelist: [authSlice.name, themeSlice.name]
 };
-
 const persistedReducer = persistReducer(persistConfig, rootReducer);
-
 export const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
@@ -60,7 +56,6 @@ export const store = configureStore({
       authCacheListener.middleware
     )
 });
-
 export const persistor = persistStore(store);
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

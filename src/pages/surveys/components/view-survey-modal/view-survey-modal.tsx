@@ -1,17 +1,15 @@
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import styles from "./view-survey-modal.module.scss";
 import {
   useGetSurveyByIdQuery,
   useSubmitSurveyResponseMutation
 } from "../../survey.api";
 import type { Question, QuestionAnswerPayload } from "../../survey.types";
-
 interface ViewSurveyModalProps {
   isOpen: boolean;
   surveyId: string;
   onClose: () => void;
 }
-
 export const ViewSurveyModal = ({
   isOpen,
   surveyId,
@@ -26,26 +24,21 @@ export const ViewSurveyModal = ({
   });
   const [submitResponse, { isLoading: isSubmitting }] =
     useSubmitSurveyResponseMutation();
-
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
-
   useEffect(() => {
     if (!isOpen) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setAnswers({});
-      setSubmitError(null);
+      startTransition(() => {
+        setAnswers({});
+        setSubmitError(null);
+      });
     }
   }, [isOpen, surveyId]);
-
   if (!isOpen) return null;
-
   const alreadyResponded = survey?.hasCurrentUserResponded ?? false;
-
   const handleSingleAnswer = (questionId: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
-
   const handleMultipleAnswer = (
     questionId: string,
     option: string,
@@ -64,19 +57,14 @@ export const ViewSurveyModal = ({
       }));
     }
   };
-
   const handleTextAnswer = (questionId: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
-
   const buildPayload = (): QuestionAnswerPayload[] | null => {
     if (!survey?.questions?.length) return null;
-
     const payload: QuestionAnswerPayload[] = [];
-
     for (const question of survey.questions) {
       const raw = answers[question.id];
-
       if (question.type === "text") {
         const text = typeof raw === "string" ? raw.trim() : "";
         if (!text) return null;
@@ -87,7 +75,6 @@ export const ViewSurveyModal = ({
         });
         continue;
       }
-
       if (question.type === "single") {
         if (typeof raw !== "string" || !raw) return null;
         payload.push({
@@ -96,7 +83,6 @@ export const ViewSurveyModal = ({
         });
         continue;
       }
-
       if (question.type === "multiple") {
         const selected = Array.isArray(raw) ? raw : [];
         if (selected.length === 0) return null;
@@ -106,10 +92,8 @@ export const ViewSurveyModal = ({
         });
       }
     }
-
     return payload.length === survey.questions.length ? payload : null;
   };
-
   const handleSubmit = async () => {
     setSubmitError(null);
     const payload = buildPayload();
@@ -117,7 +101,6 @@ export const ViewSurveyModal = ({
       setSubmitError("Ответьте на все вопросы перед отправкой.");
       return;
     }
-
     try {
       await submitResponse({ surveyId, body: { answers: payload } }).unwrap();
       await refetch();
@@ -125,10 +108,8 @@ export const ViewSurveyModal = ({
       setSubmitError("Не удалось отправить ответы. Попробуйте позже.");
     }
   };
-
   const renderQuestion = (question: Question) => {
     const qid = question.id;
-
     switch (question.type) {
       case "single":
         return (
@@ -148,7 +129,6 @@ export const ViewSurveyModal = ({
             ))}
           </div>
         );
-
       case "multiple":
         return (
           <div className={styles.optionsGroup}>
@@ -170,7 +150,6 @@ export const ViewSurveyModal = ({
             })}
           </div>
         );
-
       case "text":
         return (
           <textarea
@@ -181,21 +160,17 @@ export const ViewSurveyModal = ({
             onChange={(e) => handleTextAnswer(qid, e.target.value)}
           />
         );
-
       default:
         return null;
     }
   };
-
   const handleClose = () => {
     setAnswers({});
     setSubmitError(null);
     onClose();
   };
-
   const canSubmit =
     !alreadyResponded && !isSubmitting && buildPayload() !== null;
-
   return (
     <div className={styles.overlay} onClick={handleClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -208,6 +183,20 @@ export const ViewSurveyModal = ({
           </div>
 
           <p className={styles.description}>{survey?.description}</p>
+
+          {survey && survey.isAnonymous && (
+            <p className={styles.privacyNote}>
+              Этот опрос анонимный: автор видит только общую статистику, без
+              привязки ответов к вашему имени.
+            </p>
+          )}
+
+          {survey && !survey.isAnonymous && (
+            <p className={styles.privacyNote}>
+              Этот опрос не анонимный: автор опроса увидит ваши ответы с
+              указанием ФИО в статистике.
+            </p>
+          )}
 
           {alreadyResponded && (
             <p className={styles.alreadyAnswered}>

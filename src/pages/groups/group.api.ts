@@ -1,6 +1,5 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauth } from "@/shared/api/base-query";
-
 export interface Group {
   id: string;
   name: string;
@@ -9,11 +8,9 @@ export interface Group {
   firstName: string;
   lastName: string;
   surname: string;
-
   curatorEmail: string;
   headStudentEmail?: string;
 }
-
 export interface CreateGroupRequest {
   name: string;
   faculty: string;
@@ -21,7 +18,6 @@ export interface CreateGroupRequest {
   curatorEmail: string;
   headStudentEmail?: string;
 }
-
 export interface UpdateGroupRequest {
   id: string;
   name: string;
@@ -30,7 +26,6 @@ export interface UpdateGroupRequest {
   curatorEmail: string;
   headEmail?: string;
 }
-
 export interface FeedItem {
   id: string;
   title: string;
@@ -38,7 +33,6 @@ export interface FeedItem {
   authorId: string;
   authorName: string;
   createdAt: string;
-  /** 0 — сообщение, 1 — опрос, 2 — документ. */
   type?: number;
   surveyId?: string | null;
   surveyTitle?: string | null;
@@ -52,14 +46,12 @@ export interface FeedItem {
     uploadedByName: string;
   }[];
 }
-
 export interface GroupMember {
   id: string;
   fullName: string | null;
   email: string | null;
   isHeadman?: boolean;
 }
-
 export interface GroupDetails {
   id: string;
   name: string;
@@ -72,20 +64,15 @@ export interface GroupDetails {
   feedItems: FeedItem[];
   students?: GroupMember[] | null;
 }
-
-/** Тело как в OpenAPI бэкенда (свойство grouId). */
 export interface AddStudentsToGroupRequest {
   groupId: string;
   studentIds: string[];
 }
-
 export type RemoveStudentsFromGroupRequest = AddStudentsToGroupRequest;
-
 export interface AssignHeadStudentRequest {
   groupId: string;
   headId: string;
 }
-
 export const groupApi = createApi({
   reducerPath: "groupApi",
   baseQuery: baseQueryWithReauth,
@@ -104,7 +91,6 @@ export const groupApi = createApi({
             ]
           : [{ type: "Group" as const, id: "LIST" }]
     }),
-
     createGroup: builder.mutation<Group, CreateGroupRequest>({
       query: (data) => ({
         url: "/Group",
@@ -113,7 +99,6 @@ export const groupApi = createApi({
       }),
       invalidatesTags: [{ type: "Group", id: "LIST" }]
     }),
-
     deleteGroup: builder.mutation<void, string>({
       query: (groupId) => ({
         url: `/Group/${groupId}`,
@@ -121,7 +106,6 @@ export const groupApi = createApi({
       }),
       invalidatesTags: [{ type: "Group", id: "LIST" }]
     }),
-
     updateGroup: builder.mutation<Group, UpdateGroupRequest>({
       query: ({ id, ...body }) => ({
         url: `/Group`,
@@ -140,7 +124,6 @@ export const groupApi = createApi({
             ]
           : [{ type: "Group", id: "LIST" }]
     }),
-
     addStudentsToGroup: builder.mutation<void, AddStudentsToGroupRequest>({
       query: ({ groupId, studentIds }) => ({
         url: "/Group/groups/students",
@@ -156,7 +139,6 @@ export const groupApi = createApi({
         { type: "Group", id: "LIST" }
       ]
     }),
-
     removeStudentsFromGroup: builder.mutation<
       void,
       RemoveStudentsFromGroupRequest
@@ -175,7 +157,6 @@ export const groupApi = createApi({
         { type: "Group", id: "LIST" }
       ]
     }),
-
     assignHeadStudent: builder.mutation<void, AssignHeadStudentRequest>({
       query: (body) => ({
         url: "/Group/groups/head-student",
@@ -188,7 +169,6 @@ export const groupApi = createApi({
         { type: "Group", id: "LIST" }
       ]
     }),
-
     removeHeadStudent: builder.mutation<void, string>({
       query: (groupId) => ({
         url: `/Group/${groupId}/head-student`,
@@ -201,7 +181,6 @@ export const groupApi = createApi({
     })
   })
 });
-
 export const {
   useGetGroupsQuery,
   useCreateGroupMutation,

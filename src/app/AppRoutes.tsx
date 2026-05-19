@@ -14,7 +14,6 @@ import { GroupDetailPage } from "@/pages/group-detail/group-detail.page";
 import { SettingsPage } from "@/pages/settings";
 import { UserManagementPage } from "@/pages/user-management/user-management.page";
 import { ChatPage } from "@/pages/chat/chat.page";
-
 export const router = createBrowserRouter([
   {
     element: <CommonProvider />,
@@ -44,7 +43,6 @@ export const router = createBrowserRouter([
         element: <AppLayout />,
         children: [
           {
-            //roles={["admin"]}
             element: <ProtectedRoutes />,
             children: [
               {

@@ -5,13 +5,11 @@ import {
   useDownloadSurveyStatisticsMutation,
   useGetSurveyStatisticsQuery
 } from "../../survey.api";
-
 interface SurveyStatisticsModalProps {
   isOpen: boolean;
   surveyId: string;
   onClose: () => void;
 }
-
 export const SurveyStatisticsModal = ({
   isOpen,
   surveyId,
@@ -23,7 +21,6 @@ export const SurveyStatisticsModal = ({
   const [downloadError, setDownloadError] = useState("");
   const [downloadStatistics, { isLoading: isDownloading }] =
     useDownloadSurveyStatisticsMutation();
-
   const handleDownload = async (format: SurveyStatisticsExportFormat) => {
     try {
       setDownloadError("");
@@ -40,9 +37,7 @@ export const SurveyStatisticsModal = ({
       setDownloadError("Не удалось скачать файл со статистикой.");
     }
   };
-
   if (!isOpen) return null;
-
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -62,6 +57,11 @@ export const SurveyStatisticsModal = ({
           <div className={styles.content}>
             <p className={styles.summary}>
               Всего ответов: <strong>{data.totalResponses}</strong>
+            </p>
+            <p className={styles.modeLine}>
+              {data.isAnonymous
+                ? "Режим: анонимный — в списке ниже не указываются ФИО участников."
+                : "Режим: неанонимный — для вопросов с вариантами ответов показаны ответы каждого участника."}
             </p>
 
             <div className={styles.exportActions}>
@@ -118,6 +118,34 @@ export const SurveyStatisticsModal = ({
                     ))}
                   </ul>
                 )}
+
+                {question.respondentChoiceAnswers &&
+                  question.respondentChoiceAnswers.length > 0 && (
+                    <div className={styles.respondentBlock}>
+                      <h4 className={styles.respondentTitle}>
+                        Ответы по участникам
+                      </h4>
+                      <ul className={styles.respondentList}>
+                        {question.respondentChoiceAnswers.map((row, ri) => (
+                          <li
+                            key={`${row.respondentName}-${row.submittedAt}-${ri}`}
+                          >
+                            <span className={styles.respondent}>
+                              {row.respondentName}
+                            </span>
+                            <span className={styles.respondentMeta}>
+                              {new Date(row.submittedAt).toLocaleString(
+                                "ru-RU"
+                              )}
+                            </span>
+                            <p className={styles.respondentChoices}>
+                              {row.selectedOptions.join(", ")}
+                            </p>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
                 {question.textAnswers && question.textAnswers.length > 0 && (
                   <ul className={styles.textList}>

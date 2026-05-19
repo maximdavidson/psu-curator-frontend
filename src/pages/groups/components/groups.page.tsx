@@ -1,10 +1,8 @@
 import styles from "./groups.module.scss";
 import GroupsPageCreate from "@/component/CreateGroupModal/OpenModal";
 import { useCurrentUserDisplayName } from "@/hooks/use-current-user";
-
 export const GroupsPage = () => {
   const { displayName, isLoading } = useCurrentUserDisplayName();
-
   return (
     <div className={styles.page}>
       <header className={styles.hero}>

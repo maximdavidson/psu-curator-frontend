@@ -1,9 +1,7 @@
 import styles from "./placeholder.styles.module.scss";
-
 interface PlaceholderProps {
   page: string;
 }
-
 export const Placeholder = ({ page }: PlaceholderProps) => {
   return (
     <div className={styles.placeholder}>

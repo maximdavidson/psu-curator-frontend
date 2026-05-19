@@ -1,6 +1,5 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauth } from "@/shared/api/base-query";
-
 export interface Notification {
   id: string;
   title: string;
@@ -10,19 +9,16 @@ export interface Notification {
   type?: "event" | "feed" | "survey" | "document";
   relatedEntityId?: string | null;
 }
-
 interface NotificationResponse extends Omit<Notification, "id"> {
   id?: string;
   notificationId?: string;
 }
-
 const normalizeNotification = (
   notification: NotificationResponse
 ): Notification => ({
   ...notification,
   id: notification.id ?? notification.notificationId ?? ""
 });
-
 export const notificationApi = createApi({
   reducerPath: "notificationApi",
   baseQuery: baseQueryWithReauth,
@@ -34,14 +30,12 @@ export const notificationApi = createApi({
         response.map(normalizeNotification),
       providesTags: ["Notification"]
     }),
-
     getUnreadNotifications: builder.query<Notification[], void>({
       query: () => "/Notification/unreads",
       transformResponse: (response: NotificationResponse[]) =>
         response.map(normalizeNotification),
       providesTags: ["Notification"]
     }),
-
     markAsRead: builder.mutation<void, string>({
       query: (notificationId) => ({
         url: `/Notification/all/${notificationId}`,
@@ -49,7 +43,6 @@ export const notificationApi = createApi({
       }),
       invalidatesTags: ["Notification"]
     }),
-
     markAllAsRead: builder.mutation<void, void>({
       query: () => ({
         url: "/Notification",
@@ -57,7 +50,6 @@ export const notificationApi = createApi({
       }),
       invalidatesTags: ["Notification"]
     }),
-
     deleteNotification: builder.mutation<void, string>({
       query: (notificationId) => ({
         url: `/Notification/${notificationId}`,
@@ -67,7 +59,6 @@ export const notificationApi = createApi({
     })
   })
 });
-
 export const {
   useGetAllNotificationsQuery,
   useGetUnreadNotificationsQuery,
