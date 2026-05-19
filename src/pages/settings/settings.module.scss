@@ -57,12 +57,19 @@
   min-width: 0;
 }
 
+.avatarActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
 .avatarUploadButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: fit-content;
-  margin-top: 4px;
   padding: 10px 14px;
   border-radius: var(--radius-sm);
   background: var(--color-btn-soft-bg);
@@ -73,6 +80,22 @@
 
   input {
     display: none;
+  }
+}
+
+.avatarDeleteButton {
+  padding: 10px 14px;
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-error);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
   }
 }
 

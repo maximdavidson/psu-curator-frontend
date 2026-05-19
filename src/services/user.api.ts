@@ -80,6 +80,13 @@ export const userApi = createApi({
         };
       },
       invalidatesTags: ["User"]
+    }),
+    deleteCurrentUserAvatar: builder.mutation<UserFullInformation, void>({
+      query: () => ({
+        url: "/User/me/avatar",
+        method: "DELETE"
+      }),
+      invalidatesTags: ["User"]
     })
   })
 });
@@ -89,5 +96,6 @@ export const {
   useGetUsersQuery,
   useCreateStaffUserMutation,
   useDeleteUserMutation,
-  useUploadCurrentUserAvatarMutation
+  useUploadCurrentUserAvatarMutation,
+  useDeleteCurrentUserAvatarMutation
 } = userApi;

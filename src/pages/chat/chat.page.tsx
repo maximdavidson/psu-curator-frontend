@@ -15,6 +15,8 @@ import {
 import { getUserIdFromAccessToken } from "@/shared/lib/jwt-claims";
 import { useChatRealtime } from "@/hooks/use-chat-realtime";
 import { selectToken } from "@/stores/auth.store";
+import { useGetUserByIdQuery } from "@/services/user.api";
+import { UserAvatar } from "@/shared/ui/user-avatar/user-avatar";
 import styles from "./chat.module.scss";
 const MIN_SEARCH_LENGTH = 2;
 const formatTime = (dateString: string): string => {
@@ -48,6 +50,9 @@ export const ChatPage = () => {
   useChatRealtime();
   const token = useSelector(selectToken);
   const currentUserId = getUserIdFromAccessToken(token);
+  const { data: currentUser } = useGetUserByIdQuery(currentUserId ?? "", {
+    skip: !currentUserId
+  });
   const [selectedUser, setSelectedUser] = useState<ChatUser | null>(null);
   const [search, setSearch] = useState("");
   const [messageText, setMessageText] = useState("");
@@ -98,6 +103,17 @@ export const ChatPage = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length, selectedUser?.id, currentUserId]);
+  useEffect(() => {
+    if (!openDialogMenuId && !openMessageMenuId) {
+      return;
+    }
+    const closeMenus = () => {
+      setOpenDialogMenuId(null);
+      setOpenMessageMenuId(null);
+    };
+    document.addEventListener("mousedown", closeMenus);
+    return () => document.removeEventListener("mousedown", closeMenus);
+  }, [openDialogMenuId, openMessageMenuId]);
   const favoriteUser = useMemo<ChatUser | null>(() => {
     if (!currentUserId) {
       return null;
@@ -105,9 +121,10 @@ export const ChatPage = () => {
     return {
       id: currentUserId,
       fullName: "Избранное",
-      email: "Сообщения самому себе"
+      email: "Сообщения самому себе",
+      avatarUrl: currentUser?.avatarUrl
     };
-  }, [currentUserId]);
+  }, [currentUser?.avatarUrl, currentUserId]);
   const favoriteDialog = dialogs.find(
     (dialog) => dialog.userId === currentUserId
   );
@@ -118,7 +135,8 @@ export const ChatPage = () => {
         .map((dialog) => ({
           id: dialog.userId,
           fullName: dialog.userFullName,
-          email: dialog.userEmail
+          email: dialog.userEmail,
+          avatarUrl: dialog.userAvatarUrl
         })),
     [currentUserId, dialogs]
   );
@@ -262,7 +280,12 @@ export const ChatPage = () => {
                 }
               }}
             >
-              <span className={styles.avatar}>★</span>
+              <UserAvatar
+                className={styles.avatar}
+                name="Избранное"
+                avatarUrl={currentUser?.avatarUrl}
+                fallback="★"
+              />
               <span className={styles.dialogText}>
                 <span className={styles.dialogName}>Избранное</span>
                 <span className={styles.dialogPreview}>
@@ -284,7 +307,7 @@ export const ChatPage = () => {
                 key={user.id}
                 role="button"
                 tabIndex={0}
-                className={`${styles.dialogItem} ${isActive ? styles.activeDialog : ""}`}
+                className={`${styles.dialogItem} ${isActive ? styles.activeDialog : ""} ${openDialogMenuId === user.id ? styles.dialogItemMenuOpen : ""}`}
                 onClick={() => handleSelectUser(user)}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") {
@@ -293,11 +316,11 @@ export const ChatPage = () => {
                   }
                 }}
               >
-                <span className={styles.avatar}>
-                  {getDialogTitle(user, currentUserId)
-                    .slice(0, 1)
-                    .toUpperCase()}
-                </span>
+                <UserAvatar
+                  className={styles.avatar}
+                  name={getDialogTitle(user, currentUserId)}
+                  avatarUrl={user.avatarUrl}
+                />
                 <span className={styles.dialogText}>
                   <span className={styles.dialogName}>
                     {getDialogTitle(user, currentUserId)}
@@ -311,7 +334,10 @@ export const ChatPage = () => {
                     {dialog.unreadCount}
                   </span>
                 )}
-                <span className={styles.dialogActions}>
+                <span
+                  className={styles.dialogActions}
+                  onMouseDown={(event) => event.stopPropagation()}
+                >
                   <button
                     type="button"
                     className={styles.dialogActionsButton}
@@ -326,10 +352,7 @@ export const ChatPage = () => {
                     ...
                   </button>
                   {openDialogMenuId === user.id && (
-                    <span
-                      className={styles.dialogActionsMenu}
-                      onClick={(event) => event.stopPropagation()}
-                    >
+                    <span className={styles.dialogActionsMenu}>
                       <button
                         type="button"
                         onClick={() => void handleDeleteDialog(user)}
@@ -364,9 +387,11 @@ export const ChatPage = () => {
                     className={`${styles.dialogItem} ${isActive ? styles.activeDialog : ""}`}
                     onClick={() => handleSelectUser(user)}
                   >
-                    <span className={styles.avatar}>
-                      {getUserTitle(user).slice(0, 1).toUpperCase()}
-                    </span>
+                    <UserAvatar
+                      className={styles.avatar}
+                      name={getUserTitle(user)}
+                      avatarUrl={user.avatarUrl}
+                    />
                     <span className={styles.dialogText}>
                       <span className={styles.dialogName}>
                         {getUserTitle(user)}
@@ -390,11 +415,16 @@ export const ChatPage = () => {
         ) : (
           <>
             <header className={styles.chatHeader}>
-              <span className={styles.avatar}>
-                {selectedUser.id === currentUserId
-                  ? "★"
-                  : getUserTitle(selectedUser).slice(0, 1).toUpperCase()}
-              </span>
+              <UserAvatar
+                className={styles.avatar}
+                name={getDialogTitle(selectedUser, currentUserId)}
+                avatarUrl={selectedUser.avatarUrl}
+                fallback={
+                  selectedUser.id === currentUserId
+                    ? "★"
+                    : getUserTitle(selectedUser).slice(0, 1).toUpperCase()
+                }
+              />
               <div>
                 <h2>{getDialogTitle(selectedUser, currentUserId)}</h2>
                 {selectedUser.email && <p>{selectedUser.email}</p>}
@@ -490,15 +520,19 @@ export const ChatPage = () => {
                           </span>
                         )}
                         {isOwn && !isEditing && (
-                          <span className={styles.messageActions}>
+                          <span
+                            className={styles.messageActions}
+                            onMouseDown={(event) => event.stopPropagation()}
+                          >
                             <button
                               type="button"
                               className={styles.messageActionsButton}
-                              onClick={() =>
+                              onClick={(event) => {
+                                event.stopPropagation();
                                 setOpenMessageMenuId((currentId) =>
                                   currentId === message.id ? null : message.id
-                                )
-                              }
+                                );
+                              }}
                               title="Действия"
                             >
                               ...

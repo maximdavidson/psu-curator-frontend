@@ -8,6 +8,7 @@ import {
 import { ThemeToggle } from "./components/theme-toggle.component";
 import {
   useGetUserByIdQuery,
+  useDeleteCurrentUserAvatarMutation,
   useUploadCurrentUserAvatarMutation
 } from "@/services/user.api";
 import { selectToken } from "@/stores/auth.store";
@@ -25,6 +26,9 @@ export const SettingsPage = () => {
   const avatarUrl = resolveAvatarUrl(currentUser?.avatarUrl);
   const [uploadAvatar, { isLoading: isUploadingAvatar }] =
     useUploadCurrentUserAvatarMutation();
+  const [deleteAvatar, { isLoading: isDeletingAvatar }] =
+    useDeleteCurrentUserAvatarMutation();
+  const isAvatarBusy = isUploadingAvatar || isDeletingAvatar;
   const handleThemeChange = (dark: boolean) => {
     const mode: ThemeMode = dark ? "dark" : "light";
     dispatch(setTheme(mode));
@@ -36,6 +40,12 @@ export const SettingsPage = () => {
     }
     await uploadAvatar(file).unwrap();
     event.target.value = "";
+  };
+  const handleAvatarDelete = async () => {
+    if (!avatarUrl) {
+      return;
+    }
+    await deleteAvatar().unwrap();
   };
   return (
     <div className={styles.page}>
@@ -69,15 +79,27 @@ export const SettingsPage = () => {
             <span className={styles.rowDescription}>
               Поддерживаются JPG, PNG и WEBP до 5 МБ.
             </span>
-            <label className={styles.avatarUploadButton}>
-              {isUploadingAvatar ? "Загрузка..." : "Выбрать изображение"}
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                disabled={isUploadingAvatar}
-                onChange={handleAvatarChange}
-              />
-            </label>
+            <div className={styles.avatarActions}>
+              <label className={styles.avatarUploadButton}>
+                {isUploadingAvatar ? "Загрузка..." : "Выбрать изображение"}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  disabled={isAvatarBusy}
+                  onChange={handleAvatarChange}
+                />
+              </label>
+              {avatarUrl && (
+                <button
+                  type="button"
+                  className={styles.avatarDeleteButton}
+                  disabled={isAvatarBusy}
+                  onClick={() => void handleAvatarDelete()}
+                >
+                  {isDeletingAvatar ? "Удаление..." : "Удалить аватар"}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </section>

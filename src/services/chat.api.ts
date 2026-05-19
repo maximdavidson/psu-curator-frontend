@@ -14,6 +14,7 @@ export interface ChatDialog {
   userId: string;
   userFullName: string;
   userEmail: string;
+  userAvatarUrl?: string | null;
   lastMessage: ChatMessage;
   unreadCount: number;
 }
@@ -21,6 +22,7 @@ export interface ChatUser {
   id: string;
   fullName: string;
   email: string;
+  avatarUrl?: string | null;
 }
 export interface SendChatMessageRequest {
   recipientId: string;
