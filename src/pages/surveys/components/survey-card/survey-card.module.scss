@@ -4,19 +4,14 @@
   align-items: center;
   padding: 16px;
   border: 1px solid var(--color-card-border);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: var(--color-card-bg);
   box-shadow: var(--shadow-card);
   color: var(--color-text);
   width: 1000px;
   gap: 8px;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-card-hover);
+    border-color: var(--color-card-hover-border);
   }
 }
 

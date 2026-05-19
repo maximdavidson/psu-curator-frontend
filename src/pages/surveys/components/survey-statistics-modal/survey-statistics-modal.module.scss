@@ -11,7 +11,7 @@
 .modal {
   background: var(--color-card-bg);
   color: var(--color-text);
-  border-radius: 24px;
+  border-radius: var(--radius-md);
   max-width: 640px;
   width: 92%;
   max-height: 85vh;
@@ -63,7 +63,7 @@
 
 .exportBtn {
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: var(--color-primary, #4f46e5);
   color: #fff;
   cursor: pointer;
@@ -154,7 +154,7 @@
   li {
     padding: 12px;
     background: var(--color-feed-surface);
-    border-radius: 12px;
+    border-radius: var(--radius-sm);
     border: 1px solid var(--color-border);
   }
 

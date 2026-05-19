@@ -27,7 +27,7 @@
   padding: 14px 16px;
   background: var(--color-card-bg);
   border: 1px solid var(--color-card-border);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   box-shadow: var(--shadow-card);
 }
 
@@ -51,7 +51,7 @@
 
 .headBadge {
   padding: 3px 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   background: var(--color-btn-soft-bg);
   color: var(--color-btn-soft-text);
   font-size: 12px;
@@ -89,7 +89,7 @@
   padding: 10px 14px;
   font-size: 15px;
   border: 1px solid var(--color-input-border);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   outline: none;
   transition: border-color 0.15s ease;
   background: var(--color-input-bg);
@@ -120,14 +120,14 @@
   padding: 12px 14px;
   background: var(--color-feed-surface);
   border: 1px solid var(--color-card-border);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
 }
 
 .addButton {
   flex-shrink: 0;
   padding: 8px 16px;
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: var(--color-btn-soft-bg);
   color: var(--color-btn-soft-text);
   font-weight: 600;
@@ -156,7 +156,7 @@
   flex-shrink: 0;
   padding: 0;
   border: 1px solid var(--color-card-border);
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   background: var(--color-card-bg);
   color: var(--color-text-secondary);
   font-weight: 700;
@@ -187,7 +187,7 @@
   min-width: 190px;
   padding: 6px;
   border: 1px solid var(--color-card-border);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   background: var(--color-card-bg);
   box-shadow: var(--shadow-card);
 }

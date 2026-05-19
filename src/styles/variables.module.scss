@@ -4,9 +4,9 @@ $color-border: var(--color-border);
 $color-background: var(--color-surface);
 $color-error: var(--color-error);
 
-$radius-small: 10px;
-$radius-medium: 12px;
-$radius-large: 25px;
+$radius-small: var(--radius-sm);
+$radius-medium: var(--radius-md);
+$radius-large: var(--radius-lg);
 
 $spacing-xs: 6px;
 $spacing-sm: 14px;
@@ -32,4 +32,4 @@ $width-full: 100%;
 $opacity-disabled: 0.6;
 $opacity-hover: 0.9;
 
-$header-height: 80px;
+$header-height: 72px;

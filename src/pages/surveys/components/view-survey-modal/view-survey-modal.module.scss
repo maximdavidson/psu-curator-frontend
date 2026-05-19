@@ -11,7 +11,7 @@
 .modal {
   background: var(--color-card-bg);
   color: var(--color-text);
-  border-radius: 24px;
+  border-radius: var(--radius-md);
   max-width: 600px;
   width: 90%;
   max-height: 80vh;
@@ -32,12 +32,12 @@
 
   &::-webkit-scrollbar-track {
     background: var(--color-feed-surface);
-    border-radius: 10px;
+    border-radius: var(--radius-sm);
   }
 
   &::-webkit-scrollbar-thumb {
     background: var(--color-border);
-    border-radius: 10px;
+    border-radius: var(--radius-sm);
   }
 }
 
@@ -91,7 +91,7 @@
 .question {
   padding: 16px;
   background: var(--color-feed-surface);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--color-card-border);
 }
 

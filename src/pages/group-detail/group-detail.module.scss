@@ -5,34 +5,39 @@
 
 .title {
   margin-bottom: 20px;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 600;
   color: var(--color-text);
 }
 
 .tabs {
   display: flex;
-  gap: 12px;
+  gap: 0;
   margin-bottom: 16px;
+  border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .tab {
-  padding: 8px 16px;
-  font-size: 16px;
-  background-color: var(--color-tab-bg);
-  color: var(--color-text);
+  padding: 10px 18px;
+  font-size: 15px;
+  background-color: transparent;
+  color: var(--color-text-secondary);
   border: none;
-  border-radius: 8px;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  margin-bottom: -1px;
   cursor: pointer;
-  transition: background-color 0.2s;
 
   &:hover {
+    color: var(--color-text);
     background-color: var(--color-tab-hover);
   }
 }
 
 .tab.active {
-  background-color: var(--color-tab-active-bg);
+  background-color: transparent;
+  color: var(--color-tab-active-bg);
+  border-bottom-color: var(--color-tab-active-bg);
   font-weight: 600;
 }
 

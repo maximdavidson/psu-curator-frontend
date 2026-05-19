@@ -33,7 +33,7 @@
 .secondaryButton,
 .backButton {
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-weight: 600;
   padding: 10px 16px;
@@ -73,7 +73,7 @@
 .journalCard {
   background: var(--color-card-bg);
   border: 1px solid var(--color-card-border);
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-card);
   overflow: hidden;
 }
@@ -123,7 +123,7 @@
 .empty,
 .status,
 .error {
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   padding: 14px 16px;
 }
 
@@ -142,7 +142,7 @@
 .tableWrap {
   overflow-x: auto;
   border: 1px solid var(--color-card-border);
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   background: var(--color-card-bg);
   box-shadow: var(--shadow-card);
 }
@@ -206,7 +206,7 @@
   background: var(--color-card-bg);
   color: var(--color-text);
   border: 1px solid var(--color-card-border);
-  border-radius: 20px;
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-modal);
   padding: 22px;
 }
@@ -245,7 +245,7 @@
 
   input {
     border: 1px solid var(--color-border);
-    border-radius: 10px;
+    border-radius: var(--radius-sm);
     background: var(--color-card-bg);
     color: var(--color-text);
     padding: 10px 12px;

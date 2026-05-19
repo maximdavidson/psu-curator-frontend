@@ -22,17 +22,13 @@
   color: var(--color-btn-primary-text);
   border: none;
   padding: 10px 14px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: 0.2s;
   font-weight: 500;
 
   &:hover {
     background: var(--color-accent-hover);
-  }
-
-  &:active {
-    transform: scale(0.97);
   }
 }
 
