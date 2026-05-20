@@ -55,6 +55,8 @@ export interface GroupMember {
   fullName: string | null;
   email: string | null;
   isHeadman?: boolean;
+  isCurator?: boolean;
+  isStudentRoster?: boolean;
 }
 export interface GroupDetails {
   id: string;

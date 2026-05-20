@@ -125,6 +125,11 @@ export const MembersTab = ({
         <ul className={styles.memberList}>
           {members.map((m) => {
             const isHeadman = m.isHeadman || m.id === headStudentId;
+            const isCurator = Boolean(m.isCurator);
+            const showManageActions =
+              canManage &&
+              (m.isStudentRoster === true ||
+                (m.isStudentRoster == null && !m.isCurator));
             const isHeadActionPending =
               pendingHeadId === m.id ||
               (isHeadman && pendingHeadId === groupId);
@@ -138,13 +143,16 @@ export const MembersTab = ({
                     <p className={styles.memberName}>
                       {m.fullName?.trim() || "Без имени"}
                     </p>
+                    {isCurator && (
+                      <span className={styles.curatorBadge}>Куратор</span>
+                    )}
                     {isHeadman && (
                       <span className={styles.headBadge}>Староста</span>
                     )}
                   </div>
                   {m.email && <p className={styles.memberEmail}>{m.email}</p>}
                 </div>
-                {canManage && (
+                {showManageActions && (
                   <div className={styles.memberActions}>
                     <button
                       type="button"
