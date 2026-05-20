@@ -56,6 +56,15 @@ export function roleCanCreateGroupFeedItems(role: string | null): boolean {
   const r = role.trim().toLowerCase();
   return !["student", "headman"].includes(r);
 }
+
+export const SURVEYS_LIST_PAGE_ROLES: string[] = [
+  "Curator",
+  "Teacher",
+  "Dean",
+  "DeputyDean",
+  "Admin"
+];
+
 export function roleCanViewGroupJournals(role: string | null): boolean {
   if (!role) return false;
   const r = role.trim().toLowerCase();

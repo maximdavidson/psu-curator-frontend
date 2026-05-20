@@ -234,6 +234,121 @@
       flex-shrink: 0;
     }
 
+    .commentsSection {
+      margin-top: 4px;
+      padding: 12px 20px 16px;
+      border-top: 1px solid var(--color-border-subtle);
+      background: var(--color-feed-surface);
+    }
+
+    .commentsTitle {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      margin: 0 0 10px;
+    }
+
+    .commentList {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .commentRow {
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--color-card-bg);
+      border: 1px solid var(--color-card-border);
+    }
+
+    .commentMeta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .commentAuthor {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text);
+    }
+
+    .commentDate {
+      font-size: 12px;
+      color: var(--color-text-muted);
+    }
+
+    .commentText {
+      margin: 0;
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .commentForm {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .commentTextarea {
+      width: 100%;
+      min-height: 72px;
+      box-sizing: border-box;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-family: inherit;
+      border: 1px solid var(--color-input-border);
+      border-radius: var(--radius-sm);
+      background: var(--color-input-bg);
+      color: var(--color-text);
+      resize: vertical;
+
+      &:focus {
+        outline: none;
+        border-color: var(--color-accent);
+      }
+    }
+
+    .commentSubmit {
+      align-self: flex-start;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: var(--color-accent);
+      color: var(--color-on-accent, #fff);
+      cursor: pointer;
+
+      &:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+
+      &:hover:not(:disabled) {
+        filter: brightness(1.05);
+      }
+    }
+
+    .commentError {
+      margin: 0;
+      font-size: 13px;
+      color: var(--color-error);
+    }
+
+    .emptyComments {
+      margin: 0 0 12px;
+      font-size: 13px;
+      color: var(--color-text-muted);
+    }
+
     .feedItemActions {
       display: flex;
       gap: 8px;

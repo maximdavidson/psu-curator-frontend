@@ -17,9 +17,16 @@ export const Navigation = ({ pathname, isCollapsed }: INavigationProps) => {
     (total, dialog) => total + dialog.unreadCount,
     0
   );
-  const visibleMenu = menuData.filter(
-    (item) => !item.visibleTo || (role && item.visibleTo.includes(role))
-  );
+  const visibleMenu = menuData.filter((item) => {
+    if (!item.visibleTo) {
+      return true;
+    }
+    if (!role) {
+      return false;
+    }
+    const r = role.trim().toLowerCase();
+    return item.visibleTo.some((allowed) => allowed.toLowerCase() === r);
+  });
   return (
     <nav>
       <ul className={styles["sidebar-menu__navigation"]}>

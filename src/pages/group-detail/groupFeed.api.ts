@@ -1,5 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauth } from "@/shared/api/base-query";
+import type { FeedItemComment } from "@/pages/groups/group.api";
 export const FeedItemType = {
   Message: 0,
   Poll: 1,
@@ -104,11 +105,26 @@ export const groupFeedApi = createApi({
         { type: "Feed", id: "LIST" },
         { type: "Group", id: arg.groupId }
       ]
+    }),
+    addFeedItemComment: builder.mutation<
+      FeedItemComment,
+      { feedItemId: string; groupId: string; text: string }
+    >({
+      query: ({ feedItemId, text }) => ({
+        url: `/GroupFeedItem/${feedItemId}/comments`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: { text }
+      }),
+      invalidatesTags: (_result, _error, arg) => [
+        { type: "Group", id: arg.groupId }
+      ]
     })
   })
 });
 export const {
   useCreateFeedItemMutation,
   useDeleteFeedItemMutation,
-  useUpdateFeedItemMutation
+  useUpdateFeedItemMutation,
+  useAddFeedItemCommentMutation
 } = groupFeedApi;

@@ -5,6 +5,7 @@ import {
   useCreateFeedItemMutation,
   useDeleteFeedItemMutation,
   useUpdateFeedItemMutation,
+  useAddFeedItemCommentMutation,
   FeedItemType
 } from "../../groupFeed.api";
 import { useLazyDownloadFileQuery } from "@/pages/documents/documents.api";
@@ -87,9 +88,17 @@ export const FeedTab = ({ groupId, feed, onRefetch, canCreate }: Props) => {
   const [createFeedItem] = useCreateFeedItemMutation();
   const [updateFeedItem] = useUpdateFeedItemMutation();
   const [deleteFeedItem] = useDeleteFeedItemMutation();
+  const [addFeedItemComment] = useAddFeedItemCommentMutation();
   const [downloadFile] = useLazyDownloadFileQuery();
   const { data: userFiles = [] } = useGetUserFilesQuery();
   const [feedActionError, setFeedActionError] = useState<string | null>(null);
+  const [commentTexts, setCommentTexts] = useState<Record<string, string>>({});
+  const [commentErrors, setCommentErrors] = useState<Record<string, string>>(
+    {}
+  );
+  const [postingCommentForId, setPostingCommentForId] = useState<string | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<FeedItem | null>(null);
   const [viewingSurveyId, setViewingSurveyId] = useState<string | null>(null);
@@ -212,6 +221,28 @@ export const FeedTab = ({ groupId, feed, onRefetch, canCreate }: Props) => {
     setFeedActionError(null);
     setEditingItem(item);
     setIsModalOpen(true);
+  };
+  const handleSubmitComment = async (feedItemId: string) => {
+    const text = (commentTexts[feedItemId] ?? "").trim();
+    if (!text) return;
+    setCommentErrors((prev) => {
+      const next = { ...prev };
+      delete next[feedItemId];
+      return next;
+    });
+    setPostingCommentForId(feedItemId);
+    try {
+      await addFeedItemComment({ feedItemId, groupId, text }).unwrap();
+      setCommentTexts((prev) => ({ ...prev, [feedItemId]: "" }));
+      await onRefetch();
+    } catch {
+      setCommentErrors((prev) => ({
+        ...prev,
+        [feedItemId]: "Не удалось отправить комментарий."
+      }));
+    } finally {
+      setPostingCommentForId(null);
+    }
   };
   const handleModalClose = () => {
     setFeedActionError(null);
@@ -343,6 +374,69 @@ export const FeedTab = ({ groupId, feed, onRefetch, canCreate }: Props) => {
                     ))}
                   </div>
                 )}
+              </div>
+
+              <div className={styles.commentsSection}>
+                <h4 className={styles.commentsTitle}>Комментарии</h4>
+                {(item.comments?.length ?? 0) === 0 ? (
+                  <p className={styles.emptyComments}>
+                    Пока нет комментариев — ответьте куратору или группе.
+                  </p>
+                ) : (
+                  <div className={styles.commentList}>
+                    {item.comments!.map((c) => (
+                      <div key={c.id} className={styles.commentRow}>
+                        <div className={styles.commentMeta}>
+                          <span className={styles.commentAuthor}>
+                            {c.authorName}
+                          </span>
+                          <span className={styles.commentDate}>
+                            {formatDate(c.createdAt)}
+                          </span>
+                        </div>
+                        <p className={styles.commentText}>{c.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className={styles.commentForm}>
+                  {commentErrors[item.id] && (
+                    <p className={styles.commentError} role="alert">
+                      {commentErrors[item.id]}
+                    </p>
+                  )}
+                  <textarea
+                    className={styles.commentTextarea}
+                    placeholder="Написать комментарий…"
+                    value={commentTexts[item.id] ?? ""}
+                    maxLength={2000}
+                    aria-label="Текст комментария"
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setCommentTexts((prev) => ({ ...prev, [item.id]: v }));
+                      if (commentErrors[item.id]) {
+                        setCommentErrors((prev) => {
+                          const next = { ...prev };
+                          delete next[item.id];
+                          return next;
+                        });
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className={styles.commentSubmit}
+                    disabled={
+                      postingCommentForId === item.id ||
+                      !(commentTexts[item.id] ?? "").trim()
+                    }
+                    onClick={() => void handleSubmitComment(item.id)}
+                  >
+                    {postingCommentForId === item.id
+                      ? "Отправка…"
+                      : "Отправить"}
+                  </button>
+                </div>
               </div>
 
               {canCreate && (

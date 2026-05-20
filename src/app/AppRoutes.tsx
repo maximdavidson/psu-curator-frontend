@@ -14,6 +14,7 @@ import { GroupDetailPage } from "@/pages/group-detail/group-detail.page";
 import { SettingsPage } from "@/pages/settings";
 import { UserManagementPage } from "@/pages/user-management/user-management.page";
 import { ChatPage } from "@/pages/chat/chat.page";
+import { SURVEYS_LIST_PAGE_ROLES } from "@/shared/lib/jwt-claims";
 export const router = createBrowserRouter([
   {
     element: <CommonProvider />,
@@ -50,10 +51,6 @@ export const router = createBrowserRouter([
                 element: <GroupsPage />
               },
               {
-                path: "/surveys",
-                element: <SurveysPage />
-              },
-              {
                 path: "/documents",
                 element: <DocumentsPage />
               },
@@ -72,6 +69,17 @@ export const router = createBrowserRouter([
               {
                 path: "/settings",
                 element: <SettingsPage />
+              },
+              {
+                element: (
+                  <ProtectedRoutes allowedRoles={SURVEYS_LIST_PAGE_ROLES} />
+                ),
+                children: [
+                  {
+                    path: "/surveys",
+                    element: <SurveysPage />
+                  }
+                ]
               },
               {
                 element: (

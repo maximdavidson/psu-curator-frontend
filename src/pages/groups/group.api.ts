@@ -30,6 +30,13 @@ export interface UpdateGroupRequest {
   curatorEmail?: string;
   headEmail?: string;
 }
+export interface FeedItemComment {
+  id: string;
+  authorId: string;
+  authorName: string;
+  text: string;
+  createdAt: string;
+}
 export interface FeedItem {
   id: string;
   title: string;
@@ -49,6 +56,7 @@ export interface FeedItem {
     downloadUrl: string;
     uploadedByName: string;
   }[];
+  comments?: FeedItemComment[] | null;
 }
 export interface GroupMember {
   id: string;

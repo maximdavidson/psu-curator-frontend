@@ -5,6 +5,7 @@ import TeachesrIcon from "../../assets/teachers-icon.svg";
 import PoolsIcon from "../../assets/polls-icon.svg";
 import DocumentsIcon from "../../assets/documents-icon.svg";
 import ChatIcon from "../../assets/chat.svg";
+import { SURVEYS_LIST_PAGE_ROLES } from "@/shared/lib/jwt-claims";
 export const menuData: IMenuItem[] = [
   {
     to: "/groups",
@@ -24,7 +25,8 @@ export const menuData: IMenuItem[] = [
   {
     to: "/surveys",
     label: "Опросы",
-    icon: PoolsIcon
+    icon: PoolsIcon,
+    visibleTo: [...SURVEYS_LIST_PAGE_ROLES]
   },
   {
     to: "/documents",
