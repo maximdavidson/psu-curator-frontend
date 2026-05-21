@@ -119,6 +119,32 @@ export const groupFeedApi = createApi({
       invalidatesTags: (_result, _error, arg) => [
         { type: "Group", id: arg.groupId }
       ]
+    }),
+    updateFeedItemComment: builder.mutation<
+      FeedItemComment,
+      { commentId: string; groupId: string; text: string }
+    >({
+      query: ({ commentId, text }) => ({
+        url: `/GroupFeedItem/comments/${commentId}`,
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: { text }
+      }),
+      invalidatesTags: (_result, _error, arg) => [
+        { type: "Group", id: arg.groupId }
+      ]
+    }),
+    deleteFeedItemComment: builder.mutation<
+      void,
+      { commentId: string; groupId: string }
+    >({
+      query: ({ commentId }) => ({
+        url: `/GroupFeedItem/comments/${commentId}`,
+        method: "DELETE"
+      }),
+      invalidatesTags: (_result, _error, arg) => [
+        { type: "Group", id: arg.groupId }
+      ]
     })
   })
 });
@@ -126,5 +152,7 @@ export const {
   useCreateFeedItemMutation,
   useDeleteFeedItemMutation,
   useUpdateFeedItemMutation,
-  useAddFeedItemCommentMutation
+  useAddFeedItemCommentMutation,
+  useUpdateFeedItemCommentMutation,
+  useDeleteFeedItemCommentMutation
 } = groupFeedApi;

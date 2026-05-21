@@ -15,8 +15,10 @@ export const authApi = createApi({
         url: "/Auth/users",
         method: "POST",
         body: {
-          email: credentials.email,
-          password: credentials.password
+          email: credentials.email.trim(),
+          password: credentials.password,
+          firstName: credentials.firstName.trim(),
+          lastName: credentials.lastName.trim()
         }
       }),
       transformResponse: (raw: unknown) => {

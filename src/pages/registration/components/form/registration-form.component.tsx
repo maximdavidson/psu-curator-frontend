@@ -12,6 +12,8 @@ import {
 } from "@/shared/";
 import { authSchema, type TAuthFormDto } from "@/shared";
 import { useRegister } from "../../model/use-register";
+import styles from "./registration.styles.module.scss";
+
 export const RegistrationForm = () => {
   const {
     register,
@@ -27,6 +29,9 @@ export const RegistrationForm = () => {
       footer={<RegistrationFooter />}
       title={"Регистрация"}
     >
+      <p className={styles.hint}>
+        Регистрация доступна только студентам с почтой @students.psu.by
+      </p>
       {FIELDS_KEYS.map((key) => (
         <AuthField<TAuthFormDto>
           key={key}

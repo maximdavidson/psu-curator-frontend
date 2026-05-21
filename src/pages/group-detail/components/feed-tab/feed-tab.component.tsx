@@ -6,8 +6,12 @@ import {
   useDeleteFeedItemMutation,
   useUpdateFeedItemMutation,
   useAddFeedItemCommentMutation,
+  useUpdateFeedItemCommentMutation,
+  useDeleteFeedItemCommentMutation,
   FeedItemType
 } from "../../groupFeed.api";
+import { getUserIdFromAccessToken } from "@/shared/lib/jwt-claims";
+import type { FeedItemComment } from "@/pages/groups/group.api";
 import { useLazyDownloadFileQuery } from "@/pages/documents/documents.api";
 import { useGetUserFilesQuery } from "@/pages/documents/documents.api";
 import type { FeedItem } from "@/pages/groups/group.api";
@@ -89,6 +93,10 @@ export const FeedTab = ({ groupId, feed, onRefetch, canCreate }: Props) => {
   const [updateFeedItem] = useUpdateFeedItemMutation();
   const [deleteFeedItem] = useDeleteFeedItemMutation();
   const [addFeedItemComment] = useAddFeedItemCommentMutation();
+  const [updateFeedItemComment] = useUpdateFeedItemCommentMutation();
+  const [deleteFeedItemComment] = useDeleteFeedItemCommentMutation();
+  const currentUserId =
+    getUserIdFromAccessToken(localStorage.getItem("token")) ?? "";
   const [downloadFile] = useLazyDownloadFileQuery();
   const { data: userFiles = [] } = useGetUserFilesQuery();
   const [feedActionError, setFeedActionError] = useState<string | null>(null);
@@ -97,6 +105,12 @@ export const FeedTab = ({ groupId, feed, onRefetch, canCreate }: Props) => {
     {}
   );
   const [postingCommentForId, setPostingCommentForId] = useState<string | null>(
+    null
+  );
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editingCommentText, setEditingCommentText] = useState("");
+  const [savingCommentId, setSavingCommentId] = useState<string | null>(null);
+  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(
     null
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -244,6 +258,47 @@ export const FeedTab = ({ groupId, feed, onRefetch, canCreate }: Props) => {
       setPostingCommentForId(null);
     }
   };
+  const startEditingComment = (comment: FeedItemComment) => {
+    setEditingCommentId(comment.id);
+    setEditingCommentText(comment.text);
+  };
+  const cancelEditingComment = () => {
+    setEditingCommentId(null);
+    setEditingCommentText("");
+  };
+  const handleSaveComment = async (commentId: string) => {
+    const text = editingCommentText.trim();
+    if (!text) {
+      return;
+    }
+    setSavingCommentId(commentId);
+    try {
+      await updateFeedItemComment({ commentId, groupId, text }).unwrap();
+      cancelEditingComment();
+      await onRefetch();
+    } catch {
+      setFeedActionError("Не удалось сохранить комментарий.");
+    } finally {
+      setSavingCommentId(null);
+    }
+  };
+  const handleDeleteComment = async (commentId: string) => {
+    if (!window.confirm("Удалить комментарий?")) {
+      return;
+    }
+    setDeletingCommentId(commentId);
+    try {
+      await deleteFeedItemComment({ commentId, groupId }).unwrap();
+      if (editingCommentId === commentId) {
+        cancelEditingComment();
+      }
+      await onRefetch();
+    } catch {
+      setFeedActionError("Не удалось удалить комментарий.");
+    } finally {
+      setDeletingCommentId(null);
+    }
+  };
   const handleModalClose = () => {
     setFeedActionError(null);
     setIsModalOpen(false);
@@ -384,19 +439,88 @@ export const FeedTab = ({ groupId, feed, onRefetch, canCreate }: Props) => {
                   </p>
                 ) : (
                   <div className={styles.commentList}>
-                    {item.comments!.map((c) => (
-                      <div key={c.id} className={styles.commentRow}>
-                        <div className={styles.commentMeta}>
-                          <span className={styles.commentAuthor}>
-                            {c.authorName}
-                          </span>
-                          <span className={styles.commentDate}>
-                            {formatDate(c.createdAt)}
-                          </span>
+                    {item.comments!.map((c) => {
+                      const isOwnComment = c.authorId === currentUserId;
+                      const isEditing = editingCommentId === c.id;
+                      return (
+                        <div key={c.id} className={styles.commentRow}>
+                          <div className={styles.commentMeta}>
+                            <span className={styles.commentAuthor}>
+                              {c.authorName}
+                            </span>
+                            <span className={styles.commentDate}>
+                              {formatDate(c.createdAt)}
+                            </span>
+                            {isOwnComment && !isEditing && (
+                              <span className={styles.commentActions}>
+                                <button
+                                  type="button"
+                                  className={styles.commentActionButton}
+                                  onClick={() => startEditingComment(c)}
+                                  disabled={
+                                    deletingCommentId === c.id ||
+                                    savingCommentId === c.id
+                                  }
+                                >
+                                  Изменить
+                                </button>
+                                <button
+                                  type="button"
+                                  className={`${styles.commentActionButton} ${styles.commentDeleteButton}`}
+                                  onClick={() => void handleDeleteComment(c.id)}
+                                  disabled={
+                                    deletingCommentId === c.id ||
+                                    savingCommentId === c.id
+                                  }
+                                >
+                                  {deletingCommentId === c.id
+                                    ? "Удаление…"
+                                    : "Удалить"}
+                                </button>
+                              </span>
+                            )}
+                          </div>
+                          {isEditing ? (
+                            <div className={styles.commentEditForm}>
+                              <textarea
+                                className={styles.commentTextarea}
+                                value={editingCommentText}
+                                maxLength={2000}
+                                aria-label="Редактирование комментария"
+                                onChange={(e) =>
+                                  setEditingCommentText(e.target.value)
+                                }
+                              />
+                              <div className={styles.commentEditActions}>
+                                <button
+                                  type="button"
+                                  className={styles.commentCancelButton}
+                                  onClick={cancelEditingComment}
+                                  disabled={savingCommentId === c.id}
+                                >
+                                  Отмена
+                                </button>
+                                <button
+                                  type="button"
+                                  className={styles.commentSubmit}
+                                  disabled={
+                                    savingCommentId === c.id ||
+                                    !editingCommentText.trim()
+                                  }
+                                  onClick={() => void handleSaveComment(c.id)}
+                                >
+                                  {savingCommentId === c.id
+                                    ? "Сохранение…"
+                                    : "Сохранить"}
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className={styles.commentText}>{c.text}</p>
+                          )}
                         </div>
-                        <p className={styles.commentText}>{c.text}</p>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
                 <div className={styles.commentForm}>

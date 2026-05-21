@@ -1,5 +1,15 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauth } from "@/shared/api/base-query";
+export interface ChatAttachment {
+  id: string;
+  fileName: string;
+  contentType: string;
+  fileSize: number;
+  description?: string | null;
+  downloadUrl: string;
+  uploadedByName?: string;
+}
+
 export interface ChatMessage {
   id: string;
   senderId: string;
@@ -9,6 +19,7 @@ export interface ChatMessage {
   text: string;
   createdAt: string;
   readAt?: string | null;
+  attachments?: ChatAttachment[];
 }
 export interface ChatDialog {
   userId: string;
@@ -27,6 +38,8 @@ export interface ChatUser {
 export interface SendChatMessageRequest {
   recipientId: string;
   text: string;
+  attachmentIds?: string[];
+  files?: File[];
 }
 export interface UpdateChatMessageRequest {
   messageId: string;
@@ -76,12 +89,22 @@ export const chatApi = createApi({
       })
     }),
     sendMessage: builder.mutation<ChatMessage, SendChatMessageRequest>({
-      query: (body) => ({
-        url: "/Chat/messages",
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body
-      }),
+      query: ({ recipientId, text, attachmentIds, files }) => {
+        const formData = new FormData();
+        formData.append("recipientId", recipientId);
+        formData.append("text", text);
+        attachmentIds?.forEach((attachmentId) => {
+          formData.append("attachmentIds", attachmentId);
+        });
+        files?.forEach((file) => {
+          formData.append("Attachments", file);
+        });
+        return {
+          url: "/Chat/messages",
+          method: "POST",
+          body: formData
+        };
+      },
       invalidatesTags: (_result, _error, { recipientId }) => [
         { type: "ChatMessages", id: recipientId },
         { type: "ChatMessages", id: "LIST" },

@@ -6,6 +6,7 @@ import {
   type ThemeMode
 } from "@/stores/theme.store";
 import { ThemeToggle } from "./components/theme-toggle.component";
+import { ChangePasswordForm } from "./components/change-password-form.component";
 import {
   useGetUserByIdQuery,
   useDeleteCurrentUserAvatarMutation,
@@ -102,6 +103,17 @@ export const SettingsPage = () => {
             </div>
           </div>
         </div>
+      </section>
+
+      <section className={styles.section} aria-labelledby="security-heading">
+        <h2 id="security-heading" className={styles.sectionTitle}>
+          Безопасность
+        </h2>
+        <p className={styles.sectionHint}>
+          Измените пароль для входа в систему. Новый пароль должен быть не
+          короче 8 символов, содержать заглавную букву и спецсимвол.
+        </p>
+        <ChangePasswordForm />
       </section>
 
       <section className={styles.section} aria-labelledby="appearance-heading">

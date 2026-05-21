@@ -270,6 +270,68 @@
       margin-bottom: 6px;
     }
 
+    .commentActions {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      margin-left: auto;
+    }
+
+    .commentActionButton {
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: var(--color-accent);
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+
+      &:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+
+      &:hover:not(:disabled) {
+        text-decoration: underline;
+      }
+    }
+
+    .commentDeleteButton {
+      color: var(--color-error);
+    }
+
+    .commentEditForm {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .commentEditActions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .commentCancelButton {
+      padding: 8px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      border: 1px solid var(--color-card-border);
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--color-text);
+      cursor: pointer;
+
+      &:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+    }
+
     .commentAuthor {
       font-size: 14px;
       font-weight: 600;

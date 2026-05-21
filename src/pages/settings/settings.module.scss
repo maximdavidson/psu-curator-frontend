@@ -196,3 +196,42 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.passwordForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+  max-width: 420px;
+}
+
+.passwordSubmit {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent);
+  color: var(--color-btn-primary-text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.passwordError {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-error);
+}
+
+.passwordSuccess {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-success, #2e7d32);
+}

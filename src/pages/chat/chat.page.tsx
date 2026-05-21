@@ -128,18 +128,14 @@ export const ChatPage = () => {
   const favoriteDialog = dialogs.find(
     (dialog) => dialog.userId === currentUserId
   );
-  const dialogUsers = useMemo<ChatUser[]>(
-    () =>
-      dialogs
-        .filter((dialog) => dialog.userId !== currentUserId)
-        .map((dialog) => ({
-          id: dialog.userId,
-          fullName: dialog.userFullName,
-          email: dialog.userEmail,
-          avatarUrl: dialog.userAvatarUrl
-        })),
-    [currentUserId, dialogs]
-  );
+  const dialogUsers: ChatUser[] = dialogs
+    .filter((dialog) => dialog.userId !== currentUserId)
+    .map((dialog) => ({
+      id: dialog.userId,
+      fullName: dialog.userFullName,
+      email: dialog.userEmail,
+      avatarUrl: dialog.userAvatarUrl
+    }));
   const searchResults = searchState.data ?? [];
   const isSearching = search.trim().length >= MIN_SEARCH_LENGTH;
   const searchResultUsers = searchResults.filter(

@@ -22,6 +22,11 @@ export interface UserListItem extends UserFullInformation {
   accountStatus: number;
   createdAt: string;
 }
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export interface CreateStaffUserRequest {
   email: string;
   password: string;
@@ -87,6 +92,18 @@ export const userApi = createApi({
         method: "DELETE"
       }),
       invalidatesTags: ["User"]
+    }),
+
+    changePassword: builder.mutation<void, ChangePasswordRequest>({
+      query: (body) => ({
+        url: "/User/me/password",
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: {
+          currentPassword: body.currentPassword,
+          newPassword: body.newPassword
+        }
+      })
     })
   })
 });
@@ -97,5 +114,6 @@ export const {
   useCreateStaffUserMutation,
   useDeleteUserMutation,
   useUploadCurrentUserAvatarMutation,
-  useDeleteCurrentUserAvatarMutation
+  useDeleteCurrentUserAvatarMutation,
+  useChangePasswordMutation
 } = userApi;
