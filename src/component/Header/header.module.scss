@@ -15,6 +15,31 @@
   border-bottom: 1px solid var(--color-card-border);
 }
 
+.attendanceAlert {
+  width: calc(100% - 28px);
+  margin: 10px 14px 0;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid #c62828;
+  background: rgba(198, 40, 40, 0.1);
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.alertClose {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-card-bg);
+  color: var(--color-text);
+  padding: 6px 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
 .PSU_icon {
   cursor: pointer;
   width: 45px;

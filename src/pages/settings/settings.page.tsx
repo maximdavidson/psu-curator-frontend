@@ -21,20 +21,43 @@ import {
 } from "@/shared/lib/jwt-claims";
 import { resolveAvatarUrl } from "@/shared/lib/resolve-avatar-url";
 import styles from "./settings.module.scss";
+
+const getAttendanceLevel = (
+  hours: number | null
+): "normal" | "warning" | "danger" => {
+  if (hours == null) return "normal";
+  if (hours >= 10) return "danger";
+  if (hours > 6) return "warning";
+  return "normal";
+};
+
 export const SettingsPage = () => {
   const dispatch = useDispatch();
   const isDark = useSelector(selectIsDarkTheme);
   const token = useSelector(selectToken);
   const currentUserId = getUserIdFromAccessToken(token);
   const role = getRoleStringFromAccessToken(token);
-  const showAttendance = roleIsStudentOrHeadman(role);
+  const isStudentOrHeadman = roleIsStudentOrHeadman(role);
   const { data: currentUser } = useGetUserByIdQuery(currentUserId ?? "", {
     skip: !currentUserId
   });
   const { data: attendanceSummary } = useGetCurrentUserAttendanceSummaryQuery(
     undefined,
-    { skip: !showAttendance }
+    { skip: !isStudentOrHeadman }
   );
+  const showAttendance =
+    isStudentOrHeadman && attendanceSummary?.isInGroup === true;
+  const missedHours =
+    attendanceSummary?.totalMissedHours != null
+      ? Number(attendanceSummary.totalMissedHours)
+      : null;
+  const attendanceLevel = getAttendanceLevel(missedHours);
+  const attendanceValueClass =
+    attendanceLevel === "danger"
+      ? styles.attendanceValueDanger
+      : attendanceLevel === "warning"
+        ? styles.attendanceValueWarning
+        : styles.attendanceValue;
   const avatarUrl = resolveAvatarUrl(currentUser?.avatarUrl);
   const [uploadAvatar, { isLoading: isUploadingAvatar }] =
     useUploadCurrentUserAvatarMutation();
@@ -134,7 +157,7 @@ export const SettingsPage = () => {
                 Сумма пропусков, отмеченных в журналах посещаемости
               </span>
             </div>
-            <span className={styles.attendanceValue}>
+            <span className={attendanceValueClass}>
               {attendanceSummary != null
                 ? `${Number(attendanceSummary.totalMissedHours).toLocaleString("ru-RU", { maximumFractionDigits: 1 })} ч`
                 : "—"}

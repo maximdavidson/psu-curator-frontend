@@ -196,8 +196,15 @@
   font-size: 13px;
 }
 
-.emptyCell {
+.emptyCell,
+.readOnlyHours {
   color: var(--color-text-muted);
+}
+
+.readOnlyHours {
+  display: inline-block;
+  min-width: 72px;
+  text-align: center;
 }
 
 .participantCell {
@@ -211,6 +218,42 @@
   small {
     margin-top: 4px;
     color: var(--color-text-muted);
+  }
+}
+
+.formerMemberRow {
+  td {
+    background: color-mix(
+      in srgb,
+      var(--color-feed-surface) 88%,
+      var(--color-text-muted)
+    );
+    color: var(--color-text-muted);
+  }
+
+  .hoursInput,
+  .readOnlyHours {
+    opacity: 0.85;
+  }
+}
+
+.formerMemberLabel {
+  font-style: italic;
+}
+
+.removeParticipantButton {
+  margin-top: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-feed-surface);
+  color: var(--color-error-text, #b91c1c);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 6px 8px;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
   }
 }
 

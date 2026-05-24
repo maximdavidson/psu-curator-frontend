@@ -31,6 +31,8 @@ export interface GroupJournalParticipant {
   fullName: string;
   email: string;
   isHeadman: boolean;
+  isFormerMember: boolean;
+  canRemoveFromJournal: boolean;
   entries: GroupJournalEntry[];
 }
 export interface GroupJournalDetail {
@@ -60,7 +62,7 @@ export interface SaveGroupJournalDayScheduleRequest {
 export interface SaveGroupJournalEntryRequest {
   userId: string;
   date: string;
-  missedHours: number;
+  attendedHours: number;
   comment?: string | null;
 }
 export interface SaveGroupJournalEntriesRequest {
@@ -156,6 +158,21 @@ export const groupJournalsApi = createApi({
         method: "GET",
         responseHandler: (response) => response.blob()
       })
+    }),
+    removeFormerJournalParticipant: builder.mutation<
+      void,
+      {
+        journalId: string;
+        userId: string;
+      }
+    >({
+      query: ({ journalId, userId }) => ({
+        url: `/GroupJournals/${journalId}/participants/${userId}`,
+        method: "DELETE"
+      }),
+      invalidatesTags: (_result, _error, { journalId }) => [
+        { type: "GroupJournal", id: journalId }
+      ]
     })
   })
 });
@@ -166,5 +183,6 @@ export const {
   useUpdateGroupJournalMutation,
   useDeleteGroupJournalMutation,
   useSaveGroupJournalEntriesMutation,
-  useDownloadGroupJournalExcelMutation
+  useDownloadGroupJournalExcelMutation,
+  useRemoveFormerJournalParticipantMutation
 } = groupJournalsApi;

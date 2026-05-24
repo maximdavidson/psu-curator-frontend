@@ -145,6 +145,16 @@
   white-space: nowrap;
 }
 
+.attendanceValueWarning {
+  @extend .attendanceValue;
+  color: #b58900;
+}
+
+.attendanceValueDanger {
+  @extend .attendanceValue;
+  color: #c62828;
+}
+
 .toggle {
   position: relative;
   display: inline-flex;

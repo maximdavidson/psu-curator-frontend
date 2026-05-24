@@ -28,6 +28,7 @@ export interface ChangePasswordRequest {
 }
 
 export interface UserAttendanceSummary {
+  isInGroup: boolean;
   totalMissedHours: number;
 }
 
@@ -111,7 +112,8 @@ export const userApi = createApi({
     }),
     getCurrentUserAttendanceSummary: builder.query<UserAttendanceSummary, void>(
       {
-        query: () => "/User/me/attendance-summary"
+        query: () => "/User/me/attendance-summary",
+        providesTags: [{ type: "User", id: "attendance-summary" }]
       }
     )
   })
