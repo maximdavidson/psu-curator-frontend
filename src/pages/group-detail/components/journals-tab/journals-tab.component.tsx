@@ -196,11 +196,21 @@ const JournalDetail = ({
                 {data.dates.map((date) => {
                   const key = cellKey(participant.userId, date);
                   const value = effectiveCells[key] ?? "";
+                  const entryMeta = participant.entries.find(
+                    (entry) => entry.date.slice(0, 10) === date.slice(0, 10)
+                  );
+                  const cellEditable =
+                    data.canEditEntries && (entryMeta?.canEdit ?? true);
                   return (
                     <td key={key}>
                       <select
                         value={value}
-                        disabled={!data.canEditEntries}
+                        disabled={!cellEditable}
+                        title={
+                          !cellEditable
+                            ? "Отметку выставил куратор или другой сотрудник"
+                            : undefined
+                        }
                         onChange={(e) =>
                           handleCellChange(
                             participant.userId,

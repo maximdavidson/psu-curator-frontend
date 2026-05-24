@@ -18,6 +18,7 @@ export interface GroupJournalEntry {
   date: string;
   status?: AttendanceStatus | null;
   comment?: string | null;
+  canEdit?: boolean;
 }
 export interface GroupJournalParticipant {
   userId: string;
