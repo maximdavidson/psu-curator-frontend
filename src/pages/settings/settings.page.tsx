@@ -10,10 +10,15 @@ import { ChangePasswordForm } from "./components/change-password-form.component"
 import {
   useGetUserByIdQuery,
   useDeleteCurrentUserAvatarMutation,
-  useUploadCurrentUserAvatarMutation
+  useUploadCurrentUserAvatarMutation,
+  useGetCurrentUserAttendanceSummaryQuery
 } from "@/services/user.api";
 import { selectToken } from "@/stores/auth.store";
-import { getUserIdFromAccessToken } from "@/shared/lib/jwt-claims";
+import {
+  getUserIdFromAccessToken,
+  getRoleStringFromAccessToken,
+  roleIsStudentOrHeadman
+} from "@/shared/lib/jwt-claims";
 import { resolveAvatarUrl } from "@/shared/lib/resolve-avatar-url";
 import styles from "./settings.module.scss";
 export const SettingsPage = () => {
@@ -21,9 +26,15 @@ export const SettingsPage = () => {
   const isDark = useSelector(selectIsDarkTheme);
   const token = useSelector(selectToken);
   const currentUserId = getUserIdFromAccessToken(token);
+  const role = getRoleStringFromAccessToken(token);
+  const showAttendance = roleIsStudentOrHeadman(role);
   const { data: currentUser } = useGetUserByIdQuery(currentUserId ?? "", {
     skip: !currentUserId
   });
+  const { data: attendanceSummary } = useGetCurrentUserAttendanceSummaryQuery(
+    undefined,
+    { skip: !showAttendance }
+  );
   const avatarUrl = resolveAvatarUrl(currentUser?.avatarUrl);
   const [uploadAvatar, { isLoading: isUploadingAvatar }] =
     useUploadCurrentUserAvatarMutation();
@@ -104,6 +115,33 @@ export const SettingsPage = () => {
           </div>
         </div>
       </section>
+
+      {showAttendance && (
+        <section
+          className={styles.section}
+          aria-labelledby="attendance-heading"
+        >
+          <h2 id="attendance-heading" className={styles.sectionTitle}>
+            Посещаемость
+          </h2>
+          <p className={styles.sectionHint}>
+            Накопленные часы пропуска по всем журналам вашей группы.
+          </p>
+          <div className={styles.row}>
+            <div className={styles.rowText}>
+              <span className={styles.rowLabel}>Часы пропуска</span>
+              <span className={styles.rowDescription}>
+                Сумма пропусков, отмеченных в журналах посещаемости
+              </span>
+            </div>
+            <span className={styles.attendanceValue}>
+              {attendanceSummary != null
+                ? `${Number(attendanceSummary.totalMissedHours).toLocaleString("ru-RU", { maximumFractionDigits: 1 })} ч`
+                : "—"}
+            </span>
+          </div>
+        </section>
+      )}
 
       <section className={styles.section} aria-labelledby="security-heading">
         <h2 id="security-heading" className={styles.sectionTitle}>

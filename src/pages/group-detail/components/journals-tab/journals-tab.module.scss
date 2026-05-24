@@ -175,6 +175,29 @@
     background: var(--color-card-bg);
     color: var(--color-text);
   }
+
+  .hoursInput {
+    width: 72px;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    background: var(--color-card-bg);
+    color: var(--color-text);
+  }
+}
+
+.scheduleRow th {
+  font-weight: 500;
+  background: var(--color-feed-surface);
+}
+
+.hint {
+  margin-top: 8px !important;
+  font-size: 13px;
+}
+
+.emptyCell {
+  color: var(--color-text-muted);
 }
 
 .participantCell {

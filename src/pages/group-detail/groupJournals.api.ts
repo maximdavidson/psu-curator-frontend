@@ -1,7 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauth } from "@/shared/api/base-query";
 export type GroupJournalType = 1;
-export type AttendanceStatus = 1 | 2 | 3 | 4;
 export interface GroupJournalListItem {
   id: string;
   groupId: string;
@@ -13,10 +12,17 @@ export interface GroupJournalListItem {
   createdByName: string;
   entriesCount: number;
 }
+export interface GroupJournalDaySchedule {
+  id?: string | null;
+  date: string;
+  requiredHours: number;
+}
 export interface GroupJournalEntry {
   id?: string | null;
   date: string;
-  status?: AttendanceStatus | null;
+  requiredHours: number;
+  missedHours?: number | null;
+  attendedHours?: number | null;
   comment?: string | null;
   canEdit?: boolean;
 }
@@ -36,6 +42,7 @@ export interface GroupJournalDetail {
   startDate: string;
   endDate: string;
   dates: string[];
+  daySchedules: GroupJournalDaySchedule[];
   canManage: boolean;
   canEditEntries: boolean;
   participants: GroupJournalParticipant[];
@@ -46,11 +53,19 @@ export interface CreateGroupJournalRequest {
   endDate: string;
 }
 export type UpdateGroupJournalRequest = CreateGroupJournalRequest;
+export interface SaveGroupJournalDayScheduleRequest {
+  date: string;
+  requiredHours: number;
+}
 export interface SaveGroupJournalEntryRequest {
   userId: string;
   date: string;
-  status: AttendanceStatus;
+  missedHours: number;
   comment?: string | null;
+}
+export interface SaveGroupJournalEntriesRequest {
+  daySchedules: SaveGroupJournalDayScheduleRequest[];
+  entries: SaveGroupJournalEntryRequest[];
 }
 export const groupJournalsApi = createApi({
   reducerPath: "groupJournalsApi",
@@ -123,13 +138,13 @@ export const groupJournalsApi = createApi({
       void,
       {
         journalId: string;
-        entries: SaveGroupJournalEntryRequest[];
+        body: SaveGroupJournalEntriesRequest;
       }
     >({
-      query: ({ journalId, entries }) => ({
+      query: ({ journalId, body }) => ({
         url: `/GroupJournals/${journalId}/entries`,
         method: "PUT",
-        body: { entries }
+        body
       }),
       invalidatesTags: (_result, _error, { journalId }) => [
         { type: "GroupJournal", id: journalId }

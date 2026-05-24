@@ -138,6 +138,13 @@
   color: var(--color-text-muted);
 }
 
+.attendanceValue {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
 .toggle {
   position: relative;
   display: inline-flex;

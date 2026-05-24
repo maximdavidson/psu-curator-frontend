@@ -70,3 +70,9 @@ export function roleCanViewGroupJournals(role: string | null): boolean {
   const r = role.trim().toLowerCase();
   return ["curator", "dean", "deputydean", "admin", "headman"].includes(r);
 }
+
+export function roleIsStudentOrHeadman(role: string | null): boolean {
+  if (!role) return false;
+  const r = role.trim().toLowerCase();
+  return r === "student" || r === "headman";
+}

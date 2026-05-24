@@ -27,6 +27,10 @@ export interface ChangePasswordRequest {
   newPassword: string;
 }
 
+export interface UserAttendanceSummary {
+  totalMissedHours: number;
+}
+
 export interface CreateStaffUserRequest {
   email: string;
   password: string;
@@ -104,7 +108,12 @@ export const userApi = createApi({
           newPassword: body.newPassword
         }
       })
-    })
+    }),
+    getCurrentUserAttendanceSummary: builder.query<UserAttendanceSummary, void>(
+      {
+        query: () => "/User/me/attendance-summary"
+      }
+    )
   })
 });
 export const {
@@ -115,5 +124,6 @@ export const {
   useDeleteUserMutation,
   useUploadCurrentUserAvatarMutation,
   useDeleteCurrentUserAvatarMutation,
-  useChangePasswordMutation
+  useChangePasswordMutation,
+  useGetCurrentUserAttendanceSummaryQuery
 } = userApi;
