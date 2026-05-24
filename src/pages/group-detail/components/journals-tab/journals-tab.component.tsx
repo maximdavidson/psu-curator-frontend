@@ -180,7 +180,7 @@ const JournalDetail = ({
         <table className={styles.journalTable}>
           <thead>
             <tr>
-              <th>Участник</th>
+              <th>Студент</th>
               {data.dates.map((date) => (
                 <th key={date}>{formatDate(date)}</th>
               ))}
@@ -312,7 +312,7 @@ export const JournalsTab = ({ groupId, canManage }: Props) => {
       <div className={styles.headerRow}>
         <div>
           <h2>Журналы</h2>
-          <p>Журналы посещаемости по участникам группы.</p>
+          <p>Журналы посещаемости по студентам группы.</p>
         </div>
         {canManage && (
           <button
