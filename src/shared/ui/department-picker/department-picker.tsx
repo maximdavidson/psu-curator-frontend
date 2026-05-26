@@ -1,26 +1,26 @@
 import { useEffect, useId, useRef, useState } from "react";
-import styles from "./faculty-picker.module.scss";
-import { FACULTY_NAMES } from "@/shared/data/university-structure";
+import styles from "../faculty-picker/faculty-picker.module.scss";
+import { getDepartmentsForFaculty } from "@/shared/data/university-structure";
 
-interface FacultyPickerProps {
+interface DepartmentPickerProps {
   id: string;
   label: string;
   value: string;
+  faculty: string;
   placeholder?: string;
-  hint?: string;
   error?: string;
-  onChange: (faculty: string) => void;
+  onChange: (department: string) => void;
 }
 
-export const FacultyPicker = ({
+export const DepartmentPicker = ({
   id,
   label,
   value,
-  placeholder = "Выберите факультет",
-  hint,
+  faculty,
+  placeholder = "Выберите кафедру",
   error,
   onChange
-}: FacultyPickerProps) => {
+}: DepartmentPickerProps) => {
   const listId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState(value);
@@ -43,15 +43,16 @@ export const FacultyPicker = ({
     return () => document.removeEventListener("mousedown", handlePointerDown);
   }, [isOpen]);
 
+  const departments = getDepartmentsForFaculty(faculty);
   const normalizedQuery = query.trim().toLowerCase();
-  const filteredFaculties = FACULTY_NAMES.filter((name) =>
-    name.toLowerCase().includes(normalizedQuery)
+  const filtered = departments.filter((d) =>
+    d.toLowerCase().includes(normalizedQuery)
   );
-  const showDropdown = isOpen && filteredFaculties.length > 0;
+  const showDropdown = isOpen && filtered.length > 0;
 
-  const handleSelect = (faculty: string) => {
-    setQuery(faculty);
-    onChange(faculty);
+  const handleSelect = (department: string) => {
+    setQuery(department);
+    onChange(department);
     setIsOpen(false);
   };
 
@@ -68,8 +69,11 @@ export const FacultyPicker = ({
         role="combobox"
         aria-expanded={showDropdown}
         aria-controls={showDropdown ? listId : undefined}
-        placeholder={placeholder}
+        placeholder={
+          departments.length === 0 ? "Сначала выберите факультет" : placeholder
+        }
         value={query}
+        disabled={departments.length === 0}
         onChange={(event) => {
           const next = event.target.value;
           setQuery(next);
@@ -78,21 +82,20 @@ export const FacultyPicker = ({
         }}
         onFocus={() => setIsOpen(true)}
       />
-      {hint && !error && <p className={styles.hint}>{hint}</p>}
       {error && <p className={styles.error}>{error}</p>}
 
       {showDropdown && (
         <div id={listId} className={styles.dropdown} role="listbox">
-          {filteredFaculties.map((faculty) => (
+          {filtered.map((dept) => (
             <button
-              key={faculty}
+              key={dept}
               type="button"
               role="option"
               className={styles.option}
               onMouseDown={(event) => event.preventDefault()}
-              onClick={() => handleSelect(faculty)}
+              onClick={() => handleSelect(dept)}
             >
-              {faculty}
+              {dept}
             </button>
           ))}
         </div>

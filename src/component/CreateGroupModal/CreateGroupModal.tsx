@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import styles from "./modal.module.scss";
 import {
   Controller,
@@ -11,6 +11,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { UserEmailPicker } from "@/shared/ui/user-email-picker/user-email-picker";
 import { FacultyPicker } from "@/shared/ui/faculty-picker/faculty-picker";
+import { DepartmentPicker } from "@/shared/ui/department-picker/department-picker";
 
 const optionalEmail = yup
   .string()
@@ -86,6 +87,7 @@ const CreateGroupModal = ({
     handleSubmit,
     reset,
     control,
+    setValue,
     formState: { errors }
   } = useForm<CreateGroupFormData>({
     resolver: yupResolver(groupSchema) as Resolver<CreateGroupFormData>,
@@ -100,6 +102,15 @@ const CreateGroupModal = ({
   });
 
   const groupNameValue = useWatch({ control, name: "groupName" }) ?? "";
+  const facultyValue = useWatch({ control, name: "faculty" }) ?? "";
+  const prevFacultyRef = useRef(facultyValue);
+
+  useEffect(() => {
+    if (prevFacultyRef.current !== facultyValue) {
+      prevFacultyRef.current = facultyValue;
+      setValue("department", "");
+    }
+  }, [facultyValue, setValue]);
 
   useEffect(() => {
     if (isOpen && mode === "edit" && initialData) {
@@ -195,19 +206,20 @@ const CreateGroupModal = ({
             )}
           />
 
-          <div className={styles.Group}>
-            <label htmlFor="group-department">Кафедра</label>
-            <input
-              id="group-department"
-              type="text"
-              maxLength={200}
-              placeholder="Например: Прикладная информатика"
-              {...register("department")}
-            />
-            {errors.department && (
-              <p className={styles.Error}>{errors.department.message}</p>
+          <Controller
+            name="department"
+            control={control}
+            render={({ field }) => (
+              <DepartmentPicker
+                id="group-department"
+                label="Кафедра"
+                value={field.value ?? ""}
+                faculty={facultyValue}
+                error={errors.department?.message}
+                onChange={field.onChange}
+              />
             )}
-          </div>
+          />
 
           <div className={styles.Group}>
             <label htmlFor="group-course">Курс</label>

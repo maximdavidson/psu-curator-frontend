@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import type { FormEvent } from "react";
 import {
   type UserListItem,
@@ -9,6 +10,8 @@ import {
 import { UserRole, UserRoleLabels, type UserRoleType } from "@/shared";
 import { getSearchText, subscribeToSearch } from "@/app/store/searchStore";
 import { getRoleStringFromAccessToken } from "@/shared/lib/jwt-claims";
+import { FacultyPicker } from "@/shared/ui/faculty-picker/faculty-picker";
+import { DepartmentPicker } from "@/shared/ui/department-picker/department-picker";
 import styles from "./user-management.module.scss";
 const staffRoleOptions = [
   { value: UserRole.Teacher, label: UserRoleLabels[UserRole.Teacher] },
@@ -70,6 +73,34 @@ export const UserManagementPage = () => {
   );
   const isAdmin = currentRole === "Admin";
   const roleOptions = isAdmin ? adminRoleOptions : staffRoleOptions;
+  const [roleOpen, setRoleOpen] = useState(false);
+  const roleRef = useRef<HTMLDivElement>(null);
+  const selectedRoleLabel =
+    roleOptions.find((o) => o.value === role)?.label ?? "";
+
+  const handleRoleSelect = useCallback((value: UserRoleType) => {
+    setRole(value);
+    setRoleOpen(false);
+  }, []);
+
+  useEffect(() => {
+    if (!roleOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (!roleRef.current?.contains(e.target as Node)) {
+        setRoleOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [roleOpen]);
+
+  const prevFacultyRef = useRef(faculty);
+  useEffect(() => {
+    if (prevFacultyRef.current !== faculty) {
+      prevFacultyRef.current = faculty;
+      setDepartment("");
+    }
+  }, [faculty]);
   useEffect(() => {
     const unsubscribe = subscribeToSearch(setSearch);
     return unsubscribe;
@@ -148,70 +179,71 @@ export const UserManagementPage = () => {
         <h2>Создать пользователя</h2>
 
         <div className={styles.formGrid}>
-          <label>
-            Email / логин
+          <div className={styles.formField}>
+            <span className={styles.formLabel}>Email / логин</span>
             <input
+              className={styles.formInput}
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="teacher@psu.ru"
             />
-          </label>
+          </div>
 
-          <label>
-            Фамилия
+          <div className={styles.formField}>
+            <span className={styles.formLabel}>Фамилия</span>
             <input
+              className={styles.formInput}
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               required
               placeholder="Иванов"
             />
-          </label>
+          </div>
 
-          <label>
-            Имя
+          <div className={styles.formField}>
+            <span className={styles.formLabel}>Имя</span>
             <input
+              className={styles.formInput}
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               required
               placeholder="Иван"
             />
-          </label>
+          </div>
 
-          <label>
-            Отчество
+          <div className={styles.formField}>
+            <span className={styles.formLabel}>Отчество</span>
             <input
+              className={styles.formInput}
               value={surname}
               onChange={(e) => setSurname(e.target.value)}
               placeholder="Иванович"
             />
-          </label>
+          </div>
 
           {isAdmin && (
-            <label>
-              Факультет
-              <input
-                value={faculty}
-                onChange={(e) => setFaculty(e.target.value)}
-                required
-                placeholder="Факультет информационных технологий"
-              />
-            </label>
+            <FacultyPicker
+              id="staff-faculty"
+              label="Факультет"
+              value={faculty}
+              onChange={setFaculty}
+            />
           )}
 
-          <label>
-            Кафедра
-            <input
-              value={department}
-              onChange={(e) => setDepartment(e.target.value)}
-              placeholder="Кафедра прикладной информатики"
-            />
-          </label>
+          <DepartmentPicker
+            id="staff-department"
+            label="Кафедра"
+            value={department}
+            faculty={faculty}
+            onChange={setDepartment}
+          />
 
-          <label>
-            Пароль
+          <div className={styles.formField}>
+            <span className={styles.formLabel}>Пароль</span>
             <input
+              className={styles.formInput}
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -219,26 +251,47 @@ export const UserManagementPage = () => {
               minLength={6}
               placeholder="Password123!"
             />
-          </label>
+          </div>
 
-          <label>
-            Роль
-            <select
-              value={role}
-              onChange={(e) => setRole(Number(e.target.value) as UserRoleType)}
+          <div className={styles.formField} ref={roleRef}>
+            <span className={styles.formLabel}>Роль</span>
+            <button
+              type="button"
+              className={styles.selectTrigger}
+              onClick={() => setRoleOpen((prev) => !prev)}
             >
-              {roleOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
+              <span>{selectedRoleLabel}</span>
+              <span>▾</span>
+            </button>
+            {roleOpen && (
+              <div className={styles.selectDropdown}>
+                {roleOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={`${styles.selectOption}${
+                      option.value === role
+                        ? ` ${styles.selectOptionActive}`
+                        : ""
+                    }`}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => handleRoleSelect(option.value)}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {error && <p className={styles.error}>{error}</p>}
 
-        <button type="submit" disabled={isCreating}>
+        <button
+          type="submit"
+          className={styles.submitButton}
+          disabled={isCreating}
+        >
           {isCreating ? "Создание..." : "Создать"}
         </button>
       </form>
