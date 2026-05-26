@@ -115,7 +115,14 @@ export const userApi = createApi({
         query: () => "/User/me/attendance-summary",
         providesTags: [{ type: "User", id: "attendance-summary" }]
       }
-    )
+    ),
+    forceChangePassword: builder.mutation<void, { newPassword: string }>({
+      query: (body) => ({
+        url: "/User/me/force-change-password",
+        method: "PUT",
+        body
+      })
+    })
   })
 });
 export const {
@@ -127,5 +134,6 @@ export const {
   useUploadCurrentUserAvatarMutation,
   useDeleteCurrentUserAvatarMutation,
   useChangePasswordMutation,
+  useForceChangePasswordMutation,
   useGetCurrentUserAttendanceSummaryQuery
 } = userApi;

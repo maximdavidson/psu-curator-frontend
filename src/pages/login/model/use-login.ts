@@ -18,7 +18,11 @@ export const useLogin = () => {
       }).unwrap();
       dispatch(setTokens(response));
       localStorage.setItem("email", data.email);
-      navigate("/groups");
+      if (response.mustChangePassword) {
+        navigate("/force-change-password");
+      } else {
+        navigate("/groups");
+      }
     } catch (err: unknown) {
       console.error("Login error:", err);
       const message = readApiErrorMessage(err);

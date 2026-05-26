@@ -1,6 +1,7 @@
 export type ParsedAuthTokens = {
   accessToken: string;
   refreshToken?: string;
+  mustChangePassword?: boolean;
 };
 function pickString(
   obj: Record<string, unknown>,
@@ -25,5 +26,14 @@ export function parseAuthTokens(raw: unknown): ParsedAuthTokens | null {
     refresh ??= pickString(tp, ["refreshToken", "RefreshToken"]);
   }
   if (!access) return null;
-  return { accessToken: access, refreshToken: refresh };
+  const mcp =
+    o.mustChangePassword ??
+    o.MustChangePassword ??
+    tp?.mustChangePassword ??
+    tp?.MustChangePassword;
+  return {
+    accessToken: access,
+    refreshToken: refresh,
+    mustChangePassword: mcp === true
+  };
 }
