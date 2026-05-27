@@ -168,6 +168,62 @@
   color: var(--color-text-muted);
 }
 
+.listHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+
+  h2 {
+    margin: 0;
+  }
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.filterField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 180px;
+
+  span {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+  }
+
+  select {
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--color-input-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-input-bg);
+    color: var(--color-text);
+    font-size: 14px;
+  }
+}
+
+.presenceOnline {
+  color: #2e9f4b;
+  font-weight: 600;
+}
+
+.presenceOffline {
+  color: var(--color-text-muted);
+}
+
+.emptyRow {
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
 .tableWrap {
   overflow-x: auto;
 

@@ -75,6 +75,43 @@
   font-size: 13px;
 }
 
+.invitationActions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.acceptButton {
+  align-self: flex-start;
+  padding: 10px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent);
+  color: var(--color-btn-primary-text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--color-accent-hover);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.acceptedBadge {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(46, 159, 75, 0.12);
+  color: #2e9f4b;
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .inviteBlock {
   display: flex;
   flex-direction: column;

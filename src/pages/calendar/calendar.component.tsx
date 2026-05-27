@@ -23,7 +23,8 @@ import {
   useCreateEventMutation,
   useDeleteEventMutation,
   useGetEventsQuery,
-  useUpdateEventMutation
+  useUpdateEventMutation,
+  useAcceptEventMutation
 } from "@/services/calendar.api";
 import { getRoleStringFromAccessToken } from "@/shared/lib/jwt-claims";
 const localizer = momentLocalizer(moment);
@@ -32,6 +33,7 @@ interface CalendarEventUI {
   title: string;
   description?: string;
   isCreator?: boolean;
+  isAccepted?: boolean;
   invitedUsers: CalendarEventInvitedUser[];
   start: Date;
   end: Date;
@@ -87,6 +89,7 @@ export const CalendarPage = () => {
   const [createEvent] = useCreateEventMutation();
   const [deleteEvent] = useDeleteEventMutation();
   const [updateEvent] = useUpdateEventMutation();
+  const [acceptEvent, { isLoading: isAccepting }] = useAcceptEventMutation();
   const [view, setView] = useState<View>(Views.MONTH);
   const [date, setDate] = useState(new Date());
   const [slot, setSlot] = useState<SlotInfo | null>(null);
@@ -107,6 +110,7 @@ export const CalendarPage = () => {
         title: e.title,
         description: e.description,
         isCreator: e.isCreator,
+        isAccepted: e.isAccepted,
         invitedUsers: e.invitedUsers ?? [],
         start: new Date(e.dateOfEvent),
         end: e.endDateOfEvent
@@ -193,6 +197,12 @@ export const CalendarPage = () => {
     setEditingEvent(null);
     setSlot(null);
   };
+  const handleAcceptEvent = async (id: string) => {
+    await acceptEvent(id).unwrap();
+    setEditingEvent((current) =>
+      current?.id === id ? { ...current, isAccepted: true } : current
+    );
+  };
   const handleNavigate = useCallback((newDate: Date) => {
     setDate(newDate);
   }, []);
@@ -231,6 +241,8 @@ export const CalendarPage = () => {
           onClose={handleCloseModal}
           onSave={handleSaveEvent}
           onDelete={handleDeleteEvent}
+          onAccept={handleAcceptEvent}
+          isAccepting={isAccepting}
         />
       )}
     </div>

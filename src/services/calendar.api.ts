@@ -7,12 +7,14 @@ export interface CalendarEvent {
   title: string;
   description?: string;
   isCreator?: boolean;
+  isAccepted?: boolean;
   invitedUsers: CalendarEventInvitedUser[];
 }
 export interface CalendarEventInvitedUser {
   id: string;
   fullName: string;
   email: string;
+  isAccepted?: boolean;
 }
 export interface CalendarEventDetails {
   id: string;
@@ -24,6 +26,7 @@ export interface CalendarEventDetails {
   invitedUserEmails: string[];
   invitedUsers: CalendarEventInvitedUser[];
   isCreator: boolean;
+  isAccepted: boolean;
 }
 export interface CreateCalendarEventRequest {
   dateOfEvent: string;
@@ -93,6 +96,16 @@ export const calendarApi = createApi({
         { type: "CalendarEvent", id: arg.id },
         { type: "CalendarEvent", id: "LIST" }
       ]
+    }),
+    acceptEvent: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/CalendarEvent/events/${id}/accept`,
+        method: "POST"
+      }),
+      invalidatesTags: (_result, _error, id) => [
+        { type: "CalendarEvent", id },
+        { type: "CalendarEvent", id: "LIST" }
+      ]
     })
   })
 });
@@ -100,5 +113,6 @@ export const {
   useGetEventsQuery,
   useCreateEventMutation,
   useDeleteEventMutation,
-  useUpdateEventMutation
+  useUpdateEventMutation,
+  useAcceptEventMutation
 } = calendarApi;

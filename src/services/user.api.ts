@@ -22,6 +22,8 @@ export interface UserListItem extends UserFullInformation {
   role: number;
   accountStatus: number;
   createdAt: string;
+  lastSeenAt?: string | null;
+  isOnline?: boolean;
 }
 export interface ChangePasswordRequest {
   currentPassword: string;

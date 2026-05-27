@@ -15,6 +15,7 @@ interface Props {
     start: Date;
     end: Date;
     isCreator?: boolean;
+    isAccepted?: boolean;
     invitedUsers: CalendarEventInvitedUser[];
   } | null;
   slot?: {
@@ -32,6 +33,8 @@ interface Props {
     end: Date
   ) => void;
   onDelete: (id: string) => void;
+  onAccept: (id: string) => void;
+  isAccepting?: boolean;
 }
 const toDateInput = (date: Date): string => {
   const year = date.getFullYear();
@@ -48,7 +51,9 @@ export const EventModal = ({
   canInviteParticipants,
   onClose,
   onSave,
-  onDelete
+  onDelete,
+  onAccept,
+  isAccepting = false
 }: Props) => {
   const initialStart = event?.start ?? slot?.start ?? new Date();
   const initialEnd =
@@ -71,6 +76,10 @@ export const EventModal = ({
   const { data: groups = [] } = useGetGroupsQuery();
   const canEditParticipants =
     canInviteParticipants && (!event || Boolean(event.isCreator));
+  const canAcceptInvitation =
+    Boolean(event?.id) && !event?.isCreator && !event?.isAccepted;
+  const invitationAccepted =
+    Boolean(event?.id) && !event?.isCreator && Boolean(event?.isAccepted);
   useEffect(() => {
     const timeout = window.setTimeout(
       () => setDebouncedInviteQuery(inviteQuery.trim()),
@@ -198,7 +207,15 @@ export const EventModal = ({
                   <div key={user.id} className={styles.inviteChip}>
                     <div>
                       {user.fullName?.trim() || user.email}
-                      <span>{user.email}</span>
+                      <span>
+                        {user.email}
+                        {event?.isCreator && (
+                          <>
+                            {" "}
+                            · {user.isAccepted ? "принял(а)" : "ожидает ответа"}
+                          </>
+                        )}
+                      </span>
                     </div>
                     <button
                       type="button"
@@ -271,17 +288,44 @@ export const EventModal = ({
           </div>
         )}
 
-        {event && !event.isCreator && (
-          <p className={styles.hint}>
-            Вы приглашены на это событие. Редактирование доступно только автору.
+        {canAcceptInvitation && (
+          <div className={styles.invitationActions}>
+            <p className={styles.hint}>
+              Вас пригласили на это событие. Примите приглашение, чтобы
+              подтвердить участие.
+            </p>
+            <button
+              type="button"
+              className={styles.acceptButton}
+              disabled={isAccepting}
+              onClick={() => event?.id && onAccept(event.id)}
+            >
+              {isAccepting ? "Принимаем…" : "Принять приглашение"}
+            </button>
+          </div>
+        )}
+
+        {invitationAccepted && (
+          <p className={styles.acceptedBadge}>
+            Вы приняли приглашение на это событие.
           </p>
         )}
+
+        {event &&
+          !event.isCreator &&
+          !canAcceptInvitation &&
+          !invitationAccepted && (
+            <p className={styles.hint}>
+              Вы приглашены на это событие. Редактирование доступно только
+              автору.
+            </p>
+          )}
 
         {error && <p className={styles.error}>{error}</p>}
 
         <div className={styles.actions}>
           <button onClick={onClose} className={styles.cancelButton}>
-            Отмена
+            {canAcceptInvitation || invitationAccepted ? "Закрыть" : "Отмена"}
           </button>
 
           {event?.id && event.isCreator && (

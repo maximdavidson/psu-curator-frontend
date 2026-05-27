@@ -19,7 +19,10 @@ import { UserRole, UserRoleLabels, type UserRoleType } from "@/shared";
 import { getSearchText, subscribeToSearch } from "@/app/store/searchStore";
 import { FacultyPicker } from "@/shared/ui/faculty-picker/faculty-picker";
 import { DepartmentPicker } from "@/shared/ui/department-picker/department-picker";
+import { formatLastSeen, isUserOnline } from "@/shared/lib/format-last-seen";
 import styles from "./user-management.module.scss";
+
+const ALL_FILTER_VALUE = "";
 const staffRoleOptions = [
   { value: UserRole.Teacher, label: UserRoleLabels[UserRole.Teacher] },
   { value: UserRole.Curator, label: UserRoleLabels[UserRole.Curator] }
@@ -50,6 +53,8 @@ export const UserManagementPage = () => {
   const [role, setRole] = useState<UserRoleType>(UserRole.Teacher);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState(getSearchText());
+  const [roleFilter, setRoleFilter] = useState<string>(ALL_FILTER_VALUE);
+  const [departmentFilter, setDepartmentFilter] = useState(ALL_FILTER_VALUE);
   const [selectedUser, setSelectedUser] = useState<UserListItem | null>(null);
   const token = useSelector(selectToken);
   const currentUserId = getUserIdFromAccessToken(token);
@@ -100,24 +105,61 @@ export const UserManagementPage = () => {
     const unsubscribe = subscribeToSearch(setSearch);
     return unsubscribe;
   }, []);
+  const departmentOptions = useMemo(() => {
+    const departments = new Set<string>();
+    users.forEach((user) => {
+      const department = user.department?.trim();
+      if (department) {
+        departments.add(department);
+      }
+    });
+    return Array.from(departments).sort((left, right) =>
+      left.localeCompare(right, "ru")
+    );
+  }, [users]);
+
+  const listRoleFilterOptions = useMemo(
+    () =>
+      Object.entries(UserRole).map(([, value]) => ({
+        value: String(value),
+        label: UserRoleLabels[value as UserRoleType]
+      })),
+    []
+  );
+
   const filteredUsers = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return users;
-    return users.filter((user) =>
-      [
+    return users.filter((user) => {
+      if (roleFilter && String(user.role) !== roleFilter) {
+        return false;
+      }
+
+      if (
+        departmentFilter &&
+        (user.department?.trim() ?? "") !== departmentFilter
+      ) {
+        return false;
+      }
+
+      if (!q) {
+        return true;
+      }
+
+      return [
         user.email,
         user.firstName,
         user.lastName,
         user.surname ?? "",
         user.faculty ?? "",
         user.department ?? "",
-        getRoleLabel(user.role)
+        getRoleLabel(user.role),
+        formatLastSeen(user.lastSeenAt, user.isOnline)
       ]
         .join(" ")
         .toLowerCase()
-        .includes(q)
-    );
-  }, [search, users]);
+        .includes(q);
+    });
+  }, [departmentFilter, roleFilter, search, users]);
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
@@ -309,7 +351,39 @@ export const UserManagementPage = () => {
       </form>
 
       <section className={styles.card}>
-        <h2>Пользователи</h2>
+        <div className={styles.listHeader}>
+          <h2>Пользователи</h2>
+          <div className={styles.filters}>
+            <label className={styles.filterField}>
+              <span>Роль</span>
+              <select
+                value={roleFilter}
+                onChange={(event) => setRoleFilter(event.target.value)}
+              >
+                <option value={ALL_FILTER_VALUE}>Все роли</option>
+                {listRoleFilterOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className={styles.filterField}>
+              <span>Кафедра</span>
+              <select
+                value={departmentFilter}
+                onChange={(event) => setDepartmentFilter(event.target.value)}
+              >
+                <option value={ALL_FILTER_VALUE}>Все кафедры</option>
+                {departmentOptions.map((department) => (
+                  <option key={department} value={department}>
+                    {department}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </div>
 
         {isLoading ? (
           <p className={styles.muted}>Загрузка...</p>
@@ -323,30 +397,58 @@ export const UserManagementPage = () => {
                   <th>Факультет</th>
                   <th>Кафедра</th>
                   <th>Роль</th>
+                  <th>Последний раз в сети</th>
                   <th>Дата создания</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers.map((user) => (
-                  <tr
-                    key={user.id}
-                    className={styles.clickableRow}
-                    onClick={() => setSelectedUser(user)}
-                  >
-                    <td>{user.email}</td>
-                    <td>
-                      {[user.lastName, user.firstName, user.surname]
-                        .filter(Boolean)
-                        .join(" ") || "Не указано"}
-                    </td>
-                    <td>{user.faculty || "Не указан"}</td>
-                    <td>{user.department || "Не указана"}</td>
-                    <td>{getRoleLabel(user.role)}</td>
-                    <td>
-                      {new Date(user.createdAt).toLocaleDateString("ru-RU")}
+                {filteredUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className={styles.emptyRow}>
+                      Пользователи не найдены
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredUsers.map((user) => {
+                    const presenceLabel = formatLastSeen(
+                      user.lastSeenAt,
+                      user.isOnline
+                    );
+                    const presenceOnline = isUserOnline(
+                      user.lastSeenAt,
+                      user.isOnline
+                    );
+                    return (
+                      <tr
+                        key={user.id}
+                        className={styles.clickableRow}
+                        onClick={() => setSelectedUser(user)}
+                      >
+                        <td>{user.email}</td>
+                        <td>
+                          {[user.lastName, user.firstName, user.surname]
+                            .filter(Boolean)
+                            .join(" ") || "Не указано"}
+                        </td>
+                        <td>{user.faculty || "Не указан"}</td>
+                        <td>{user.department || "Не указана"}</td>
+                        <td>{getRoleLabel(user.role)}</td>
+                        <td
+                          className={
+                            presenceOnline
+                              ? styles.presenceOnline
+                              : styles.presenceOffline
+                          }
+                        >
+                          {presenceLabel}
+                        </td>
+                        <td>
+                          {new Date(user.createdAt).toLocaleDateString("ru-RU")}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
@@ -385,6 +487,16 @@ export const UserManagementPage = () => {
               <dd>{selectedUser.faculty || "Не указан"}</dd>
               <dt>Кафедра</dt>
               <dd>{selectedUser.department || "Не указана"}</dd>
+              <dt>Последний раз в сети</dt>
+              <dd
+                className={
+                  isUserOnline(selectedUser.lastSeenAt, selectedUser.isOnline)
+                    ? styles.presenceOnline
+                    : styles.presenceOffline
+                }
+              >
+                {formatLastSeen(selectedUser.lastSeenAt, selectedUser.isOnline)}
+              </dd>
               <dt>Дата создания</dt>
               <dd>
                 {new Date(selectedUser.createdAt).toLocaleString("ru-RU")}
