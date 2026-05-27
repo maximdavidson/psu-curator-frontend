@@ -6,6 +6,7 @@ import {
 } from "@/services/user.api";
 import { useGetGroupsQuery } from "@/pages/groups/group.api";
 import type { CalendarEventInvitedUser } from "@/services/calendar.api";
+import { EventAttendanceReport } from "./event-attendance-report.component";
 const MIN_QUERY_LEN = 2;
 interface Props {
   event?: {
@@ -310,6 +311,8 @@ export const EventModal = ({
             Вы приняли приглашение на это событие.
           </p>
         )}
+
+        {event?.id && <EventAttendanceReport eventId={event.id} />}
 
         {event &&
           !event.isCreator &&

@@ -307,3 +307,111 @@
     cursor: not-allowed;
   }
 }
+
+.attendanceBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 4px;
+  border-top: 1px solid var(--color-border);
+}
+
+.attendanceHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.attendanceTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.attendanceSummary {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.attendanceTableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.attendanceTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th,
+  td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: top;
+  }
+
+  th {
+    background: var(--color-feed-surface);
+    color: var(--color-text-muted);
+    font-weight: 600;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.attendanceName {
+  display: block;
+  font-weight: 500;
+}
+
+.attendanceEmail {
+  display: block;
+  margin-top: 2px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.statusAccepted {
+  color: var(--color-success, #2e7d32);
+}
+
+.statusPending {
+  color: var(--color-text-muted);
+}
+
+.statusAbsent {
+  color: var(--color-danger, #c62828);
+}
+
+.attendanceCheck {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.attendanceActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.attendanceSaveButton {
+  padding: 8px 14px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent);
+  color: var(--color-btn-primary-text);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}

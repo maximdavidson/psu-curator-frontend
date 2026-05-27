@@ -66,7 +66,6 @@ export function roleCanCreateGroupFeedItems(role: string | null): boolean {
 
 export const SURVEYS_LIST_PAGE_ROLES: string[] = [
   "Curator",
-  "Teacher",
   "Dean",
   "DeputyDean",
   "Admin"

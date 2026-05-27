@@ -47,6 +47,28 @@ export interface UpdateCalendarEventRequest {
   newUserEmails?: string[];
   newGroupIds?: string[];
 }
+export interface CalendarEventAttendanceParticipant {
+  userId: string;
+  fullName: string;
+  email: string;
+  isAccepted: boolean;
+  acceptedAt?: string | null;
+  wasPresent?: boolean | null;
+}
+export interface CalendarEventAttendanceReport {
+  eventId: string;
+  title: string;
+  dateOfEvent: string;
+  endDateOfEvent?: string | null;
+  invitedCount: number;
+  acceptedCount: number;
+  attendedCount: number;
+  canManage: boolean;
+  participants: CalendarEventAttendanceParticipant[];
+}
+export interface SaveCalendarEventAttendanceRequest {
+  entries: { userId: string; wasPresent: boolean }[];
+}
 export const calendarApi = createApi({
   reducerPath: "calendarApi",
   baseQuery: baseQueryWithReauth,
@@ -106,6 +128,27 @@ export const calendarApi = createApi({
         { type: "CalendarEvent", id },
         { type: "CalendarEvent", id: "LIST" }
       ]
+    }),
+    getAttendanceReport: builder.query<CalendarEventAttendanceReport, string>({
+      query: (eventId) => `/CalendarEvent/events/${eventId}/attendance-report`,
+      providesTags: (_result, _error, eventId) => [
+        { type: "CalendarEvent", id: `${eventId}-attendance` }
+      ]
+    }),
+    saveAttendance: builder.mutation<
+      CalendarEventAttendanceReport,
+      { eventId: string; body: SaveCalendarEventAttendanceRequest }
+    >({
+      query: ({ eventId, body }) => ({
+        url: `/CalendarEvent/events/${eventId}/attendance`,
+        method: "PUT",
+        body
+      }),
+      invalidatesTags: (_result, _error, { eventId }) => [
+        { type: "CalendarEvent", id: `${eventId}-attendance` },
+        { type: "CalendarEvent", id: eventId },
+        { type: "CalendarEvent", id: "LIST" }
+      ]
     })
   })
 });
@@ -114,5 +157,7 @@ export const {
   useCreateEventMutation,
   useDeleteEventMutation,
   useUpdateEventMutation,
-  useAcceptEventMutation
+  useAcceptEventMutation,
+  useGetAttendanceReportQuery,
+  useSaveAttendanceMutation
 } = calendarApi;

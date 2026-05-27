@@ -24,7 +24,6 @@ import styles from "./user-management.module.scss";
 
 const ALL_FILTER_VALUE = "";
 const staffRoleOptions = [
-  { value: UserRole.Teacher, label: UserRoleLabels[UserRole.Teacher] },
   { value: UserRole.Curator, label: UserRoleLabels[UserRole.Curator] }
 ];
 const adminRoleOptions = [
@@ -50,7 +49,7 @@ export const UserManagementPage = () => {
   const [surname, setSurname] = useState("");
   const [faculty, setFaculty] = useState("");
   const [department, setDepartment] = useState("");
-  const [role, setRole] = useState<UserRoleType>(UserRole.Teacher);
+  const [role, setRole] = useState<UserRoleType>(UserRole.Curator);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState(getSearchText());
   const [roleFilter, setRoleFilter] = useState<string>(ALL_FILTER_VALUE);
@@ -194,7 +193,7 @@ export const UserManagementPage = () => {
       setSurname("");
       setFaculty("");
       setDepartment("");
-      setRole(UserRole.Teacher);
+      setRole(UserRole.Curator);
     } catch (err) {
       setError(
         readApiErrorMessage(err) ??
