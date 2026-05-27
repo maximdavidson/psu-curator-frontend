@@ -10,13 +10,17 @@ import {
   useSendMessageMutation,
   useUpdateMessageMutation,
   useDeleteMessageMutation,
-  useDeleteDialogMutation
+  useDeleteDialogMutation,
+  useGetUserPresenceQuery,
+  type ChatUserPresence
 } from "@/services/chat.api";
 import { getUserIdFromAccessToken } from "@/shared/lib/jwt-claims";
 import { useChatRealtime } from "@/hooks/use-chat-realtime";
 import { selectToken } from "@/stores/auth.store";
 import { useGetUserByIdQuery } from "@/services/user.api";
 import { UserAvatar } from "@/shared/ui/user-avatar/user-avatar";
+import { formatLastSeen, isUserOnline } from "@/shared/lib/format-last-seen";
+import type { ChatDialog } from "@/services/chat.api";
 import styles from "./chat.module.scss";
 const MIN_SEARCH_LENGTH = 2;
 const formatTime = (dateString: string): string => {
@@ -33,6 +37,49 @@ const getDialogTitle = (
   user: ChatUser,
   currentUserId: string | null
 ): string => (user.id === currentUserId ? "Избранное" : getUserTitle(user));
+type PresenceSource =
+  | Pick<ChatUser, "lastSeenAt" | "isOnline">
+  | ChatUserPresence;
+
+const getPresenceSource = (
+  dialog?: ChatDialog,
+  user?: Pick<ChatUser, "lastSeenAt" | "isOnline">,
+  presence?: PresenceSource
+) => ({
+  lastSeenAt:
+    presence?.lastSeenAt ?? dialog?.userLastSeenAt ?? user?.lastSeenAt ?? null,
+  isOnline:
+    presence?.isOnline ?? dialog?.userIsOnline ?? user?.isOnline ?? false
+});
+
+const getPresenceLabel = (
+  userId: string,
+  currentUserId: string | null,
+  dialog?: ChatDialog,
+  user?: Pick<ChatUser, "lastSeenAt" | "isOnline">,
+  presence?: PresenceSource
+): string | null => {
+  if (userId === currentUserId) {
+    return null;
+  }
+
+  const source = getPresenceSource(dialog, user, presence);
+  return formatLastSeen(source?.lastSeenAt, source?.isOnline);
+};
+const getPresenceOnline = (
+  userId: string,
+  currentUserId: string | null,
+  dialog?: ChatDialog,
+  user?: Pick<ChatUser, "lastSeenAt" | "isOnline">,
+  presence?: PresenceSource
+): boolean => {
+  if (userId === currentUserId) {
+    return false;
+  }
+
+  const source = getPresenceSource(dialog, user, presence);
+  return isUserOnline(source?.lastSeenAt, source?.isOnline);
+};
 const getReadState = (
   isOwnMessage: boolean,
   isFavoriteDialog: boolean,
@@ -66,6 +113,13 @@ export const ChatPage = () => {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const { data: dialogs = [], isLoading: isDialogsLoading } =
     useGetDialogsQuery();
+  const { data: selectedUserPresence } = useGetUserPresenceQuery(
+    selectedUser?.id ?? "",
+    {
+      skip: !selectedUser || selectedUser.id === currentUserId,
+      pollingInterval: 60_000
+    }
+  );
   const messagesQueryArg = selectedUser
     ? buildChatMessagesQueryArg(currentUserId, selectedUser.id)
     : null;
@@ -134,7 +188,9 @@ export const ChatPage = () => {
       id: dialog.userId,
       fullName: dialog.userFullName,
       email: dialog.userEmail,
-      avatarUrl: dialog.userAvatarUrl
+      avatarUrl: dialog.userAvatarUrl,
+      lastSeenAt: dialog.userLastSeenAt,
+      isOnline: dialog.userIsOnline
     }));
   const searchResults = searchState.data ?? [];
   const isSearching = search.trim().length >= MIN_SEARCH_LENGTH;
@@ -298,6 +354,18 @@ export const ChatPage = () => {
           {dialogUsers.map((user) => {
             const dialog = dialogs.find((item) => item.userId === user.id);
             const isActive = selectedUser?.id === user.id;
+            const presenceLabel = getPresenceLabel(
+              user.id,
+              currentUserId,
+              dialog,
+              user
+            );
+            const presenceOnline = getPresenceOnline(
+              user.id,
+              currentUserId,
+              dialog,
+              user
+            );
             return (
               <div
                 key={user.id}
@@ -321,6 +389,17 @@ export const ChatPage = () => {
                   <span className={styles.dialogName}>
                     {getDialogTitle(user, currentUserId)}
                   </span>
+                  {presenceLabel && (
+                    <span
+                      className={
+                        presenceOnline
+                          ? styles.presenceOnline
+                          : styles.dialogPresence
+                      }
+                    >
+                      {presenceLabel}
+                    </span>
+                  )}
                   <span className={styles.dialogPreview}>
                     {dialog?.lastMessage.text ?? user.email}
                   </span>
@@ -376,6 +455,18 @@ export const ChatPage = () => {
 
               {searchResultUsers.map((user) => {
                 const isActive = selectedUser?.id === user.id;
+                const presenceLabel = getPresenceLabel(
+                  user.id,
+                  currentUserId,
+                  undefined,
+                  user
+                );
+                const presenceOnline = getPresenceOnline(
+                  user.id,
+                  currentUserId,
+                  undefined,
+                  user
+                );
                 return (
                   <button
                     key={user.id}
@@ -392,7 +483,21 @@ export const ChatPage = () => {
                       <span className={styles.dialogName}>
                         {getUserTitle(user)}
                       </span>
-                      <span className={styles.dialogPreview}>{user.email}</span>
+                      {presenceLabel ? (
+                        <span
+                          className={
+                            presenceOnline
+                              ? styles.presenceOnline
+                              : styles.dialogPresence
+                          }
+                        >
+                          {presenceLabel}
+                        </span>
+                      ) : (
+                        <span className={styles.dialogPreview}>
+                          {user.email}
+                        </span>
+                      )}
                     </span>
                     <span className={styles.newChatLabel}>Новый</span>
                   </button>
@@ -423,7 +528,40 @@ export const ChatPage = () => {
               />
               <div>
                 <h2>{getDialogTitle(selectedUser, currentUserId)}</h2>
-                {selectedUser.email && <p>{selectedUser.email}</p>}
+                {selectedUser.id === currentUserId
+                  ? selectedUser.email && <p>{selectedUser.email}</p>
+                  : (() => {
+                      const activeDialog = dialogs.find(
+                        (dialog) => dialog.userId === selectedUser.id
+                      );
+                      const presenceLabel = getPresenceLabel(
+                        selectedUser.id,
+                        currentUserId,
+                        activeDialog,
+                        selectedUser,
+                        selectedUserPresence
+                      );
+                      const presenceOnline = getPresenceOnline(
+                        selectedUser.id,
+                        currentUserId,
+                        activeDialog,
+                        selectedUser,
+                        selectedUserPresence
+                      );
+                      return presenceLabel ? (
+                        <p
+                          className={
+                            presenceOnline
+                              ? styles.presenceOnline
+                              : styles.presenceStatus
+                          }
+                        >
+                          {presenceLabel}
+                        </p>
+                      ) : (
+                        selectedUser.email && <p>{selectedUser.email}</p>
+                      );
+                    })()}
               </div>
             </header>
 

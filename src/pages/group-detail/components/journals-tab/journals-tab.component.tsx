@@ -15,6 +15,7 @@ import {
   useSaveGroupJournalEntriesMutation,
   useUpdateGroupJournalMutation
 } from "../../groupJournals.api";
+import { readApiErrorMessage } from "@/shared/lib/read-api-error-message";
 import { JournalFormModal } from "./journal-form-modal.component";
 interface Props {
   groupId: string;
@@ -56,31 +57,15 @@ const buildInitialDaySchedules = (journal?: GroupJournalDetail) => {
   }
   return result;
 };
-const toAttendedHours = (
-  requiredHours: number,
-  entry: GroupJournalDetail["participants"][number]["entries"][number]
-): number | "" => {
-  if (entry.attendedHours != null && entry.attendedHours >= 0) {
-    return entry.attendedHours;
-  }
-
-  const missed = entry.missedHours ?? 0;
-  if (missed <= 0) {
-    return "";
-  }
-
-  return Math.max(0, Math.round((requiredHours - missed) * 10) / 10);
-};
-
-const buildInitialAttendedCells = (journal?: GroupJournalDetail) => {
+const buildInitialMissedCells = (journal?: GroupJournalDetail) => {
   const result: Record<string, number | ""> = {};
   if (!journal) return result;
 
   for (const participant of journal.participants) {
     for (const entry of participant.entries) {
-      const attended = toAttendedHours(entry.requiredHours, entry);
-      if (attended !== "") {
-        result[cellKey(participant.userId, entry.date)] = attended;
+      const missed = entry.missedHours ?? 0;
+      if (missed > 0) {
+        result[cellKey(participant.userId, entry.date)] = missed;
       }
     }
   }
@@ -105,9 +90,9 @@ const JournalDetail = ({
   const [daySchedules, setDaySchedules] = useState<Record<string, number | "">>(
     {}
   );
-  const [attendedCells, setAttendedCells] = useState<
-    Record<string, number | "">
-  >({});
+  const [missedCells, setMissedCells] = useState<Record<string, number | "">>(
+    {}
+  );
   const [dirtyJournalId, setDirtyJournalId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const effectiveDaySchedules = useMemo(() => {
@@ -117,13 +102,13 @@ const JournalDetail = ({
     }
     return daySchedules;
   }, [daySchedules, data, dirtyJournalId]);
-  const effectiveAttendedCells = useMemo(() => {
-    if (!data) return attendedCells;
+  const effectiveMissedCells = useMemo(() => {
+    if (!data) return missedCells;
     if (dirtyJournalId !== data.id) {
-      return buildInitialAttendedCells(data);
+      return buildInitialMissedCells(data);
     }
-    return attendedCells;
-  }, [attendedCells, data, dirtyJournalId]);
+    return missedCells;
+  }, [missedCells, data, dirtyJournalId]);
   const getRequiredHours = (date: string) => {
     const value = effectiveDaySchedules[dateKey(date)];
     return value === "" || value === undefined ? 0 : value;
@@ -134,34 +119,30 @@ const JournalDetail = ({
       dirtyJournalId === data.id
         ? daySchedules
         : buildInitialDaySchedules(data);
-    const initialAttended =
-      dirtyJournalId === data.id
-        ? attendedCells
-        : buildInitialAttendedCells(data);
+    const initialMissed =
+      dirtyJournalId === data.id ? missedCells : buildInitialMissedCells(data);
     setDirtyJournalId(data.id);
     setDaySchedules({
       ...initialDays,
       [dateKey(date)]: parseHoursInput(rawValue)
     });
-    setAttendedCells(initialAttended);
+    setMissedCells(initialMissed);
   };
-  const handleAttendedChange = (
+  const handleMissedChange = (
     userId: string,
     date: string,
     rawValue: string
   ) => {
     if (!data) return;
-    const initialAttended =
-      dirtyJournalId === data.id
-        ? attendedCells
-        : buildInitialAttendedCells(data);
+    const initialMissed =
+      dirtyJournalId === data.id ? missedCells : buildInitialMissedCells(data);
     const initialDays =
       dirtyJournalId === data.id
         ? daySchedules
         : buildInitialDaySchedules(data);
     setDirtyJournalId(data.id);
-    setAttendedCells({
-      ...initialAttended,
+    setMissedCells({
+      ...initialMissed,
       [cellKey(userId, date)]: parseHoursInput(rawValue)
     });
     setDaySchedules(initialDays);
@@ -170,10 +151,16 @@ const JournalDetail = ({
     if (!data) return;
     setError("");
     const daySchedulePayload = data.dates.map((date) => ({
-      date,
+      date: toApiDate(dateKey(date)),
       requiredHours: getRequiredHours(date)
     }));
-    let hasInvalidAttendedHours = false;
+
+    if (!daySchedulePayload.some((day) => day.requiredHours > 0)) {
+      setError("Сначала укажите длительность занятий хотя бы для одного дня.");
+      return;
+    }
+
+    let hasInvalidMissedHours = false;
     const validEntries: SaveGroupJournalEntryRequest[] = [];
     for (const participant of data.participants) {
       if (participant.isFormerMember) {
@@ -185,27 +172,28 @@ const JournalDetail = ({
           continue;
         }
 
-        const attended =
-          effectiveAttendedCells[cellKey(participant.userId, date)];
+        const missed = effectiveMissedCells[cellKey(participant.userId, date)];
 
-        if (attended === "" || attended === undefined) {
+        if (missed === "" || missed === undefined) {
           continue;
         }
 
-        if (attended > required) {
-          hasInvalidAttendedHours = true;
+        if (missed > required) {
+          hasInvalidMissedHours = true;
           continue;
         }
 
         validEntries.push({
           userId: participant.userId,
-          date,
-          attendedHours: attended
+          date: toApiDate(dateKey(date)),
+          attendedHours: Math.round((required - missed) * 10) / 10
         });
       }
     }
-    if (hasInvalidAttendedHours) {
-      setError("Часы посещения не могут превышать норму в этот день.");
+    if (hasInvalidMissedHours) {
+      setError(
+        "Часов отсутствия не может быть больше длительности занятий в этот день."
+      );
       return;
     }
     try {
@@ -223,9 +211,11 @@ const JournalDetail = ({
       );
       setDirtyJournalId(null);
       setDaySchedules({});
-      setAttendedCells({});
-    } catch {
-      setError("Не удалось сохранить посещаемость.");
+      setMissedCells({});
+    } catch (err) {
+      setError(
+        readApiErrorMessage(err) ?? "Не удалось сохранить посещаемость."
+      );
     }
   };
   const handleRemoveFormerParticipant = async (
@@ -291,9 +281,9 @@ const JournalDetail = ({
             {formatFullDate(data.endDate)}
           </p>
           <p className={styles.hint}>
-            Укажите норму часов по дням и фактические часы посещения по
-            студентам. Пропуск рассчитывается автоматически: норма минус
-            посещение.
+            В строке «Длительность занятий» — сколько часов длились пары в день.
+            В ячейках студентов — сколько часов отсутствовал (пусто — был на
+            всех занятиях).
           </p>
         </div>
         <div className={styles.detailActions}>
@@ -330,7 +320,9 @@ const JournalDetail = ({
               ))}
             </tr>
             <tr className={styles.scheduleRow}>
-              <th>Норма / посещение (ч)</th>
+              <th>
+                <span className={styles.rowLabel}>Длительность занятий</span>
+              </th>
               {data.dates.map((date) => {
                 const key = dateKey(date);
                 const value = effectiveDaySchedules[key] ?? "";
@@ -392,54 +384,59 @@ const JournalDetail = ({
                 </td>
                 {data.dates.map((date) => {
                   const key = cellKey(participant.userId, date);
-                  const value = effectiveAttendedCells[key] ?? "";
+                  const value = effectiveMissedCells[key] ?? "";
                   const required = getRequiredHours(date);
                   const entryMeta = participant.entries.find(
                     (entry) => entry.date.slice(0, 10) === date.slice(0, 10)
                   );
+                  const savedMissed = entryMeta?.missedHours ?? 0;
                   const cellEditable =
                     !participant.isFormerMember &&
                     data.canEditEntries &&
                     required > 0 &&
                     (entryMeta?.canEdit ?? true);
-                  const readOnlyAttended =
-                    !cellEditable && entryMeta && required > 0
-                      ? toAttendedHours(required, entryMeta)
-                      : "";
+                  const displayMissed =
+                    value !== "" && value !== undefined
+                      ? Number(value)
+                      : savedMissed > 0
+                        ? savedMissed
+                        : null;
                   return (
                     <td key={key}>
                       {required <= 0 ? (
                         <span className={styles.emptyCell}>—</span>
                       ) : cellEditable ? (
-                        <input
-                          type="number"
-                          min={0}
-                          max={required}
-                          step={0.5}
-                          className={styles.hoursInput}
-                          value={value}
-                          disabled={!cellEditable}
-                          title={
-                            !cellEditable
-                              ? entryMeta?.canEdit === false
-                                ? "Отметку выставил куратор или другой сотрудник"
-                                : "Сначала укажите норму часов в этот день"
-                              : `Посещение, макс. ${formatHours(required)} ч`
-                          }
-                          placeholder={formatHours(required)}
-                          onChange={(e) =>
-                            handleAttendedChange(
-                              participant.userId,
-                              date,
-                              e.target.value
-                            )
-                          }
-                        />
+                        <div className={styles.attendanceCell}>
+                          <input
+                            type="number"
+                            min={0}
+                            max={required}
+                            step={0.5}
+                            className={styles.hoursInput}
+                            value={value}
+                            disabled={!cellEditable}
+                            title={`Сколько часов отсутствовал (макс. ${formatHours(required)} ч)`}
+                            placeholder="ч"
+                            aria-label={`Отсутствие, ${formatDate(date)}`}
+                            onChange={(e) =>
+                              handleMissedChange(
+                                participant.userId,
+                                date,
+                                e.target.value
+                              )
+                            }
+                          />
+                          {displayMissed != null && displayMissed > 0 && (
+                            <span className={styles.missedTag}>
+                              отсутствовал {formatHours(displayMissed)} ч
+                            </span>
+                          )}
+                        </div>
                       ) : (
                         <span className={styles.readOnlyHours}>
-                          {readOnlyAttended === ""
-                            ? "—"
-                            : formatHours(Number(readOnlyAttended))}
+                          {displayMissed != null && displayMissed > 0
+                            ? `отсутствовал ${formatHours(displayMissed)} ч`
+                            : "—"}
                         </span>
                       )}
                     </td>

@@ -5,11 +5,18 @@ import {
   type UserListItem,
   useCreateStaffUserMutation,
   useDeleteUserMutation,
-  useGetUsersQuery
+  useGetUsersQuery,
+  useGetUserByIdQuery
 } from "@/services/user.api";
+import { readApiErrorMessage } from "@/shared/lib/read-api-error-message";
+import {
+  getRoleStringFromAccessToken,
+  getUserIdFromAccessToken
+} from "@/shared/lib/jwt-claims";
+import { useSelector } from "react-redux";
+import { selectToken } from "@/stores/auth.store";
 import { UserRole, UserRoleLabels, type UserRoleType } from "@/shared";
 import { getSearchText, subscribeToSearch } from "@/app/store/searchStore";
-import { getRoleStringFromAccessToken } from "@/shared/lib/jwt-claims";
 import { FacultyPicker } from "@/shared/ui/faculty-picker/faculty-picker";
 import { DepartmentPicker } from "@/shared/ui/department-picker/department-picker";
 import styles from "./user-management.module.scss";
@@ -32,26 +39,6 @@ const getRoleLabel = (role: UserRoleType | string | number): string => {
   }
   return UserRoleLabels[role as UserRoleType] ?? `Роль ${role}`;
 };
-const getApiErrorMessage = (error: unknown): string | null => {
-  if (typeof error !== "object" || error === null) return null;
-  const data =
-    "data" in error
-      ? (
-          error as {
-            data?: unknown;
-          }
-        ).data
-      : null;
-  if (typeof data === "string") return data;
-  if (typeof data !== "object" || data === null) return null;
-  const payload = data as {
-    error?: unknown;
-    message?: unknown;
-  };
-  if (typeof payload.error === "string") return payload.error;
-  if (typeof payload.message === "string") return payload.message;
-  return null;
-};
 export const UserManagementPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -64,14 +51,22 @@ export const UserManagementPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState(getSearchText());
   const [selectedUser, setSelectedUser] = useState<UserListItem | null>(null);
+  const token = useSelector(selectToken);
+  const currentUserId = getUserIdFromAccessToken(token);
   const { data: users = [], isLoading } = useGetUsersQuery();
+  const { data: currentUserProfile } = useGetUserByIdQuery(
+    currentUserId ?? "",
+    {
+      skip: !currentUserId
+    }
+  );
   const [createStaffUser, { isLoading: isCreating }] =
     useCreateStaffUserMutation();
   const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
-  const currentRole = getRoleStringFromAccessToken(
-    localStorage.getItem("token")
-  );
+  const currentRole = getRoleStringFromAccessToken(token);
   const isAdmin = currentRole === "Admin";
+  const deanFaculty = currentUserProfile?.faculty?.trim() ?? "";
+  const effectiveFaculty = isAdmin ? faculty.trim() : deanFaculty;
   const roleOptions = isAdmin ? adminRoleOptions : staffRoleOptions;
   const [roleOpen, setRoleOpen] = useState(false);
   const roleRef = useRef<HTMLDivElement>(null);
@@ -126,15 +121,28 @@ export const UserManagementPage = () => {
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
+
+    if (!isAdmin && !deanFaculty) {
+      setError(
+        "У вашей учётной записи не указан факультет. Обратитесь к администратору — без этого деканат не может создавать пользователей."
+      );
+      return;
+    }
+
+    if (isAdmin && !faculty.trim()) {
+      setError("Выберите факультет для нового пользователя.");
+      return;
+    }
+
     try {
       await createStaffUser({
-        email,
+        email: email.trim(),
         password,
-        firstName,
-        lastName,
-        surname,
-        faculty: isAdmin ? faculty : undefined,
-        department,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        surname: surname.trim() || undefined,
+        faculty: isAdmin ? faculty.trim() : undefined,
+        department: department.trim() || undefined,
         role
       }).unwrap();
       setEmail("");
@@ -147,7 +155,7 @@ export const UserManagementPage = () => {
       setRole(UserRole.Teacher);
     } catch (err) {
       setError(
-        getApiErrorMessage(err) ??
+        readApiErrorMessage(err) ??
           "Не удалось создать пользователя. Проверьте данные и права доступа."
       );
     }
@@ -159,20 +167,13 @@ export const UserManagementPage = () => {
       await deleteUser(selectedUser.id).unwrap();
       setSelectedUser(null);
     } catch (err) {
-      setError(getApiErrorMessage(err) ?? "Не удалось удалить пользователя.");
+      setError(readApiErrorMessage(err) ?? "Не удалось удалить пользователя.");
     }
   };
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <div>
-          <h1>Управление пользователями</h1>
-          <p>
-            Деканат создаёт преподавателей и кураторов только в своём
-            факультете. Администратор создаёт деканов и замдеканов и видит все
-            факультеты.
-          </p>
-        </div>
+        <h1>Управление пользователями</h1>
       </div>
 
       <form className={styles.card} onSubmit={handleSubmit}>
@@ -223,20 +224,31 @@ export const UserManagementPage = () => {
             />
           </div>
 
-          {isAdmin && (
+          {isAdmin ? (
             <FacultyPicker
               id="staff-faculty"
               label="Факультет"
               value={faculty}
               onChange={setFaculty}
             />
+          ) : (
+            <div className={styles.formField}>
+              <span className={styles.formLabel}>Факультет</span>
+              <input
+                className={styles.formInput}
+                type="text"
+                value={deanFaculty || "Не указан в профиле"}
+                readOnly
+                disabled
+              />
+            </div>
           )}
 
           <DepartmentPicker
             id="staff-department"
             label="Кафедра"
             value={department}
-            faculty={faculty}
+            faculty={effectiveFaculty}
             onChange={setDepartment}
           />
 
@@ -248,7 +260,7 @@ export const UserManagementPage = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={6}
+              minLength={8}
               placeholder="Password123!"
             />
           </div>

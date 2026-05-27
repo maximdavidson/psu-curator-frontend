@@ -227,6 +227,23 @@
   text-align: center;
 }
 
+.dialogPresence,
+.presenceStatus {
+  display: block;
+  margin-top: 2px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.presenceOnline {
+  display: block;
+  margin-top: 2px;
+  color: #2e9f4b;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
 .chatHeader {
   display: flex;
   align-items: center;
@@ -247,6 +264,16 @@
   p {
     margin: 4px 0 0;
     color: var(--color-text-secondary);
+    font-size: 13px;
+  }
+
+  .presenceOnline {
+    margin-top: 4px;
+    font-size: 13px;
+  }
+
+  .presenceStatus {
+    margin-top: 4px;
     font-size: 13px;
   }
 }

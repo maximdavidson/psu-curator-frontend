@@ -8,6 +8,7 @@ import {
   type GroupMember
 } from "@/pages/groups/group.api";
 import { useLazySearchUsersByNameQuery } from "@/services/user.api";
+import { StudentFundingBadge } from "@/shared/ui/student-funding-badge/student-funding-badge";
 const MIN_QUERY_LEN = 2;
 interface Props {
   groupId: string;
@@ -149,6 +150,9 @@ export const MembersTab = ({
                     {isHeadman && (
                       <span className={styles.headBadge}>Староста</span>
                     )}
+                    {!isCurator && (
+                      <StudentFundingBadge fundingType={m.fundingType} />
+                    )}
                   </div>
                   {m.email && <p className={styles.memberEmail}>{m.email}</p>}
                 </div>
@@ -219,10 +223,6 @@ export const MembersTab = ({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
-            <p className={styles.searchHint}>
-              Введите не менее {MIN_QUERY_LEN} символов — покажем подходящих
-              пользователей.
-            </p>
           </div>
         </>
       )}
@@ -246,9 +246,12 @@ export const MembersTab = ({
           {filteredResults.map((u) => (
             <div key={u.id} className={styles.resultRow}>
               <div className={styles.memberMain}>
-                <p className={styles.memberName}>
-                  {u.fullName?.trim() || "Без имени"}
-                </p>
+                <div className={styles.memberTitleRow}>
+                  <p className={styles.memberName}>
+                    {u.fullName?.trim() || "Без имени"}
+                  </p>
+                  <StudentFundingBadge fundingType={u.fundingType} />
+                </div>
                 {u.email && <p className={styles.memberEmail}>{u.email}</p>}
               </div>
               <button

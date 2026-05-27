@@ -26,6 +26,8 @@ export interface ChatDialog {
   userFullName: string;
   userEmail: string;
   userAvatarUrl?: string | null;
+  userLastSeenAt?: string | null;
+  userIsOnline?: boolean;
   lastMessage: ChatMessage;
   unreadCount: number;
 }
@@ -34,6 +36,13 @@ export interface ChatUser {
   fullName: string;
   email: string;
   avatarUrl?: string | null;
+  lastSeenAt?: string | null;
+  isOnline?: boolean;
+}
+export interface ChatUserPresence {
+  userId: string;
+  lastSeenAt?: string | null;
+  isOnline: boolean;
 }
 export interface SendChatMessageRequest {
   recipientId: string;
@@ -59,7 +68,7 @@ export const buildChatMessagesQueryArg = (
 export const chatApi = createApi({
   reducerPath: "chatApi",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["ChatDialogs", "ChatMessages"],
+  tagTypes: ["ChatDialogs", "ChatMessages", "ChatUserPresence"],
   endpoints: (builder) => ({
     getDialogs: builder.query<ChatDialog[], void>({
       query: () => "/Chat/dialogs",
@@ -142,6 +151,18 @@ export const chatApi = createApi({
         { type: "ChatMessages", id: "LIST" },
         { type: "ChatDialogs", id: "LIST" }
       ]
+    }),
+    touchPresence: builder.mutation<void, void>({
+      query: () => ({
+        url: "/Chat/presence",
+        method: "POST"
+      })
+    }),
+    getUserPresence: builder.query<ChatUserPresence, string>({
+      query: (userId) => `/Chat/users/${userId}/presence`,
+      providesTags: (_result, _error, userId) => [
+        { type: "ChatUserPresence", id: userId }
+      ]
     })
   })
 });
@@ -152,5 +173,7 @@ export const {
   useSendMessageMutation,
   useUpdateMessageMutation,
   useDeleteMessageMutation,
-  useDeleteDialogMutation
+  useDeleteDialogMutation,
+  useTouchPresenceMutation,
+  useGetUserPresenceQuery
 } = chatApi;

@@ -1,7 +1,9 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { CommonProvider } from "./providers/CommonProvider";
 import { LoginationPage } from "@/pages/login";
-import { RegistrationPage } from "@/pages/registration";
+
+import { StudentRegisterPage } from "@/pages/student-register";
+import { STUDENT_REGISTER_PAGE_ROLES } from "@/shared/lib/jwt-claims";
 import { GroupsPage } from "@/pages/groups";
 import { ProtectedRoutes } from "./ProtectedRoutes";
 import { DynamicPlaceholder } from "@/component/Placeholder/DynamicPlayceholder";
@@ -25,7 +27,7 @@ export const router = createBrowserRouter([
         children: [
           {
             path: "/",
-            element: <Navigate to="/register" />
+            element: <Navigate to="/login" />
           },
           {
             path: "/login",
@@ -33,13 +35,13 @@ export const router = createBrowserRouter([
           },
           {
             path: "/register",
-            element: <RegistrationPage />
+            element: <Navigate to="/login" replace />
           }
         ]
       },
       {
         path: "/",
-        element: <Navigate to="/register" />
+        element: <Navigate to="/login" />
       },
       {
         path: "/force-change-password",
@@ -102,6 +104,19 @@ export const router = createBrowserRouter([
                   {
                     path: "/users",
                     element: <UserManagementPage />
+                  }
+                ]
+              },
+              {
+                element: (
+                  <ProtectedRoutes
+                    allowedRoles={[...STUDENT_REGISTER_PAGE_ROLES]}
+                  />
+                ),
+                children: [
+                  {
+                    path: "/students/register",
+                    element: <StudentRegisterPage />
                   }
                 ]
               }

@@ -191,6 +191,21 @@
   background: var(--color-feed-surface);
 }
 
+.rowLabel {
+  display: block;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.rowLabelHint {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  line-height: 1.3;
+}
+
 .hint {
   margin-top: 8px !important;
   font-size: 13px;
@@ -205,6 +220,23 @@
   display: inline-block;
   min-width: 72px;
   text-align: center;
+}
+
+.attendanceCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.missedTag {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9a3412;
+  background: #ffedd5;
+  padding: 2px 6px;
+  border-radius: 999px;
+  white-space: nowrap;
 }
 
 .participantCell {

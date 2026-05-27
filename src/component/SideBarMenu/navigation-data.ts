@@ -5,12 +5,21 @@ import TeachesrIcon from "../../assets/teachers-icon.svg";
 import PoolsIcon from "../../assets/polls-icon.svg";
 import DocumentsIcon from "../../assets/documents-icon.svg";
 import ChatIcon from "../../assets/chat.svg";
-import { SURVEYS_LIST_PAGE_ROLES } from "@/shared/lib/jwt-claims";
+import {
+  STUDENT_REGISTER_PAGE_ROLES,
+  SURVEYS_LIST_PAGE_ROLES
+} from "@/shared/lib/jwt-claims";
 export const menuData: IMenuItem[] = [
   {
     to: "/groups",
     label: "Группы факультета",
     icon: HomeIcon
+  },
+  {
+    to: "/students/register",
+    label: "Студенты",
+    icon: TeachesrIcon,
+    visibleTo: [...STUDENT_REGISTER_PAGE_ROLES]
   },
   {
     to: "/calendar",

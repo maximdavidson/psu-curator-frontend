@@ -51,6 +51,13 @@ export function roleCanManageStudentGroups(role: string | null): boolean {
   const r = role.trim().toLowerCase();
   return ["curator", "dean", "deputydean", "admin"].includes(r);
 }
+
+export const STUDENT_REGISTER_PAGE_ROLES = [
+  "Curator",
+  "Dean",
+  "DeputyDean",
+  "Admin"
+] as const;
 export function roleCanCreateGroupFeedItems(role: string | null): boolean {
   if (!role) return false;
   const r = role.trim().toLowerCase();

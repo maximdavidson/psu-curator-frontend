@@ -25,7 +25,7 @@ export const UserEmailPicker = ({
   label,
   value,
   placeholder,
-  hint = "Введите имя или email — подскажем пользователей из системы.",
+  hint,
   error,
   onChange
 }: UserEmailPickerProps) => {

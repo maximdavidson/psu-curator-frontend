@@ -5,6 +5,7 @@ export interface UserFullName {
   fullName: string | null;
   email: string | null;
   avatarUrl?: string | null;
+  fundingType?: number | null;
 }
 export interface UserFullInformation {
   id: string;
@@ -42,10 +43,23 @@ export interface CreateStaffUserRequest {
   department?: string;
   role: number;
 }
+
+export interface CreateStudentUserRequest {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  surname?: string;
+  studentCardNumber: string;
+  courseNumber: number;
+  enrollmentYear?: number;
+  groupId?: string;
+  fundingType: number;
+}
 export const userApi = createApi({
   reducerPath: "userApi",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["User"],
+  tagTypes: ["User", "Group"],
   endpoints: (builder) => ({
     getUserById: builder.query<UserFullInformation, string>({
       query: (userId) => `/User/${userId}`,
@@ -72,6 +86,16 @@ export const userApi = createApi({
       }),
       invalidatesTags: ["User"]
     }),
+    createStudentUser: builder.mutation<UserListItem, CreateStudentUserRequest>(
+      {
+        query: (body) => ({
+          url: "/User/students",
+          method: "POST",
+          body
+        }),
+        invalidatesTags: ["User", "Group"]
+      }
+    ),
     deleteUser: builder.mutation<void, string>({
       query: (userId) => ({
         url: `/User/${userId}`,
@@ -130,6 +154,7 @@ export const {
   useLazySearchUsersByNameQuery,
   useGetUsersQuery,
   useCreateStaffUserMutation,
+  useCreateStudentUserMutation,
   useDeleteUserMutation,
   useUploadCurrentUserAvatarMutation,
   useDeleteCurrentUserAvatarMutation,

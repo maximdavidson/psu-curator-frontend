@@ -65,6 +65,7 @@ export interface GroupMember {
   isHeadman?: boolean;
   isCurator?: boolean;
   isStudentRoster?: boolean;
+  fundingType?: number | null;
 }
 export interface GroupDetails {
   id: string;
