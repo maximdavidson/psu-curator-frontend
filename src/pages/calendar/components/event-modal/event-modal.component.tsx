@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 import styles from "./event-modal.module.scss";
 import {
   useLazySearchUsersByNameQuery,
@@ -7,6 +8,11 @@ import {
 import { useGetGroupsQuery } from "@/pages/groups/group.api";
 import type { CalendarEventInvitedUser } from "@/services/calendar.api";
 import { EventAttendanceReport } from "./event-attendance-report.component";
+import { selectToken } from "@/stores/auth.store";
+import {
+  getRoleStringFromAccessToken,
+  roleCanViewEventAttendance
+} from "@/shared/lib/jwt-claims";
 const MIN_QUERY_LEN = 2;
 interface Props {
   event?: {
@@ -75,6 +81,10 @@ export const EventModal = ({
   const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
   const [searchUsers, searchState] = useLazySearchUsersByNameQuery();
   const { data: groups = [] } = useGetGroupsQuery();
+  const token = useSelector(selectToken);
+  const canViewAttendance = roleCanViewEventAttendance(
+    getRoleStringFromAccessToken(token)
+  );
   const canEditParticipants =
     canInviteParticipants && (!event || Boolean(event.isCreator));
   const canAcceptInvitation =
@@ -312,7 +322,9 @@ export const EventModal = ({
           </p>
         )}
 
-        {event?.id && <EventAttendanceReport eventId={event.id} />}
+        {event?.id && canViewAttendance && (
+          <EventAttendanceReport eventId={event.id} />
+        )}
 
         {event &&
           !event.isCreator &&

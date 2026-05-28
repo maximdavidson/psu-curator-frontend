@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import styles from "./event-modal.module.scss";
 import {
+  useDownloadAttendanceReportDocxMutation,
   useGetAttendanceReportQuery,
   useSaveAttendanceMutation,
   type CalendarEventAttendanceParticipant
@@ -9,6 +10,13 @@ import {
 interface Props {
   eventId: string;
 }
+
+const sanitizeFileName = (value: string) =>
+  value
+    .trim()
+    .replace(/[<>:"/\\|?*]+/g, "")
+    .replace(/\s+/g, "-")
+    .slice(0, 80) || "meropriyatie";
 
 const buildPresenceState = (
   participants: CalendarEventAttendanceParticipant[]
@@ -23,11 +31,14 @@ const buildPresenceState = (
 export const EventAttendanceReport = ({ eventId }: Props) => {
   const { data, isLoading, isError } = useGetAttendanceReportQuery(eventId);
   const [saveAttendance, { isLoading: isSaving }] = useSaveAttendanceMutation();
+  const [downloadDocx, { isLoading: isDownloading }] =
+    useDownloadAttendanceReportDocxMutation();
   const [editedPresence, setEditedPresence] = useState<Record<
     string,
     boolean
   > | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   const serverPresence = useMemo(
     () => (data ? buildPresenceState(data.participants) : {}),
@@ -53,14 +64,44 @@ export const EventAttendanceReport = ({ eventId }: Props) => {
     return null;
   }
 
+  const handleDownloadWord = async () => {
+    setDownloadError(null);
+    try {
+      const blob = await downloadDocx(eventId).unwrap();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${sanitizeFileName(data.title)}-poseshchaemost.docx`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      setDownloadError("Не удалось скачать отчёт в Word.");
+    }
+  };
+
   if (data.participants.length === 0) {
     return (
       <div className={styles.attendanceBlock}>
-        <h3 className={styles.attendanceTitle}>Посещаемость</h3>
-        <p className={styles.hint}>
-          Добавьте участников в событие, чтобы вести отчёт по приглашениям и
-          посещению.
-        </p>
+        <div className={styles.attendanceHeader}>
+          <div className={styles.attendanceHeaderMain}>
+            <h3 className={styles.attendanceTitle}>Посещаемость</h3>
+            <p className={styles.hint}>
+              Добавьте участников в событие, чтобы вести отчёт по приглашениям и
+              посещению.
+            </p>
+          </div>
+          <button
+            type="button"
+            className={styles.attendanceDownloadButton}
+            disabled={isDownloading}
+            onClick={() => void handleDownloadWord()}
+          >
+            {isDownloading ? "Скачивание…" : "Скачать Word"}
+          </button>
+        </div>
+        {downloadError && <p className={styles.error}>{downloadError}</p>}
       </div>
     );
   }
@@ -94,13 +135,23 @@ export const EventAttendanceReport = ({ eventId }: Props) => {
   return (
     <div className={styles.attendanceBlock}>
       <div className={styles.attendanceHeader}>
-        <h3 className={styles.attendanceTitle}>Посещаемость</h3>
-        {summary && (
-          <p className={styles.attendanceSummary}>
-            Приглашено: {summary.invited} · Приняли: {summary.accepted} ·
-            Присутствовали: {summary.attended}
-          </p>
-        )}
+        <div className={styles.attendanceHeaderMain}>
+          <h3 className={styles.attendanceTitle}>Посещаемость</h3>
+          {summary && (
+            <p className={styles.attendanceSummary}>
+              Приглашено: {summary.invited} · Приняли: {summary.accepted} ·
+              Присутствовали: {summary.attended}
+            </p>
+          )}
+        </div>
+        <button
+          type="button"
+          className={styles.attendanceDownloadButton}
+          disabled={isDownloading}
+          onClick={() => void handleDownloadWord()}
+        >
+          {isDownloading ? "Скачивание…" : "Скачать Word"}
+        </button>
       </div>
 
       <div className={styles.attendanceTableWrap}>
@@ -175,6 +226,7 @@ export const EventAttendanceReport = ({ eventId }: Props) => {
         </p>
       )}
 
+      {downloadError && <p className={styles.error}>{downloadError}</p>}
       {saveError && <p className={styles.error}>{saveError}</p>}
     </div>
   );

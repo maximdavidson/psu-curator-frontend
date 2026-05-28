@@ -149,6 +149,13 @@ export const calendarApi = createApi({
         { type: "CalendarEvent", id: eventId },
         { type: "CalendarEvent", id: "LIST" }
       ]
+    }),
+    downloadAttendanceReportDocx: builder.mutation<Blob, string>({
+      query: (eventId) => ({
+        url: `/CalendarEvent/events/${eventId}/attendance-report/export/docx`,
+        method: "GET",
+        responseHandler: (response) => response.blob()
+      })
     })
   })
 });
@@ -159,5 +166,6 @@ export const {
   useUpdateEventMutation,
   useAcceptEventMutation,
   useGetAttendanceReportQuery,
-  useSaveAttendanceMutation
+  useSaveAttendanceMutation,
+  useDownloadAttendanceReportDocxMutation
 } = calendarApi;

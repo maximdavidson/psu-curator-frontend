@@ -52,6 +52,11 @@ export function roleCanManageStudentGroups(role: string | null): boolean {
   return ["curator", "dean", "deputydean", "admin"].includes(r);
 }
 
+/** Отчёт посещаемости мероприятия в календаре — только для куратора, деканата и администратора. */
+export function roleCanViewEventAttendance(role: string | null): boolean {
+  return roleCanManageStudentGroups(role);
+}
+
 export const STUDENT_REGISTER_PAGE_ROLES = [
   "Curator",
   "Dean",
