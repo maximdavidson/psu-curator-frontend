@@ -1,15 +1,89 @@
-import { startTransition, useEffect, useState } from "react";
+/* eslint-disable react-hooks/preserve-manual-memoization */
+/* eslint-disable react-hooks/set-state-in-effect */
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from "react";
 import styles from "./view-survey-modal.module.scss";
 import {
   useGetSurveyByIdQuery,
+  useStartSurveyAttemptMutation,
   useSubmitSurveyResponseMutation
 } from "../../survey.api";
 import type { Question, QuestionAnswerPayload } from "../../survey.types";
+
 interface ViewSurveyModalProps {
   isOpen: boolean;
   surveyId: string;
   onClose: () => void;
 }
+
+const formatRemaining = (totalSeconds: number): string => {
+  const safe = Math.max(0, totalSeconds);
+  const hours = Math.floor(safe / 3600);
+  const minutes = Math.floor((safe % 3600) / 60);
+  const seconds = safe % 60;
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  }
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+};
+
+const buildAnswerPayload = (
+  questions: Question[],
+  answers: Record<string, string | string[]>,
+  requireAll: boolean
+): QuestionAnswerPayload[] | null => {
+  if (!questions.length) return null;
+  const payload: QuestionAnswerPayload[] = [];
+  for (const question of questions) {
+    const raw = answers[question.id];
+    if (question.type === "text") {
+      const text = typeof raw === "string" ? raw.trim() : "";
+      if (!text) {
+        if (requireAll) return null;
+        continue;
+      }
+      payload.push({
+        questionId: question.id,
+        selectedOptions: [],
+        textValue: text
+      });
+      continue;
+    }
+    if (question.type === "single") {
+      if (typeof raw !== "string" || !raw) {
+        if (requireAll) return null;
+        continue;
+      }
+      payload.push({
+        questionId: question.id,
+        selectedOptions: [raw]
+      });
+      continue;
+    }
+    if (question.type === "multiple") {
+      const selected = Array.isArray(raw) ? raw : [];
+      if (selected.length === 0) {
+        if (requireAll) return null;
+        continue;
+      }
+      payload.push({
+        questionId: question.id,
+        selectedOptions: selected
+      });
+    }
+  }
+  if (requireAll) {
+    return payload.length === questions.length ? payload : null;
+  }
+  return payload;
+};
+
 export const ViewSurveyModal = ({
   isOpen,
   surveyId,
@@ -22,23 +96,163 @@ export const ViewSurveyModal = ({
   } = useGetSurveyByIdQuery(surveyId, {
     skip: !isOpen || !surveyId
   });
+  const [startAttempt, { isLoading: isStarting }] =
+    useStartSurveyAttemptMutation();
   const [submitResponse, { isLoading: isSubmitting }] =
     useSubmitSurveyResponseMutation();
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
+  const [attemptStarted, setAttemptStarted] = useState(false);
+  const autoSubmittedRef = useRef(false);
+
+  const hasTimeLimit =
+    Boolean(survey?.timeLimitMinutes) && (survey?.timeLimitMinutes ?? 0) > 0;
+
   useEffect(() => {
     if (!isOpen) {
+      autoSubmittedRef.current = false;
       startTransition(() => {
         setAnswers({});
         setSubmitError(null);
+        setRemainingSeconds(null);
+        setAttemptStarted(false);
       });
     }
   }, [isOpen, surveyId]);
-  if (!isOpen) return null;
+
+  useEffect(() => {
+    if (!isOpen || !survey || survey.hasCurrentUserResponded || !hasTimeLimit) {
+      return;
+    }
+
+    if (survey.attemptExpiresAt) {
+      setAttemptStarted(true);
+      return;
+    }
+
+    if (attemptStarted || isStarting) {
+      return;
+    }
+
+    void (async () => {
+      try {
+        await startAttempt(surveyId).unwrap();
+        setAttemptStarted(true);
+        await refetch();
+      } catch {
+        setSubmitError("Не удалось начать прохождение опроса.");
+      }
+    })();
+  }, [
+    isOpen,
+    survey,
+    surveyId,
+    hasTimeLimit,
+    attemptStarted,
+    isStarting,
+    startAttempt,
+    refetch
+  ]);
+
+  useEffect(() => {
+    if (!survey?.attemptExpiresAt || survey.hasCurrentUserResponded) {
+      setRemainingSeconds(null);
+      return;
+    }
+
+    const updateRemaining = () => {
+      const expiresAt = new Date(survey.attemptExpiresAt!).getTime();
+      const diff = Math.floor((expiresAt - Date.now()) / 1000);
+      setRemainingSeconds(Math.max(0, diff));
+    };
+
+    updateRemaining();
+    const timerId = window.setInterval(updateRemaining, 1000);
+    return () => window.clearInterval(timerId);
+  }, [survey?.attemptExpiresAt, survey?.hasCurrentUserResponded]);
+
   const alreadyResponded = survey?.hasCurrentUserResponded ?? false;
+  const isTimeExpired =
+    survey?.isTimeExpired === true ||
+    (remainingSeconds !== null && remainingSeconds <= 0);
+
+  const submitAnswers = useCallback(
+    async (partial: boolean) => {
+      if (!survey?.questions?.length) return;
+      setSubmitError(null);
+      const payload = buildAnswerPayload(survey.questions, answers, !partial);
+      if (!partial && !payload) {
+        setSubmitError("Ответьте на все вопросы перед отправкой.");
+        return;
+      }
+      try {
+        await submitResponse({
+          surveyId,
+          body: { answers: payload ?? [] }
+        }).unwrap();
+        await refetch();
+      } catch {
+        setSubmitError(
+          partial
+            ? "Не удалось сохранить ответы после истечения времени."
+            : "Не удалось отправить ответы. Попробуйте позже."
+        );
+      }
+    },
+    [survey?.questions, answers, surveyId, submitResponse, refetch]
+  );
+
+  useEffect(() => {
+    if (
+      !isOpen ||
+      alreadyResponded ||
+      !isTimeExpired ||
+      isSubmitting ||
+      isStarting ||
+      !survey?.questions?.length
+    ) {
+      return;
+    }
+    if (autoSubmittedRef.current) return;
+    autoSubmittedRef.current = true;
+    void submitAnswers(true);
+  }, [
+    isOpen,
+    alreadyResponded,
+    isTimeExpired,
+    isSubmitting,
+    isStarting,
+    survey?.questions?.length,
+    submitAnswers
+  ]);
+
+  const timerLabel = useMemo(() => {
+    if (!hasTimeLimit || alreadyResponded) return null;
+    if (isStarting) return "Запуск таймера…";
+    if (remainingSeconds === null) return null;
+    if (isTimeExpired) {
+      if (isSubmitting && !alreadyResponded) {
+        return "Время истекло. Сохраняем ваши ответы…";
+      }
+      return "Время истекло";
+    }
+    return `Осталось: ${formatRemaining(remainingSeconds)}`;
+  }, [
+    hasTimeLimit,
+    alreadyResponded,
+    isStarting,
+    remainingSeconds,
+    isTimeExpired,
+    isSubmitting
+  ]);
+
+  if (!isOpen) return null;
+
   const handleSingleAnswer = (questionId: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
+
   const handleMultipleAnswer = (
     questionId: string,
     option: string,
@@ -57,57 +271,17 @@ export const ViewSurveyModal = ({
       }));
     }
   };
+
   const handleTextAnswer = (questionId: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
-  const buildPayload = (): QuestionAnswerPayload[] | null => {
-    if (!survey?.questions?.length) return null;
-    const payload: QuestionAnswerPayload[] = [];
-    for (const question of survey.questions) {
-      const raw = answers[question.id];
-      if (question.type === "text") {
-        const text = typeof raw === "string" ? raw.trim() : "";
-        if (!text) return null;
-        payload.push({
-          questionId: question.id,
-          selectedOptions: [],
-          textValue: text
-        });
-        continue;
-      }
-      if (question.type === "single") {
-        if (typeof raw !== "string" || !raw) return null;
-        payload.push({
-          questionId: question.id,
-          selectedOptions: [raw]
-        });
-        continue;
-      }
-      if (question.type === "multiple") {
-        const selected = Array.isArray(raw) ? raw : [];
-        if (selected.length === 0) return null;
-        payload.push({
-          questionId: question.id,
-          selectedOptions: selected
-        });
-      }
-    }
-    return payload.length === survey.questions.length ? payload : null;
-  };
+
   const handleSubmit = async () => {
-    setSubmitError(null);
-    const payload = buildPayload();
-    if (!payload) {
-      setSubmitError("Ответьте на все вопросы перед отправкой.");
-      return;
-    }
-    try {
-      await submitResponse({ surveyId, body: { answers: payload } }).unwrap();
-      await refetch();
-    } catch {
-      setSubmitError("Не удалось отправить ответы. Попробуйте позже.");
-    }
+    await submitAnswers(false);
   };
+
+  const inputsDisabled = alreadyResponded || isTimeExpired || isStarting;
+
   const renderQuestion = (question: Question) => {
     const qid = question.id;
     switch (question.type) {
@@ -121,7 +295,7 @@ export const ViewSurveyModal = ({
                   name={`question_${qid}`}
                   value={opt}
                   checked={answers[qid] === opt}
-                  disabled={alreadyResponded}
+                  disabled={inputsDisabled}
                   onChange={(e) => handleSingleAnswer(qid, e.target.value)}
                 />
                 {opt}
@@ -139,7 +313,7 @@ export const ViewSurveyModal = ({
                   <input
                     type="checkbox"
                     checked={selected.includes(opt)}
-                    disabled={alreadyResponded}
+                    disabled={inputsDisabled}
                     onChange={(e) =>
                       handleMultipleAnswer(qid, opt, e.target.checked)
                     }
@@ -156,7 +330,7 @@ export const ViewSurveyModal = ({
             className={styles.textarea}
             placeholder="Введите ваш ответ..."
             value={(answers[qid] as string) || ""}
-            disabled={alreadyResponded}
+            disabled={inputsDisabled}
             onChange={(e) => handleTextAnswer(qid, e.target.value)}
           />
         );
@@ -164,13 +338,23 @@ export const ViewSurveyModal = ({
         return null;
     }
   };
+
   const handleClose = () => {
     setAnswers({});
     setSubmitError(null);
     onClose();
   };
+
+  const fullPayload =
+    survey?.questions && buildAnswerPayload(survey.questions, answers, true);
+
   const canSubmit =
-    !alreadyResponded && !isSubmitting && buildPayload() !== null;
+    !alreadyResponded &&
+    !isSubmitting &&
+    !isTimeExpired &&
+    !isStarting &&
+    fullPayload !== null;
+
   return (
     <div className={styles.overlay} onClick={handleClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -183,6 +367,21 @@ export const ViewSurveyModal = ({
           </div>
 
           <p className={styles.description}>{survey?.description}</p>
+
+          {hasTimeLimit && !alreadyResponded && timerLabel && (
+            <p
+              className={
+                isTimeExpired
+                  ? styles.timeExpiredBanner
+                  : styles.timeLimitBanner
+              }
+            >
+              {timerLabel}
+              {!isTimeExpired && survey?.timeLimitMinutes
+                ? ` (лимит ${survey.timeLimitMinutes} мин.)`
+                : ""}
+            </p>
+          )}
 
           {survey && survey.isAnonymous && (
             <p className={styles.privacyNote}>
@@ -223,7 +422,7 @@ export const ViewSurveyModal = ({
                 <p className={styles.submitError}>{submitError}</p>
               )}
 
-              {!alreadyResponded && (
+              {!alreadyResponded && !isTimeExpired && (
                 <div className={styles.footer}>
                   <button
                     className={styles.submitBtn}

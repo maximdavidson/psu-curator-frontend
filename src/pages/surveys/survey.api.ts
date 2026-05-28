@@ -10,6 +10,7 @@ export interface CreateSurveyRequest {
   title: string;
   description: string;
   isAnonymous: boolean;
+  timeLimitMinutes?: number | null;
   questions: {
     text: string;
     type: string;
@@ -46,6 +47,15 @@ export const surveyApi = createApi({
         method: "DELETE"
       }),
       invalidatesTags: ["Survey"]
+    }),
+    startSurveyAttempt: builder.mutation<SurveyDetail, string>({
+      query: (surveyId) => ({
+        url: `/Survey/${surveyId}/start`,
+        method: "POST"
+      }),
+      invalidatesTags: (_result, _error, surveyId) => [
+        { type: "Survey", id: surveyId }
+      ]
     }),
     submitSurveyResponse: builder.mutation<
       void,
@@ -90,6 +100,7 @@ export const {
   useGetSurveyByIdQuery,
   useCreateSurveyMutation,
   useDeleteSurveyMutation,
+  useStartSurveyAttemptMutation,
   useSubmitSurveyResponseMutation,
   useGetSurveyStatisticsQuery,
   useDownloadSurveyStatisticsMutation

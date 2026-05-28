@@ -238,6 +238,25 @@ hr {
   }
 }
 
+.timeLimitRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+
+  input[type="number"] {
+    width: 88px;
+    flex-shrink: 0;
+  }
+
+  > span {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    line-height: 1.4;
+  }
+}
+
 .checkboxRow {
   display: flex;
   align-items: flex-start;

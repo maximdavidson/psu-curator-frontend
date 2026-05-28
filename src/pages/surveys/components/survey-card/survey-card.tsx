@@ -53,6 +53,9 @@ export const SurveyCard = ({ survey, onDeleted }: Props) => {
           <p className={styles.meta}>
             {survey.questionCount} вопр. · {survey.responseCount} ответов
             {survey.isAnonymous ? " · анонимный" : ""}
+            {survey.timeLimitMinutes
+              ? ` · лимит ${survey.timeLimitMinutes} мин.`
+              : ""}
           </p>
         </div>
 

@@ -8,6 +8,7 @@ export interface CreateSurveyPayload {
   title: string;
   description: string;
   isAnonymous: boolean;
+  timeLimitMinutes?: number | null;
   questions: {
     text: string;
     type: QuestionType;
@@ -30,6 +31,8 @@ export const CreateSurveyModal = ({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const [hasTimeLimit, setHasTimeLimit] = useState(false);
+  const [timeLimitMinutes, setTimeLimitMinutes] = useState(30);
   const [questions, setQuestions] = useState<Question[]>([
     { id: nanoid(), text: "", type: "single", options: ["", ""] }
   ]);
@@ -41,7 +44,14 @@ export const CreateSurveyModal = ({
     const validate = async () => {
       try {
         await surveySchema.validate(
-          { title, description, isAnonymous, questions },
+          {
+            title,
+            description,
+            isAnonymous,
+            hasTimeLimit,
+            timeLimitMinutes,
+            questions
+          },
           { abortEarly: false }
         );
         setErrors({});
@@ -61,7 +71,14 @@ export const CreateSurveyModal = ({
       }
     };
     validate();
-  }, [title, description, isAnonymous, questions]);
+  }, [
+    title,
+    description,
+    isAnonymous,
+    hasTimeLimit,
+    timeLimitMinutes,
+    questions
+  ]);
   const handleQuestionChange = (
     id: string,
     field: keyof Question,
@@ -118,6 +135,7 @@ export const CreateSurveyModal = ({
         title,
         description,
         isAnonymous,
+        timeLimitMinutes: hasTimeLimit ? timeLimitMinutes : null,
         questions: questions.map((q) => ({
           text: q.text,
           type: q.type,
@@ -131,6 +149,8 @@ export const CreateSurveyModal = ({
       setTitle("");
       setDescription("");
       setIsAnonymous(false);
+      setHasTimeLimit(false);
+      setTimeLimitMinutes(30);
       setQuestions([
         { id: nanoid(), text: "", type: "single", options: ["", ""] }
       ]);
@@ -186,6 +206,40 @@ export const CreateSurveyModal = ({
               каждому участнику)
             </span>
           </label>
+        </div>
+
+        <div className={styles.field}>
+          <label className={styles.checkboxRow}>
+            <input
+              type="checkbox"
+              checked={hasTimeLimit}
+              onChange={(e) => setHasTimeLimit(e.target.checked)}
+            />
+            <span>Ограничить время прохождения опроса</span>
+          </label>
+          {hasTimeLimit && (
+            <div className={styles.timeLimitRow}>
+              <input
+                className={
+                  shouldShowFieldError("timeLimitMinutes") ? styles.error : ""
+                }
+                type="number"
+                min={1}
+                max={1440}
+                value={timeLimitMinutes}
+                onChange={(e) =>
+                  setTimeLimitMinutes(Number.parseInt(e.target.value, 10) || 0)
+                }
+                onBlur={() => handleFieldTouch("timeLimitMinutes")}
+              />
+              <span>минут на прохождение (от момента открытия опроса)</span>
+            </div>
+          )}
+          {getError("timeLimitMinutes") && (
+            <span className={styles.errorText}>
+              {getError("timeLimitMinutes")}
+            </span>
+          )}
         </div>
 
         <hr />
