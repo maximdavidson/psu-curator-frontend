@@ -43,11 +43,23 @@ const sanitizeFileName = (value: string) => {
 };
 const dateKey = (date: string) => date.slice(0, 10);
 const cellKey = (userId: string, date: string) => `${userId}:${dateKey(date)}`;
+const EXCUSED_ABSENCE_MARK = "у";
+type MissedCellValue = number | "" | typeof EXCUSED_ABSENCE_MARK;
+const isExcusedAbsenceComment = (comment?: string | null) =>
+  comment?.trim().toLocaleLowerCase("ru-RU") === EXCUSED_ABSENCE_MARK;
 const parseHoursInput = (value: string): number | "" => {
   if (value.trim() === "") return "";
   const parsed = Number(value.replace(",", "."));
   if (Number.isNaN(parsed) || parsed < 0) return "";
   return Math.round(parsed * 10) / 10;
+};
+const parseMissedInput = (value: string): MissedCellValue => {
+  const normalized = value.trim().toLocaleLowerCase("ru-RU");
+  if (normalized === EXCUSED_ABSENCE_MARK) {
+    return EXCUSED_ABSENCE_MARK;
+  }
+
+  return parseHoursInput(value);
 };
 const buildInitialDaySchedules = (journal?: GroupJournalDetail) => {
   const result: Record<string, number | ""> = {};
@@ -58,13 +70,15 @@ const buildInitialDaySchedules = (journal?: GroupJournalDetail) => {
   return result;
 };
 const buildInitialMissedCells = (journal?: GroupJournalDetail) => {
-  const result: Record<string, number | ""> = {};
+  const result: Record<string, MissedCellValue> = {};
   if (!journal) return result;
 
   for (const participant of journal.participants) {
     for (const entry of participant.entries) {
       const missed = entry.missedHours ?? 0;
-      if (missed > 0) {
+      if (isExcusedAbsenceComment(entry.comment)) {
+        result[cellKey(participant.userId, entry.date)] = EXCUSED_ABSENCE_MARK;
+      } else if (missed > 0) {
         result[cellKey(participant.userId, entry.date)] = missed;
       }
     }
@@ -90,9 +104,9 @@ const JournalDetail = ({
   const [daySchedules, setDaySchedules] = useState<Record<string, number | "">>(
     {}
   );
-  const [missedCells, setMissedCells] = useState<Record<string, number | "">>(
-    {}
-  );
+  const [missedCells, setMissedCells] = useState<
+    Record<string, MissedCellValue>
+  >({});
   const [dirtyJournalId, setDirtyJournalId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const effectiveDaySchedules = useMemo(() => {
@@ -143,7 +157,7 @@ const JournalDetail = ({
     setDirtyJournalId(data.id);
     setMissedCells({
       ...initialMissed,
-      [cellKey(userId, date)]: parseHoursInput(rawValue)
+      [cellKey(userId, date)]: parseMissedInput(rawValue)
     });
     setDaySchedules(initialDays);
   };
@@ -175,6 +189,16 @@ const JournalDetail = ({
         const missed = effectiveMissedCells[cellKey(participant.userId, date)];
 
         if (missed === "" || missed === undefined) {
+          continue;
+        }
+
+        if (missed === EXCUSED_ABSENCE_MARK) {
+          validEntries.push({
+            userId: participant.userId,
+            date: toApiDate(dateKey(date)),
+            attendedHours: required,
+            comment: EXCUSED_ABSENCE_MARK
+          });
           continue;
         }
 
@@ -283,7 +307,7 @@ const JournalDetail = ({
           <p className={styles.hint}>
             В строке «Длительность занятий» — сколько часов длились пары в день.
             В ячейках студентов — сколько часов отсутствовал (пусто — был на
-            всех занятиях).
+            всех занятиях), либо русская «у» для уважительной причины.
           </p>
         </div>
         <div className={styles.detailActions}>
@@ -390,13 +414,19 @@ const JournalDetail = ({
                     (entry) => entry.date.slice(0, 10) === date.slice(0, 10)
                   );
                   const savedMissed = entryMeta?.missedHours ?? 0;
+                  const isExcused =
+                    value === EXCUSED_ABSENCE_MARK ||
+                    (value === "" &&
+                      isExcusedAbsenceComment(entryMeta?.comment));
                   const cellEditable =
                     !participant.isFormerMember &&
                     data.canEditEntries &&
                     required > 0 &&
                     (entryMeta?.canEdit ?? true);
                   const displayMissed =
-                    value !== "" && value !== undefined
+                    value !== "" &&
+                    value !== undefined &&
+                    value !== EXCUSED_ABSENCE_MARK
                       ? Number(value)
                       : savedMissed > 0
                         ? savedMissed
@@ -408,15 +438,13 @@ const JournalDetail = ({
                       ) : cellEditable ? (
                         <div className={styles.attendanceCell}>
                           <input
-                            type="number"
-                            min={0}
-                            max={required}
-                            step={0.5}
+                            type="text"
+                            inputMode="decimal"
                             className={styles.hoursInput}
                             value={value}
                             disabled={!cellEditable}
-                            title={`Сколько часов отсутствовал (макс. ${formatHours(required)} ч)`}
-                            placeholder="ч"
+                            title={`Сколько часов отсутствовал (макс. ${formatHours(required)} ч) или «у»`}
+                            placeholder="ч / у"
                             aria-label={`Отсутствие, ${formatDate(date)}`}
                             onChange={(e) =>
                               handleMissedChange(
@@ -426,6 +454,11 @@ const JournalDetail = ({
                               )
                             }
                           />
+                          {isExcused && (
+                            <span className={styles.excusedTag}>
+                              уважительная причина
+                            </span>
+                          )}
                           {displayMissed != null && displayMissed > 0 && (
                             <span className={styles.missedTag}>
                               отсутствовал {formatHours(displayMissed)} ч
@@ -434,9 +467,11 @@ const JournalDetail = ({
                         </div>
                       ) : (
                         <span className={styles.readOnlyHours}>
-                          {displayMissed != null && displayMissed > 0
-                            ? `отсутствовал ${formatHours(displayMissed)} ч`
-                            : "—"}
+                          {isExcused
+                            ? "у"
+                            : displayMissed != null && displayMissed > 0
+                              ? `отсутствовал ${formatHours(displayMissed)} ч`
+                              : "—"}
                         </span>
                       )}
                     </td>
