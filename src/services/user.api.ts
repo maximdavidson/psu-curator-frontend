@@ -65,6 +65,7 @@ export interface StudentListItem {
   firstName: string;
   lastName: string;
   surname?: string | null;
+  faculty?: string | null;
   studentCardNumber: string;
   courseNumber: number;
   enrollmentYear: number;

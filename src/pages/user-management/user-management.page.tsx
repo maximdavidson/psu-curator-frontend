@@ -23,6 +23,12 @@ import { formatLastSeen, isUserOnline } from "@/shared/lib/format-last-seen";
 import styles from "./user-management.module.scss";
 
 const ALL_FILTER_VALUE = "";
+const staffRolesForUserList = [
+  UserRole.Curator,
+  UserRole.Dean,
+  UserRole.DeputyDean,
+  UserRole.Admin
+] as const;
 const staffRoleOptions = [
   { value: UserRole.Curator, label: UserRoleLabels[UserRole.Curator] }
 ];
@@ -119,9 +125,9 @@ export const UserManagementPage = () => {
 
   const listRoleFilterOptions = useMemo(
     () =>
-      Object.entries(UserRole).map(([, value]) => ({
+      staffRolesForUserList.map((value) => ({
         value: String(value),
-        label: UserRoleLabels[value as UserRoleType]
+        label: UserRoleLabels[value]
       })),
     []
   );
@@ -129,6 +135,10 @@ export const UserManagementPage = () => {
   const filteredUsers = useMemo(() => {
     const q = search.trim().toLowerCase();
     return users.filter((user) => {
+      if (user.role === UserRole.Student || user.role === UserRole.Headman) {
+        return false;
+      }
+
       if (roleFilter && String(user.role) !== roleFilter) {
         return false;
       }
