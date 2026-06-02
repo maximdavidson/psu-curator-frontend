@@ -8,6 +8,7 @@ export interface CreateSurveyPayload {
   title: string;
   description: string;
   isAnonymous: boolean;
+  deadlineAt?: string | null;
   timeLimitMinutes?: number | null;
   questions: {
     text: string;
@@ -23,6 +24,10 @@ interface Props {
   onCreate: (data: CreateSurveyPayload) => void | Promise<void>;
   isLoading?: boolean;
 }
+const toDatetimeLocalValue = (date: Date) => {
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
 export const CreateSurveyModal = ({
   onClose,
   onCreate,
@@ -31,8 +36,8 @@ export const CreateSurveyModal = ({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
-  const [hasTimeLimit, setHasTimeLimit] = useState(false);
-  const [timeLimitMinutes, setTimeLimitMinutes] = useState(30);
+  const [hasDeadline, setHasDeadline] = useState(false);
+  const [deadlineAt, setDeadlineAt] = useState("");
   const [questions, setQuestions] = useState<Question[]>([
     { id: nanoid(), text: "", type: "single", options: ["", ""] }
   ]);
@@ -48,8 +53,8 @@ export const CreateSurveyModal = ({
             title,
             description,
             isAnonymous,
-            hasTimeLimit,
-            timeLimitMinutes,
+            hasDeadline,
+            deadlineAt,
             questions
           },
           { abortEarly: false }
@@ -71,14 +76,7 @@ export const CreateSurveyModal = ({
       }
     };
     validate();
-  }, [
-    title,
-    description,
-    isAnonymous,
-    hasTimeLimit,
-    timeLimitMinutes,
-    questions
-  ]);
+  }, [title, description, isAnonymous, hasDeadline, deadlineAt, questions]);
   const handleQuestionChange = (
     id: string,
     field: keyof Question,
@@ -135,7 +133,8 @@ export const CreateSurveyModal = ({
         title,
         description,
         isAnonymous,
-        timeLimitMinutes: hasTimeLimit ? timeLimitMinutes : null,
+        deadlineAt: hasDeadline ? new Date(deadlineAt).toISOString() : null,
+        timeLimitMinutes: null,
         questions: questions.map((q) => ({
           text: q.text,
           type: q.type,
@@ -149,8 +148,8 @@ export const CreateSurveyModal = ({
       setTitle("");
       setDescription("");
       setIsAnonymous(false);
-      setHasTimeLimit(false);
-      setTimeLimitMinutes(30);
+      setHasDeadline(false);
+      setDeadlineAt("");
       setQuestions([
         { id: nanoid(), text: "", type: "single", options: ["", ""] }
       ]);
@@ -212,33 +211,28 @@ export const CreateSurveyModal = ({
           <label className={styles.checkboxRow}>
             <input
               type="checkbox"
-              checked={hasTimeLimit}
-              onChange={(e) => setHasTimeLimit(e.target.checked)}
+              checked={hasDeadline}
+              onChange={(e) => setHasDeadline(e.target.checked)}
             />
-            <span>Ограничить время прохождения опроса</span>
+            <span>Указать дату, до которой нужно пройти опрос</span>
           </label>
-          {hasTimeLimit && (
+          {hasDeadline && (
             <div className={styles.timeLimitRow}>
               <input
                 className={
-                  shouldShowFieldError("timeLimitMinutes") ? styles.error : ""
+                  shouldShowFieldError("deadlineAt") ? styles.error : ""
                 }
-                type="number"
-                min={1}
-                max={1440}
-                value={timeLimitMinutes}
-                onChange={(e) =>
-                  setTimeLimitMinutes(Number.parseInt(e.target.value, 10) || 0)
-                }
-                onBlur={() => handleFieldTouch("timeLimitMinutes")}
+                type="datetime-local"
+                min={toDatetimeLocalValue(new Date())}
+                value={deadlineAt}
+                onChange={(e) => setDeadlineAt(e.target.value)}
+                onBlur={() => handleFieldTouch("deadlineAt")}
               />
-              <span>минут на прохождение (от момента открытия опроса)</span>
+              <span>после этой даты пройти опрос будет нельзя</span>
             </div>
           )}
-          {getError("timeLimitMinutes") && (
-            <span className={styles.errorText}>
-              {getError("timeLimitMinutes")}
-            </span>
+          {getError("deadlineAt") && (
+            <span className={styles.errorText}>{getError("deadlineAt")}</span>
           )}
         </div>
 

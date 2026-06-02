@@ -20,6 +20,15 @@ export const SurveyCard = ({ survey, onDeleted }: Props) => {
     Boolean(currentUserId) &&
     Boolean(survey.createdByUserId) &&
     survey.createdByUserId === currentUserId;
+  const deadlineLabel = survey.deadlineAt
+    ? new Date(survey.deadlineAt).toLocaleString("ru-RU", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      })
+    : null;
   const toggleMenu = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsOpen((prev) => !prev);
@@ -53,9 +62,7 @@ export const SurveyCard = ({ survey, onDeleted }: Props) => {
           <p className={styles.meta}>
             {survey.questionCount} вопр. · {survey.responseCount} ответов
             {survey.isAnonymous ? " · анонимный" : ""}
-            {survey.timeLimitMinutes
-              ? ` · лимит ${survey.timeLimitMinutes} мин.`
-              : ""}
+            {deadlineLabel ? ` · пройти до ${deadlineLabel}` : ""}
           </p>
         </div>
 

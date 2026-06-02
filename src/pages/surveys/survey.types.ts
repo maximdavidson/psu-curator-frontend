@@ -14,6 +14,7 @@ export interface SurveyListItem {
   questionCount: number;
   responseCount: number;
   isAnonymous: boolean;
+  deadlineAt?: string | null;
   timeLimitMinutes?: number | null;
 }
 export interface SurveyDetail {
@@ -27,6 +28,7 @@ export interface SurveyDetail {
   hasCurrentUserResponded: boolean;
   responseCount: number;
   isAnonymous: boolean;
+  deadlineAt?: string | null;
   timeLimitMinutes?: number | null;
   attemptStartedAt?: string | null;
   attemptExpiresAt?: string | null;

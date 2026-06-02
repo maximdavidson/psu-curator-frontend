@@ -5,13 +5,11 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState
 } from "react";
 import styles from "./view-survey-modal.module.scss";
 import {
   useGetSurveyByIdQuery,
-  useStartSurveyAttemptMutation,
   useSubmitSurveyResponseMutation
 } from "../../survey.api";
 import type { Question, QuestionAnswerPayload } from "../../survey.types";
@@ -96,73 +94,32 @@ export const ViewSurveyModal = ({
   } = useGetSurveyByIdQuery(surveyId, {
     skip: !isOpen || !surveyId
   });
-  const [startAttempt, { isLoading: isStarting }] =
-    useStartSurveyAttemptMutation();
   const [submitResponse, { isLoading: isSubmitting }] =
     useSubmitSurveyResponseMutation();
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
-  const [attemptStarted, setAttemptStarted] = useState(false);
-  const autoSubmittedRef = useRef(false);
 
-  const hasTimeLimit =
-    Boolean(survey?.timeLimitMinutes) && (survey?.timeLimitMinutes ?? 0) > 0;
+  const hasDeadline = Boolean(survey?.deadlineAt);
 
   useEffect(() => {
     if (!isOpen) {
-      autoSubmittedRef.current = false;
       startTransition(() => {
         setAnswers({});
         setSubmitError(null);
         setRemainingSeconds(null);
-        setAttemptStarted(false);
       });
     }
   }, [isOpen, surveyId]);
 
   useEffect(() => {
-    if (!isOpen || !survey || survey.hasCurrentUserResponded || !hasTimeLimit) {
-      return;
-    }
-
-    if (survey.attemptExpiresAt) {
-      setAttemptStarted(true);
-      return;
-    }
-
-    if (attemptStarted || isStarting) {
-      return;
-    }
-
-    void (async () => {
-      try {
-        await startAttempt(surveyId).unwrap();
-        setAttemptStarted(true);
-        await refetch();
-      } catch {
-        setSubmitError("Не удалось начать прохождение опроса.");
-      }
-    })();
-  }, [
-    isOpen,
-    survey,
-    surveyId,
-    hasTimeLimit,
-    attemptStarted,
-    isStarting,
-    startAttempt,
-    refetch
-  ]);
-
-  useEffect(() => {
-    if (!survey?.attemptExpiresAt || survey.hasCurrentUserResponded) {
+    if (!survey?.deadlineAt || survey.hasCurrentUserResponded) {
       setRemainingSeconds(null);
       return;
     }
 
     const updateRemaining = () => {
-      const expiresAt = new Date(survey.attemptExpiresAt!).getTime();
+      const expiresAt = new Date(survey.deadlineAt!).getTime();
       const diff = Math.floor((expiresAt - Date.now()) / 1000);
       setRemainingSeconds(Math.max(0, diff));
     };
@@ -170,82 +127,51 @@ export const ViewSurveyModal = ({
     updateRemaining();
     const timerId = window.setInterval(updateRemaining, 1000);
     return () => window.clearInterval(timerId);
-  }, [survey?.attemptExpiresAt, survey?.hasCurrentUserResponded]);
+  }, [survey?.deadlineAt, survey?.hasCurrentUserResponded]);
 
   const alreadyResponded = survey?.hasCurrentUserResponded ?? false;
   const isTimeExpired =
     survey?.isTimeExpired === true ||
     (remainingSeconds !== null && remainingSeconds <= 0);
 
-  const submitAnswers = useCallback(
-    async (partial: boolean) => {
-      if (!survey?.questions?.length) return;
-      setSubmitError(null);
-      const payload = buildAnswerPayload(survey.questions, answers, !partial);
-      if (!partial && !payload) {
-        setSubmitError("Ответьте на все вопросы перед отправкой.");
-        return;
-      }
-      try {
-        await submitResponse({
-          surveyId,
-          body: { answers: payload ?? [] }
-        }).unwrap();
-        await refetch();
-      } catch {
-        setSubmitError(
-          partial
-            ? "Не удалось сохранить ответы после истечения времени."
-            : "Не удалось отправить ответы. Попробуйте позже."
-        );
-      }
-    },
-    [survey?.questions, answers, surveyId, submitResponse, refetch]
-  );
-
-  useEffect(() => {
-    if (
-      !isOpen ||
-      alreadyResponded ||
-      !isTimeExpired ||
-      isSubmitting ||
-      isStarting ||
-      !survey?.questions?.length
-    ) {
+  const submitAnswers = useCallback(async () => {
+    if (!survey?.questions?.length) return;
+    setSubmitError(null);
+    const payload = buildAnswerPayload(survey.questions, answers, true);
+    if (!payload) {
+      setSubmitError("Ответьте на все вопросы перед отправкой.");
       return;
     }
-    if (autoSubmittedRef.current) return;
-    autoSubmittedRef.current = true;
-    void submitAnswers(true);
+    if (isTimeExpired) {
+      setSubmitError("Срок прохождения опроса истёк.");
+      return;
+    }
+    try {
+      await submitResponse({
+        surveyId,
+        body: { answers: payload }
+      }).unwrap();
+      await refetch();
+    } catch {
+      setSubmitError("Не удалось отправить ответы. Попробуйте позже.");
+    }
   }, [
-    isOpen,
-    alreadyResponded,
+    survey?.questions,
+    answers,
     isTimeExpired,
-    isSubmitting,
-    isStarting,
-    survey?.questions?.length,
-    submitAnswers
+    surveyId,
+    submitResponse,
+    refetch
   ]);
 
   const timerLabel = useMemo(() => {
-    if (!hasTimeLimit || alreadyResponded) return null;
-    if (isStarting) return "Запуск таймера…";
+    if (!hasDeadline || alreadyResponded) return null;
     if (remainingSeconds === null) return null;
     if (isTimeExpired) {
-      if (isSubmitting && !alreadyResponded) {
-        return "Время истекло. Сохраняем ваши ответы…";
-      }
-      return "Время истекло";
+      return "Срок прохождения опроса истёк";
     }
-    return `Осталось: ${formatRemaining(remainingSeconds)}`;
-  }, [
-    hasTimeLimit,
-    alreadyResponded,
-    isStarting,
-    remainingSeconds,
-    isTimeExpired,
-    isSubmitting
-  ]);
+    return `До завершения опроса: ${formatRemaining(remainingSeconds)}`;
+  }, [hasDeadline, alreadyResponded, remainingSeconds, isTimeExpired]);
 
   if (!isOpen) return null;
 
@@ -277,10 +203,10 @@ export const ViewSurveyModal = ({
   };
 
   const handleSubmit = async () => {
-    await submitAnswers(false);
+    await submitAnswers();
   };
 
-  const inputsDisabled = alreadyResponded || isTimeExpired || isStarting;
+  const inputsDisabled = alreadyResponded || isTimeExpired;
 
   const renderQuestion = (question: Question) => {
     const qid = question.id;
@@ -352,7 +278,6 @@ export const ViewSurveyModal = ({
     !alreadyResponded &&
     !isSubmitting &&
     !isTimeExpired &&
-    !isStarting &&
     fullPayload !== null;
 
   return (
@@ -368,7 +293,7 @@ export const ViewSurveyModal = ({
 
           <p className={styles.description}>{survey?.description}</p>
 
-          {hasTimeLimit && !alreadyResponded && timerLabel && (
+          {hasDeadline && !alreadyResponded && timerLabel && (
             <p
               className={
                 isTimeExpired
@@ -377,9 +302,6 @@ export const ViewSurveyModal = ({
               }
             >
               {timerLabel}
-              {!isTimeExpired && survey?.timeLimitMinutes
-                ? ` (лимит ${survey.timeLimitMinutes} мин.)`
-                : ""}
             </p>
           )}
 

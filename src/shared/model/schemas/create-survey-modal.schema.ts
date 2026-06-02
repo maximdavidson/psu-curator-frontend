@@ -22,21 +22,22 @@ export const surveySchema = yup.object({
   title: yup.string().required("Название опроса обязательно"),
   description: yup.string(),
   isAnonymous: yup.boolean().default(false),
-  hasTimeLimit: yup.boolean().default(false),
-  timeLimitMinutes: yup
-    .number()
+  hasDeadline: yup.boolean().default(false),
+  deadlineAt: yup
+    .string()
     .transform((value, originalValue) =>
       originalValue === "" || originalValue === null ? undefined : value
     )
-    .when("hasTimeLimit", {
+    .when("hasDeadline", {
       is: true,
       then: (schema) =>
         schema
-          .typeError("Укажите число минут")
-          .integer("Лимит указывается целым числом минут")
-          .min(1, "Минимум 1 минута")
-          .max(1440, "Не более 24 часов (1440 минут)")
-          .required("Укажите лимит времени в минутах"),
+          .required("Укажите дату завершения опроса")
+          .test(
+            "future-deadline",
+            "Дата завершения должна быть в будущем",
+            (value) => Boolean(value && new Date(value).getTime() > Date.now())
+          ),
       otherwise: (schema) => schema.notRequired()
     }),
   questions: yup

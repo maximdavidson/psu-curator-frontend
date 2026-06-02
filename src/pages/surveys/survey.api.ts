@@ -10,6 +10,7 @@ export interface CreateSurveyRequest {
   title: string;
   description: string;
   isAnonymous: boolean;
+  deadlineAt?: string | null;
   timeLimitMinutes?: number | null;
   questions: {
     text: string;
