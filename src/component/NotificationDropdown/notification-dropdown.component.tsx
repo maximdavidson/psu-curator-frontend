@@ -70,6 +70,12 @@ export const NotificationDropdown = () => {
     if (type === "event" && relatedEntityId) {
       setIsOpen(false);
       navigate(`/calendar?eventId=${relatedEntityId}`);
+      return;
+    }
+
+    if (type === "journal-reminder" && relatedEntityId) {
+      setIsOpen(false);
+      navigate(`/groups/${relatedEntityId}`);
     }
   };
   const handleMarkAllRead = async () => {
