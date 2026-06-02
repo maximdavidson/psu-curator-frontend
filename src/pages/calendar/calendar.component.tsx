@@ -34,6 +34,8 @@ interface CalendarEventUI {
   description?: string;
   isCreator?: boolean;
   isAccepted?: boolean;
+  eventTypeId?: string | null;
+  eventTypeName?: string | null;
   invitedUsers: CalendarEventInvitedUser[];
   start: Date;
   end: Date;
@@ -109,6 +111,8 @@ export const CalendarPage = () => {
         id: e.id,
         title: e.title,
         description: e.description,
+        eventTypeId: e.eventTypeId,
+        eventTypeName: e.eventTypeName,
         isCreator: e.isCreator,
         isAccepted: e.isAccepted,
         invitedUsers: e.invitedUsers ?? [],
@@ -148,7 +152,8 @@ export const CalendarPage = () => {
     invitedUsers: CalendarEventInvitedUser[],
     invitedGroupIds: string[],
     start: Date,
-    end: Date
+    end: Date,
+    eventTypeId?: string | null
   ) => {
     if (editingEvent?.id) {
       const currentUserIds = new Set(
@@ -166,6 +171,7 @@ export const CalendarPage = () => {
           newDescription: description,
           newDateOfEvent: start.toISOString(),
           newEndDateOfEvent: end.toISOString(),
+          newEventTypeId: eventTypeId,
           userForDelete,
           newUsers,
           newGroupIds: invitedGroupIds
@@ -180,6 +186,7 @@ export const CalendarPage = () => {
       description,
       dateOfEvent: start.toISOString(),
       endDateOfEvent: end.toISOString(),
+      eventTypeId,
       invitedUsersIds: invitedUsers.map((user) => user.id),
       invitedUserEmails: [],
       invitedGroupIds

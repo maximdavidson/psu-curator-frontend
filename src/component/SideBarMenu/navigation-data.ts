@@ -27,6 +27,11 @@ export const menuData: IMenuItem[] = [
     icon: CalendarIcon
   },
   {
+    to: "/event-types",
+    label: "Типы событий",
+    icon: CalendarIcon
+  },
+  {
     to: "/chat",
     label: "Мессенджер",
     icon: ChatIcon

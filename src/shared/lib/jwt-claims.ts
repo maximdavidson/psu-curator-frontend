@@ -57,6 +57,12 @@ export function roleCanViewEventAttendance(role: string | null): boolean {
   return roleCanManageStudentGroups(role);
 }
 
+export function roleCanManageEventTypes(role: string | null): boolean {
+  if (!role) return false;
+  const r = role.trim().toLowerCase();
+  return ["dean", "deputydean", "admin"].includes(r);
+}
+
 export const STUDENT_REGISTER_PAGE_ROLES = [
   "Curator",
   "Dean",

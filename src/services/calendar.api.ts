@@ -6,6 +6,8 @@ export interface CalendarEvent {
   endDateOfEvent?: string | null;
   title: string;
   description?: string;
+  eventTypeId?: string | null;
+  eventTypeName?: string | null;
   isCreator?: boolean;
   isAccepted?: boolean;
   invitedUsers: CalendarEventInvitedUser[];
@@ -22,6 +24,8 @@ export interface CalendarEventDetails {
   endDateOfEvent?: string | null;
   title: string;
   description: string;
+  eventTypeId?: string | null;
+  eventTypeName?: string | null;
   creatorFullName: string;
   invitedUserEmails: string[];
   invitedUsers: CalendarEventInvitedUser[];
@@ -33,6 +37,7 @@ export interface CreateCalendarEventRequest {
   endDateOfEvent?: string | null;
   title: string;
   description?: string;
+  eventTypeId?: string | null;
   invitedUsersIds?: string[];
   invitedUserEmails: string[];
   invitedGroupIds?: string[];
@@ -42,6 +47,7 @@ export interface UpdateCalendarEventRequest {
   newEndDateOfEvent?: string | null;
   newTitle?: string;
   newDescription?: string;
+  newEventTypeId?: string | null;
   userForDelete?: string[];
   newUsers?: string[];
   newUserEmails?: string[];

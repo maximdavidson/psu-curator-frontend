@@ -52,6 +52,14 @@
   resize: vertical;
 }
 
+.fieldLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
 .timeGrid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;

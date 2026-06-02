@@ -17,6 +17,7 @@ import { SettingsPage } from "@/pages/settings";
 import { UserManagementPage } from "@/pages/user-management/user-management.page";
 import { ChatPage } from "@/pages/chat/chat.page";
 import { ForceChangePasswordPage } from "@/pages/force-change-password/force-change-password.page";
+import { EventTypesPage } from "@/pages/event-types/event-types.page";
 import { SURVEYS_LIST_PAGE_ROLES } from "@/shared/lib/jwt-claims";
 export const router = createBrowserRouter([
   {
@@ -70,6 +71,10 @@ export const router = createBrowserRouter([
               {
                 path: "/calendar",
                 element: <CalendarPage />
+              },
+              {
+                path: "/event-types",
+                element: <EventTypesPage />
               },
               {
                 path: "/chat",

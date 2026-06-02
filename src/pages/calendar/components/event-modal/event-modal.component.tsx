@@ -7,6 +7,7 @@ import {
 } from "@/services/user.api";
 import { useGetGroupsQuery } from "@/pages/groups/group.api";
 import type { CalendarEventInvitedUser } from "@/services/calendar.api";
+import { useGetEventTypesQuery } from "@/services/calendarEventType.api";
 import { EventAttendanceReport } from "./event-attendance-report.component";
 import { selectToken } from "@/stores/auth.store";
 import {
@@ -21,6 +22,8 @@ interface Props {
     description?: string;
     start: Date;
     end: Date;
+    eventTypeId?: string | null;
+    eventTypeName?: string | null;
     isCreator?: boolean;
     isAccepted?: boolean;
     invitedUsers: CalendarEventInvitedUser[];
@@ -37,7 +40,8 @@ interface Props {
     users: CalendarEventInvitedUser[],
     groupIds: string[],
     start: Date,
-    end: Date
+    end: Date,
+    eventTypeId?: string | null
   ) => void;
   onDelete: (id: string) => void;
   onAccept: (id: string) => void;
@@ -72,6 +76,7 @@ export const EventModal = ({
   const [date, setDate] = useState(toDateInput(initialStart));
   const [startTime, setStartTime] = useState(toTimeInput(initialStart));
   const [endTime, setEndTime] = useState(toTimeInput(initialEnd));
+  const [eventTypeId, setEventTypeId] = useState(event?.eventTypeId ?? "");
   const [error, setError] = useState<string | null>(null);
   const [inviteQuery, setInviteQuery] = useState("");
   const [debouncedInviteQuery, setDebouncedInviteQuery] = useState("");
@@ -81,6 +86,7 @@ export const EventModal = ({
   const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
   const [searchUsers, searchState] = useLazySearchUsersByNameQuery();
   const { data: groups = [] } = useGetGroupsQuery();
+  const { data: eventTypes = [] } = useGetEventTypesQuery();
   const token = useSelector(selectToken);
   const canViewAttendance = roleCanViewEventAttendance(
     getRoleStringFromAccessToken(token)
@@ -147,7 +153,15 @@ export const EventModal = ({
       setError("Время окончания должно быть позже времени начала.");
       return;
     }
-    onSave(title, description, selectedInvitees, selectedGroupIds, start, end);
+    onSave(
+      title,
+      description,
+      selectedInvitees,
+      selectedGroupIds,
+      start,
+      end,
+      eventTypeId || null
+    );
   };
   const handleDelete = () => {
     if (!event?.id) return;
@@ -175,6 +189,22 @@ export const EventModal = ({
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
+
+        <label className={styles.fieldLabel}>
+          Тип события
+          <select
+            className={styles.input}
+            value={eventTypeId}
+            onChange={(e) => setEventTypeId(e.target.value)}
+          >
+            <option value="">Без типа</option>
+            {eventTypes.map((type) => (
+              <option key={type.id} value={type.id}>
+                {type.name}
+              </option>
+            ))}
+          </select>
+        </label>
 
         <div className={styles.timeGrid}>
           <label>

@@ -14,6 +14,7 @@ import { documentsApi } from "@/pages/documents/documents.api";
 import { notificationApi } from "@/services/notification.api";
 import { userApi } from "@/services/user.api";
 import { chatApi } from "@/services/chat.api";
+import { calendarEventTypeApi } from "@/services/calendarEventType.api";
 import { authCacheListener } from "./auth-cache-listener.middleware";
 const rootReducer = combineReducers({
   [authSlice.name]: authSlice.reducer,
@@ -27,7 +28,8 @@ const rootReducer = combineReducers({
   [documentsApi.reducerPath]: documentsApi.reducer,
   [notificationApi.reducerPath]: notificationApi.reducer,
   [userApi.reducerPath]: userApi.reducer,
-  [chatApi.reducerPath]: chatApi.reducer
+  [chatApi.reducerPath]: chatApi.reducer,
+  [calendarEventTypeApi.reducerPath]: calendarEventTypeApi.reducer
 });
 const persistConfig = {
   key: "root",
@@ -53,6 +55,7 @@ export const store = configureStore({
       notificationApi.middleware,
       userApi.middleware,
       chatApi.middleware,
+      calendarEventTypeApi.middleware,
       authCacheListener.middleware
     )
 });
