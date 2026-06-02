@@ -89,6 +89,68 @@
   font-size: 0.875rem;
 }
 
+.participantsBlock {
+  margin-bottom: 24px;
+
+  h3 {
+    margin: 0 0 10px;
+    font-size: 1rem;
+  }
+}
+
+.participantsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--color-feed-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+  }
+}
+
+.participantName {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.participantMeta {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.statusDone,
+.statusPending {
+  flex-shrink: 0;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.statusDone {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.statusPending {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
 .status {
   padding: 24px;
   text-align: center;

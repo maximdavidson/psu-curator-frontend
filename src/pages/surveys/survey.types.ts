@@ -67,10 +67,20 @@ export interface QuestionStatistics {
   respondentChoiceAnswers?: RespondentChoiceAnswer[];
   textAnswers?: TextAnswerStatistics[];
 }
+export interface SurveyParticipantStatus {
+  userId: string;
+  fullName: string;
+  email: string;
+  groupName: string;
+  hasResponded: boolean;
+  submittedAt?: string | null;
+}
 export interface SurveyStatistics {
   surveyId: string;
   title: string;
   isAnonymous: boolean;
   totalResponses: number;
+  totalAudience: number;
+  participants: SurveyParticipantStatus[];
   questions: QuestionStatistics[];
 }

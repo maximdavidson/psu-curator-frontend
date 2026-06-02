@@ -57,6 +57,12 @@ export const SurveyStatisticsModal = ({
           <div className={styles.content}>
             <p className={styles.summary}>
               Всего ответов: <strong>{data.totalResponses}</strong>
+              {data.totalAudience > 0 && (
+                <>
+                  {" "}
+                  из <strong>{data.totalAudience}</strong> участников
+                </>
+              )}
             </p>
             <p className={styles.modeLine}>
               {data.isAnonymous
@@ -84,6 +90,38 @@ export const SurveyStatisticsModal = ({
             </div>
             {downloadError && (
               <p className={styles.downloadError}>{downloadError}</p>
+            )}
+
+            {data.participants.length > 0 && (
+              <section className={styles.participantsBlock}>
+                <h3>Статус прохождения</h3>
+                <ul className={styles.participantsList}>
+                  {data.participants.map((participant) => (
+                    <li key={participant.userId}>
+                      <div>
+                        <span className={styles.participantName}>
+                          {participant.fullName || participant.email}
+                        </span>
+                        <span className={styles.participantMeta}>
+                          {participant.groupName}
+                          {participant.submittedAt
+                            ? ` · ${new Date(participant.submittedAt).toLocaleString("ru-RU")}`
+                            : ""}
+                        </span>
+                      </div>
+                      <span
+                        className={
+                          participant.hasResponded
+                            ? styles.statusDone
+                            : styles.statusPending
+                        }
+                      >
+                        {participant.hasResponded ? "Прошёл" : "Не прошёл"}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
             )}
 
             {data.questions.map((question, idx) => (
