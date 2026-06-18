@@ -4,26 +4,29 @@ import styles from "./group-detail.module.scss";
 import { FeedTab } from "./components/feed-tab/feed-tab.component";
 import { MembersTab } from "./components/members-tab/members-tab.component";
 import { JournalsTab } from "./components/journals-tab/journals-tab.component";
+import { AbsencesTab } from "./components/absences-tab/absences-tab.component";
 import { useGetGroupByIdQuery } from "../groups/group.api";
 import { useCanManageGroups } from "@/hooks/use-can-manage-groups";
 import {
   getRoleStringFromAccessToken,
   roleCanCreateGroupFeedItems,
+  roleCanViewGroupAbsences,
   roleCanViewGroupJournals
 } from "@/shared/lib/jwt-claims";
 export const GroupDetailPage = () => {
   const { groupId } = useParams<{
     groupId: string;
   }>();
-  const [activeTab, setActiveTab] = useState<"feed" | "members" | "journals">(
-    "feed"
-  );
+  const [activeTab, setActiveTab] = useState<
+    "feed" | "members" | "journals" | "absences"
+  >("feed");
   const canManageGroups = useCanManageGroups();
   const currentRole = getRoleStringFromAccessToken(
     localStorage.getItem("token")
   );
   const canCreateFeedItems = roleCanCreateGroupFeedItems(currentRole);
   const canViewJournals = roleCanViewGroupJournals(currentRole);
+  const canViewAbsences = roleCanViewGroupAbsences(currentRole);
   const {
     data: group,
     isLoading,
@@ -68,6 +71,15 @@ export const GroupDetailPage = () => {
             Журналы
           </button>
         )}
+
+        {canViewAbsences && (
+          <button
+            className={`${styles.tab} ${activeTab === "absences" ? styles.active : ""}`}
+            onClick={() => setActiveTab("absences")}
+          >
+            Пропуска
+          </button>
+        )}
       </div>
 
       <div className={styles.tabContent}>
@@ -92,6 +104,10 @@ export const GroupDetailPage = () => {
 
         {activeTab === "journals" && canViewJournals && (
           <JournalsTab groupId={group.id} canManage={canManageGroups} />
+        )}
+
+        {activeTab === "absences" && canViewAbsences && (
+          <AbsencesTab groupId={group.id} groupName={group.name} />
         )}
       </div>
     </div>

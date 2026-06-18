@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import styles from "./journals-tab.module.scss";
 import { useAppDispatch } from "@/app/store/store.types";
 import { userApi } from "@/services/user.api";
+import { groupAbsencesApi } from "../../groupAbsences.api";
 import {
   type GroupJournalDetail,
   type GroupJournalListItem,
@@ -233,6 +234,11 @@ const JournalDetail = ({
           { type: "User", id: "attendance-summary" }
         ])
       );
+      dispatch(
+        groupAbsencesApi.util.invalidateTags([
+          { type: "GroupAbsence", id: data.groupId }
+        ])
+      );
       setDirtyJournalId(null);
       setDaySchedules({});
       setMissedCells({});
@@ -263,6 +269,11 @@ const JournalDetail = ({
       dispatch(
         userApi.util.invalidateTags([
           { type: "User", id: "attendance-summary" }
+        ])
+      );
+      dispatch(
+        groupAbsencesApi.util.invalidateTags([
+          { type: "GroupAbsence", id: data.groupId }
         ])
       );
     } catch {

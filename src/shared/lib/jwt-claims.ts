@@ -88,6 +88,11 @@ export function roleCanViewGroupJournals(role: string | null): boolean {
   return ["curator", "dean", "deputydean", "admin", "headman"].includes(r);
 }
 
+/** Статистика пропусков группы — только для куратора, деканата и администратора. */
+export function roleCanViewGroupAbsences(role: string | null): boolean {
+  return roleCanManageStudentGroups(role);
+}
+
 export function roleIsStudentOrHeadman(role: string | null): boolean {
   if (!role) return false;
   const r = role.trim().toLowerCase();
