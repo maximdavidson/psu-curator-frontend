@@ -18,7 +18,7 @@ import styles from "../student-register.module.scss";
 export const StudentRegisterForm = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const { data: groups = [] } = useGetGroupsQuery();
+  const { data: groups = [] } = useGetGroupsQuery(undefined);
   const [createStudent, { isLoading }] = useCreateStudentUserMutation();
 
   const {

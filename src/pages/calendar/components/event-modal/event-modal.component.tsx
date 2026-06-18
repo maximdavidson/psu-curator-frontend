@@ -85,7 +85,7 @@ export const EventModal = ({
   >(event?.invitedUsers ?? []);
   const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
   const [searchUsers, searchState] = useLazySearchUsersByNameQuery();
-  const { data: groups = [] } = useGetGroupsQuery();
+  const { data: groups = [] } = useGetGroupsQuery(undefined);
   const { data: eventTypes = [] } = useGetEventTypesQuery();
   const token = useSelector(selectToken);
   const canViewAttendance = roleCanViewEventAttendance(

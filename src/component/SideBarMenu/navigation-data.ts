@@ -1,6 +1,5 @@
 import type { IMenuItem } from "./navigation.types";
 import CalendarIcon from "../../assets/calendar.svg";
-import HomeIcon from "../../assets/groups-icon.svg";
 import TeachesrIcon from "../../assets/teachers-icon.svg";
 import PoolsIcon from "../../assets/polls-icon.svg";
 import DocumentsIcon from "../../assets/documents-icon.svg";
@@ -10,11 +9,6 @@ import {
   SURVEYS_LIST_PAGE_ROLES
 } from "@/shared/lib/jwt-claims";
 export const menuData: IMenuItem[] = [
-  {
-    to: "/groups",
-    label: "Группы факультета",
-    icon: HomeIcon
-  },
   {
     to: "/students/register",
     label: "Студенты",

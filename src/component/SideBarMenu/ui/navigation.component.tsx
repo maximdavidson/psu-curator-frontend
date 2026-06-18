@@ -1,5 +1,6 @@
 import { menuData } from "../navigation-data";
 import { NavigationItem } from "./navigation-item.component";
+import { NavigationGroupsSection } from "./navigation-groups-section.component";
 import styles from "../side-bar-menu.module.scss";
 import { getRoleStringFromAccessToken } from "@/shared/lib/jwt-claims";
 import { useGetDialogsQuery } from "@/services/chat.api";
@@ -30,6 +31,11 @@ export const Navigation = ({ pathname, isCollapsed }: INavigationProps) => {
   return (
     <nav>
       <ul className={styles["sidebar-menu__navigation"]}>
+        <NavigationGroupsSection
+          pathname={pathname}
+          isCollapsed={isCollapsed}
+        />
+
         {visibleMenu.map((item, index) => (
           <NavigationItem
             {...item}

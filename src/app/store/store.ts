@@ -11,6 +11,7 @@ import { calendarApi } from "@/services/calendar.api";
 import { groupFeedApi } from "@/pages/group-detail/groupFeed.api";
 import { groupJournalsApi } from "@/pages/group-detail/groupJournals.api";
 import { groupAbsencesApi } from "@/pages/group-detail/groupAbsences.api";
+import { groupCategoryApi } from "@/pages/groups/groupCategory.api";
 import { documentsApi } from "@/pages/documents/documents.api";
 import { notificationApi } from "@/services/notification.api";
 import { userApi } from "@/services/user.api";
@@ -27,6 +28,7 @@ const rootReducer = combineReducers({
   [groupFeedApi.reducerPath]: groupFeedApi.reducer,
   [groupJournalsApi.reducerPath]: groupJournalsApi.reducer,
   [groupAbsencesApi.reducerPath]: groupAbsencesApi.reducer,
+  [groupCategoryApi.reducerPath]: groupCategoryApi.reducer,
   [documentsApi.reducerPath]: documentsApi.reducer,
   [notificationApi.reducerPath]: notificationApi.reducer,
   [userApi.reducerPath]: userApi.reducer,
@@ -54,6 +56,7 @@ export const store = configureStore({
       groupFeedApi.middleware,
       groupJournalsApi.middleware,
       groupAbsencesApi.middleware,
+      groupCategoryApi.middleware,
       documentsApi.middleware,
       notificationApi.middleware,
       userApi.middleware,

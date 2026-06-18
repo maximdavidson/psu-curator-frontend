@@ -1,11 +1,14 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauth } from "@/shared/api/base-query";
+import { groupCategoryApi } from "@/pages/groups/groupCategory.api";
 export interface Group {
   id: string;
   name: string;
   faculty: string;
   department?: string | null;
   courseNumber: number;
+  categoryId?: string | null;
+  categoryName?: string | null;
   countOfstudents: number;
   firstName: string;
   lastName: string;
@@ -18,6 +21,7 @@ export interface CreateGroupRequest {
   faculty: string;
   department?: string;
   courseNumber: number;
+  categoryId?: string;
   curatorEmail?: string;
   headStudentEmail?: string;
 }
@@ -94,8 +98,11 @@ export const groupApi = createApi({
   baseQuery: baseQueryWithReauth,
   tagTypes: ["Group"],
   endpoints: (builder) => ({
-    getGroups: builder.query<Group[], void>({
-      query: () => "/Group",
+    getGroups: builder.query<Group[], string | undefined>({
+      query: (categoryId) => ({
+        url: "/Group",
+        params: categoryId ? { categoryId } : undefined
+      }),
       providesTags: (result) =>
         result
           ? [
@@ -113,14 +120,38 @@ export const groupApi = createApi({
         method: "POST",
         body: data
       }),
-      invalidatesTags: [{ type: "Group", id: "LIST" }]
+      invalidatesTags: [{ type: "Group", id: "LIST" }],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(
+            groupCategoryApi.util.invalidateTags([
+              { type: "GroupCategory", id: "LIST" }
+            ])
+          );
+        } catch {
+          // mutation failed — counts unchanged
+        }
+      }
     }),
     deleteGroup: builder.mutation<void, string>({
       query: (groupId) => ({
         url: `/Group/${groupId}`,
         method: "DELETE"
       }),
-      invalidatesTags: [{ type: "Group", id: "LIST" }]
+      invalidatesTags: [{ type: "Group", id: "LIST" }],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(
+            groupCategoryApi.util.invalidateTags([
+              { type: "GroupCategory", id: "LIST" }
+            ])
+          );
+        } catch {
+          // mutation failed — counts unchanged
+        }
+      }
     }),
     updateGroup: builder.mutation<Group, UpdateGroupRequest>({
       query: ({ id, ...body }) => ({
@@ -128,7 +159,19 @@ export const groupApi = createApi({
         method: "PUT",
         body: { id, ...body }
       }),
-      invalidatesTags: [{ type: "Group", id: "LIST" }]
+      invalidatesTags: [{ type: "Group", id: "LIST" }],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(
+            groupCategoryApi.util.invalidateTags([
+              { type: "GroupCategory", id: "LIST" }
+            ])
+          );
+        } catch {
+          // mutation failed — counts unchanged
+        }
+      }
     }),
     getGroupById: builder.query<GroupDetails, string>({
       query: (groupId) => `/Group/${groupId}`,
