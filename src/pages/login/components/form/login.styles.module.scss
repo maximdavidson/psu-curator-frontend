@@ -17,3 +17,11 @@
     text-decoration: underline;
   }
 }
+
+.success {
+  margin: 0 $spacing-xl $spacing-sm;
+  font-size: $font-size-xs;
+  line-height: 1.5;
+  color: var(--color-text);
+  text-align: center;
+}

@@ -1,11 +1,21 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import type { TRegisterFormDto } from "@/shared";
-import type { TLoginFormDto } from "@/shared";
+import type { TRegisterFormDto, TLoginFormDto } from "@/shared";
 import { baseQueryWithReauth } from "@/shared/api/base-query";
 import {
   parseAuthTokens,
   type ParsedAuthTokens
 } from "@/shared/lib/parse-auth-response";
+
+export interface RecoverPasswordRequest {
+  email: string;
+  firstName: string;
+  lastName: string;
+  surname?: string;
+  courseNumber?: number;
+  newPassword: string;
+  confirmPassword: string;
+}
+
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: baseQueryWithReauth,
@@ -42,7 +52,21 @@ export const authApi = createApi({
         }
         return t;
       }
+    }),
+    recoverPassword: builder.mutation<
+      { message: string },
+      RecoverPasswordRequest
+    >({
+      query: (body) => ({
+        url: "/Auth/password-reset",
+        method: "POST",
+        body
+      })
     })
   })
 });
-export const { useRegisterMutation, useLoginMutation } = authApi;
+export const {
+  useRegisterMutation,
+  useLoginMutation,
+  useRecoverPasswordMutation
+} = authApi;

@@ -55,6 +55,42 @@ const passwordFieldSchema = yup
     "Пароль должен содержать хотя бы один спецсимвол"
   );
 
+export const recoverPasswordSchema = yup.object({
+  email: yup
+    .string()
+    .email("Введите корректный email")
+    .required("Электронная почта обязательна"),
+  firstName: yup
+    .string()
+    .trim()
+    .max(50, "Имя не может быть длиннее 50 символов")
+    .required("Укажите имя"),
+  lastName: yup
+    .string()
+    .trim()
+    .max(50, "Фамилия не может быть длиннее 50 символов")
+    .required("Укажите фамилию"),
+  surname: yup
+    .string()
+    .trim()
+    .max(50, "Отчество не может быть длиннее 50 символов")
+    .default(""),
+  courseNumber: yup
+    .string()
+    .trim()
+    .test(
+      "course-range",
+      "Курс должен быть от 1 до 6",
+      (value) => !value || /^[1-6]$/.test(value)
+    )
+    .default(""),
+  newPassword: passwordFieldSchema.required("Новый пароль обязателен"),
+  confirmPassword: yup
+    .string()
+    .required("Подтверждение пароля обязательно")
+    .oneOf([yup.ref("newPassword")], "Пароли не совпадают")
+});
+
 export const changePasswordSchema = yup
   .object({
     currentPassword: yup.string().required("Текущий пароль обязателен"),
@@ -69,4 +105,7 @@ export const changePasswordSchema = yup
 export type TLoginFormDto = yup.InferType<typeof loginSchema>;
 export type TRegisterFormDto = yup.InferType<typeof registerSchema>;
 export type TChangePasswordFormDto = yup.InferType<typeof changePasswordSchema>;
+export type TRecoverPasswordFormDto = yup.InferType<
+  typeof recoverPasswordSchema
+>;
 export type TAuthFormDto = TRegisterFormDto;

@@ -5,12 +5,18 @@ import { LoginFooter } from "./login-footer.component";
 import { ForgetPasswordLink } from "./forget-password-link";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useLocation } from "react-router-dom";
 import { useLogin } from "../../model/use-login";
 import {
   loginSchema,
   type TLoginFormDto
 } from "@/shared/model/schemas/auth.schema";
+import styles from "./login.styles.module.scss";
+
 export const LoginForm = () => {
+  const location = useLocation();
+  const recoveryMessage = (location.state as { message?: string } | null)
+    ?.message;
   const {
     register,
     handleSubmit,
@@ -29,6 +35,11 @@ export const LoginForm = () => {
       footer={<LoginFooter />}
       title={"Вход"}
     >
+      {recoveryMessage && (
+        <p className={styles.success} role="status">
+          {recoveryMessage}
+        </p>
+      )}
       <AuthField<TLoginFormDto>
         label={"Почта"}
         name={"email"}

@@ -22,6 +22,7 @@ function shouldSkipRefreshForUrl(url: string): boolean {
     return true;
   }
   if (u.includes("/auth/users")) return true;
+  if (u.includes("/auth/password-reset")) return true;
   if (u.includes("/auth/sessions") && !u.includes("refresh")) return true;
   return false;
 }
