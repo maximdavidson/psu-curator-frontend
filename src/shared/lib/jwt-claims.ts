@@ -63,6 +63,8 @@ export function roleCanManageEventTypes(role: string | null): boolean {
   return ["dean", "deputydean", "admin"].includes(r);
 }
 
+export const EVENT_TYPES_PAGE_ROLES = ["Dean", "DeputyDean", "Admin"] as const;
+
 export const STUDENT_REGISTER_PAGE_ROLES = [
   "Curator",
   "Dean",

@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
 import type { FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { useGetEventsQuery } from "@/services/calendar.api";
 import {
   useCreateEventTypeMutation,
-  useGetEventTypesQuery
+  useDeleteEventTypeMutation,
+  useGetEventTypesQuery,
+  useUpdateEventTypeMutation,
+  type CalendarEventType
 } from "@/services/calendarEventType.api";
 import { readApiErrorMessage } from "@/shared/lib/read-api-error-message";
 import {
@@ -13,51 +13,56 @@ import {
   roleCanManageEventTypes
 } from "@/shared/lib/jwt-claims";
 import { selectToken } from "@/stores/auth.store";
+import { useSelector } from "react-redux";
 import styles from "./event-types.module.scss";
 
 const ALL_TYPES = "";
 
-const formatDateTime = (value: string): string =>
+const formatDate = (value: string): string =>
   new Intl.DateTimeFormat("ru-RU", {
     day: "2-digit",
     month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit"
+    year: "numeric"
   }).format(new Date(value));
 
 export const EventTypesPage = () => {
-  const navigate = useNavigate();
   const token = useSelector(selectToken);
   const currentRole = getRoleStringFromAccessToken(token);
   const canManageTypes = roleCanManageEventTypes(currentRole);
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [selectedTypeId, setSelectedTypeId] = useState(ALL_TYPES);
-  const [error, setError] = useState<string | null>(null);
-  const { data: types = [], isLoading: isTypesLoading } =
-    useGetEventTypesQuery();
-  const { data: events = [], isLoading: isEventsLoading } = useGetEventsQuery();
+  const [filterTypeId, setFilterTypeId] = useState(ALL_TYPES);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [editingType, setEditingType] = useState<CalendarEventType | null>(
+    null
+  );
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editError, setEditError] = useState<string | null>(null);
+
+  const { data: types = [], isLoading } = useGetEventTypesQuery();
   const [createEventType, { isLoading: isCreating }] =
     useCreateEventTypeMutation();
+  const [updateEventType, { isLoading: isUpdating }] =
+    useUpdateEventTypeMutation();
+  const [deleteEventType, { isLoading: isDeleting }] =
+    useDeleteEventTypeMutation();
 
-  const filteredEvents = useMemo(() => {
-    return events
-      .filter((event) =>
-        selectedTypeId ? event.eventTypeId === selectedTypeId : true
-      )
-      .sort(
-        (a, b) =>
-          new Date(a.dateOfEvent).getTime() - new Date(b.dateOfEvent).getTime()
-      );
-  }, [events, selectedTypeId]);
+  const filteredTypes = useMemo(() => {
+    if (!filterTypeId) {
+      return types;
+    }
+
+    return types.filter((type) => type.id === filterTypeId);
+  }, [filterTypeId, types]);
 
   const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError(null);
+    setFormError(null);
     const trimmedName = name.trim();
     if (!trimmedName) {
-      setError("Укажите название типа события.");
+      setFormError("Укажите название типа события.");
       return;
     }
 
@@ -69,12 +74,78 @@ export const EventTypesPage = () => {
       setName("");
       setDescription("");
     } catch (err) {
-      setError(readApiErrorMessage(err) ?? "Не удалось создать тип события.");
+      setFormError(
+        readApiErrorMessage(err) ?? "Не удалось создать тип события."
+      );
     }
   };
 
-  const openEvent = (eventId: string) => {
-    navigate(`/calendar?eventId=${eventId}`);
+  const openEdit = (type: CalendarEventType) => {
+    setEditingType(type);
+    setEditName(type.name);
+    setEditDescription(type.description ?? "");
+    setEditError(null);
+  };
+
+  const closeEdit = () => {
+    setEditingType(null);
+    setEditName("");
+    setEditDescription("");
+    setEditError(null);
+  };
+
+  const handleUpdate = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!editingType) {
+      return;
+    }
+
+    setEditError(null);
+    const trimmedName = editName.trim();
+    if (!trimmedName) {
+      setEditError("Укажите название типа события.");
+      return;
+    }
+
+    try {
+      await updateEventType({
+        id: editingType.id,
+        body: {
+          name: trimmedName,
+          description: editDescription.trim() || null
+        }
+      }).unwrap();
+      closeEdit();
+    } catch (err) {
+      setEditError(
+        readApiErrorMessage(err) ?? "Не удалось сохранить тип события."
+      );
+    }
+  };
+
+  const handleDelete = async (type: CalendarEventType) => {
+    const confirmed = window.confirm(
+      type.eventsCount > 0
+        ? `Удалить тип «${type.name}»? У ${type.eventsCount} событий в календаре тип будет сброшен.`
+        : `Удалить тип «${type.name}»?`
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await deleteEventType(type.id).unwrap();
+      if (filterTypeId === type.id) {
+        setFilterTypeId(ALL_TYPES);
+      }
+      if (editingType?.id === type.id) {
+        closeEdit();
+      }
+    } catch (err) {
+      window.alert(
+        readApiErrorMessage(err) ?? "Не удалось удалить тип события."
+      );
+    }
   };
 
   return (
@@ -83,8 +154,8 @@ export const EventTypesPage = () => {
         <div>
           <h1>Типы событий</h1>
           <p>
-            Создавайте теги для событий календаря и быстро находите мероприятия
-            по выбранному типу.
+            Справочник категорий для календаря. Название события задаётся
+            отдельно при создании мероприятия.
           </p>
         </div>
       </header>
@@ -94,7 +165,7 @@ export const EventTypesPage = () => {
           <h2>Создать тип события</h2>
           <form className={styles.form} onSubmit={handleCreate}>
             <label className={styles.field}>
-              Название
+              Название типа
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -102,14 +173,14 @@ export const EventTypesPage = () => {
               />
             </label>
             <label className={styles.field}>
-              Описание
+              Описание типа
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Краткое пояснение для этого типа"
+                placeholder="Краткое пояснение категории"
               />
             </label>
-            {error && <p className={styles.error}>{error}</p>}
+            {formError && <p className={styles.error}>{formError}</p>}
             <button type="submit" disabled={isCreating}>
               {isCreating ? "Создание..." : "Создать тип"}
             </button>
@@ -119,10 +190,10 @@ export const EventTypesPage = () => {
 
       <section className={styles.card}>
         <div className={styles.sectionHeader}>
-          <h2>События по типам</h2>
+          <h2>Справочник типов</h2>
           <select
-            value={selectedTypeId}
-            onChange={(e) => setSelectedTypeId(e.target.value)}
+            value={filterTypeId}
+            onChange={(e) => setFilterTypeId(e.target.value)}
           >
             <option value={ALL_TYPES}>Все типы</option>
             {types.map((type) => (
@@ -133,32 +204,88 @@ export const EventTypesPage = () => {
           </select>
         </div>
 
-        {isTypesLoading || isEventsLoading ? (
+        {isLoading ? (
           <p className={styles.empty}>Загрузка...</p>
-        ) : filteredEvents.length === 0 ? (
-          <p className={styles.empty}>Событий по выбранному типу пока нет.</p>
+        ) : filteredTypes.length === 0 ? (
+          <p className={styles.empty}>Типы событий пока не созданы.</p>
         ) : (
-          <div className={styles.eventsList}>
-            {filteredEvents.map((event) => (
-              <button
-                key={event.id}
-                type="button"
-                className={styles.eventCard}
-                onClick={() => openEvent(event.id)}
-              >
-                <div>
-                  <strong>{event.title}</strong>
-                  <span>
-                    {event.eventTypeName || "Без типа"} ·{" "}
-                    {formatDateTime(event.dateOfEvent)}
-                  </span>
-                </div>
-                {event.description && <p>{event.description}</p>}
-              </button>
-            ))}
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Тип</th>
+                  <th>Описание</th>
+                  <th>Событий в календаре</th>
+                  <th>Создан</th>
+                  {canManageTypes && <th>Действия</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredTypes.map((type) => (
+                  <tr key={type.id}>
+                    <td>{type.name}</td>
+                    <td>{type.description || "—"}</td>
+                    <td>{type.eventsCount}</td>
+                    <td>{formatDate(type.createdAt)}</td>
+                    {canManageTypes && (
+                      <td className={styles.actionsCell}>
+                        <button
+                          type="button"
+                          className={styles.actionBtn}
+                          onClick={() => openEdit(type)}
+                        >
+                          Изменить
+                        </button>
+                        <button
+                          type="button"
+                          className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
+                          onClick={() => handleDelete(type)}
+                          disabled={isDeleting}
+                        >
+                          Удалить
+                        </button>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </section>
+
+      {editingType && (
+        <div className={styles.overlay}>
+          <div className={styles.modal} role="dialog" aria-modal="true">
+            <h2>Редактировать тип</h2>
+            <form className={styles.form} onSubmit={handleUpdate}>
+              <label className={styles.field}>
+                Название типа
+                <input
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                />
+              </label>
+              <label className={styles.field}>
+                Описание типа
+                <textarea
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                />
+              </label>
+              {editError && <p className={styles.error}>{editError}</p>}
+              <div className={styles.modalActions}>
+                <button type="button" onClick={closeEdit} disabled={isUpdating}>
+                  Отмена
+                </button>
+                <button type="submit" disabled={isUpdating}>
+                  {isUpdating ? "Сохранение..." : "Сохранить"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

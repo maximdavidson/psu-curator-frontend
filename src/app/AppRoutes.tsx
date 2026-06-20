@@ -19,7 +19,10 @@ import { ChatPage } from "@/pages/chat/chat.page";
 import { ForceChangePasswordPage } from "@/pages/force-change-password/force-change-password.page";
 import { ForgotPasswordPage } from "@/pages/forgot-password";
 import { EventTypesPage } from "@/pages/event-types/event-types.page";
-import { SURVEYS_LIST_PAGE_ROLES } from "@/shared/lib/jwt-claims";
+import {
+  EVENT_TYPES_PAGE_ROLES,
+  SURVEYS_LIST_PAGE_ROLES
+} from "@/shared/lib/jwt-claims";
 export const router = createBrowserRouter([
   {
     element: <CommonProvider />,
@@ -82,8 +85,15 @@ export const router = createBrowserRouter([
                 element: <CalendarPage />
               },
               {
-                path: "/event-types",
-                element: <EventTypesPage />
+                element: (
+                  <ProtectedRoutes allowedRoles={[...EVENT_TYPES_PAGE_ROLES]} />
+                ),
+                children: [
+                  {
+                    path: "/event-types",
+                    element: <EventTypesPage />
+                  }
+                ]
               },
               {
                 path: "/chat",

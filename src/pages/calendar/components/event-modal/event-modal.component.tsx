@@ -178,7 +178,7 @@ export const EventModal = ({
 
         <input
           className={styles.input}
-          placeholder="Название"
+          placeholder="Название события"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />

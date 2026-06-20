@@ -6,12 +6,15 @@ export interface CalendarEventType {
   name: string;
   description?: string | null;
   createdAt: string;
+  eventsCount: number;
 }
 
 export interface CreateCalendarEventTypeRequest {
   name: string;
   description?: string | null;
 }
+
+export type UpdateCalendarEventTypeRequest = CreateCalendarEventTypeRequest;
 
 export const calendarEventTypeApi = createApi({
   reducerPath: "calendarEventTypeApi",
@@ -32,9 +35,31 @@ export const calendarEventTypeApi = createApi({
         body
       }),
       invalidatesTags: ["CalendarEventType"]
+    }),
+    updateEventType: builder.mutation<
+      CalendarEventType,
+      { id: string; body: UpdateCalendarEventTypeRequest }
+    >({
+      query: ({ id, body }) => ({
+        url: `/CalendarEvent/event-types/${id}`,
+        method: "PUT",
+        body
+      }),
+      invalidatesTags: ["CalendarEventType"]
+    }),
+    deleteEventType: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/CalendarEvent/event-types/${id}`,
+        method: "DELETE"
+      }),
+      invalidatesTags: ["CalendarEventType"]
     })
   })
 });
 
-export const { useGetEventTypesQuery, useCreateEventTypeMutation } =
-  calendarEventTypeApi;
+export const {
+  useGetEventTypesQuery,
+  useCreateEventTypeMutation,
+  useUpdateEventTypeMutation,
+  useDeleteEventTypeMutation
+} = calendarEventTypeApi;

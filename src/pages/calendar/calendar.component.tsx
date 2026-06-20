@@ -26,6 +26,7 @@ import {
   useUpdateEventMutation,
   useAcceptEventMutation
 } from "@/services/calendar.api";
+import { useGetEventTypesQuery } from "@/services/calendarEventType.api";
 import { getRoleStringFromAccessToken } from "@/shared/lib/jwt-claims";
 const localizer = momentLocalizer(moment);
 interface CalendarEventUI {
@@ -40,6 +41,9 @@ interface CalendarEventUI {
   start: Date;
   end: Date;
 }
+const ALL_EVENT_TYPES = "";
+const NO_EVENT_TYPE = "__none__";
+
 const CustomToolbar = ({
   date,
   onNavigate,
@@ -88,6 +92,7 @@ const CustomToolbar = ({
 };
 export const CalendarPage = () => {
   const { data: events = [] } = useGetEventsQuery();
+  const { data: eventTypes = [] } = useGetEventTypesQuery();
   const [createEvent] = useCreateEventMutation();
   const [deleteEvent] = useDeleteEventMutation();
   const [updateEvent] = useUpdateEventMutation();
@@ -99,6 +104,7 @@ export const CalendarPage = () => {
     null
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTypeId, setSelectedTypeId] = useState(ALL_EVENT_TYPES);
   const [searchParams, setSearchParams] = useSearchParams();
   const currentRole = getRoleStringFromAccessToken(
     localStorage.getItem("token")
@@ -107,21 +113,31 @@ export const CalendarPage = () => {
     currentRole !== "Student" && currentRole !== "Headman";
   const mappedEvents: CalendarEventUI[] = useMemo(
     () =>
-      events.map((e) => ({
-        id: e.id,
-        title: e.title,
-        description: e.description,
-        eventTypeId: e.eventTypeId,
-        eventTypeName: e.eventTypeName,
-        isCreator: e.isCreator,
-        isAccepted: e.isAccepted,
-        invitedUsers: e.invitedUsers ?? [],
-        start: new Date(e.dateOfEvent),
-        end: e.endDateOfEvent
-          ? new Date(e.endDateOfEvent)
-          : moment(e.dateOfEvent).add(1, "hour").toDate()
-      })),
-    [events]
+      events
+        .filter((event) => {
+          if (!selectedTypeId) {
+            return true;
+          }
+          if (selectedTypeId === NO_EVENT_TYPE) {
+            return !event.eventTypeId;
+          }
+          return event.eventTypeId === selectedTypeId;
+        })
+        .map((e) => ({
+          id: e.id,
+          title: e.title,
+          description: e.description,
+          eventTypeId: e.eventTypeId,
+          eventTypeName: e.eventTypeName,
+          isCreator: e.isCreator,
+          isAccepted: e.isAccepted,
+          invitedUsers: e.invitedUsers ?? [],
+          start: new Date(e.dateOfEvent),
+          end: e.endDateOfEvent
+            ? new Date(e.endDateOfEvent)
+            : moment(e.dateOfEvent).add(1, "hour").toDate()
+        })),
+    [events, selectedTypeId]
   );
   const handleSelectSlot = (slotInfo: SlotInfo) => {
     setSlot(slotInfo);
@@ -136,8 +152,22 @@ export const CalendarPage = () => {
   useEffect(() => {
     const eventId = searchParams.get("eventId");
     if (!eventId || events.length === 0) return;
-    const event = mappedEvents.find((item) => item.id === eventId);
-    if (!event) return;
+    const source = events.find((item) => item.id === eventId);
+    if (!source) return;
+    const event: CalendarEventUI = {
+      id: source.id,
+      title: source.title,
+      description: source.description,
+      eventTypeId: source.eventTypeId,
+      eventTypeName: source.eventTypeName,
+      isCreator: source.isCreator,
+      isAccepted: source.isAccepted,
+      invitedUsers: source.invitedUsers ?? [],
+      start: new Date(source.dateOfEvent),
+      end: source.endDateOfEvent
+        ? new Date(source.endDateOfEvent)
+        : moment(source.dateOfEvent).add(1, "hour").toDate()
+    };
     startTransition(() => {
       setDate(event.start);
       setEditingEvent(event);
@@ -145,7 +175,7 @@ export const CalendarPage = () => {
       setIsModalOpen(true);
       setSearchParams({}, { replace: true });
     });
-  }, [events.length, mappedEvents, searchParams, setSearchParams]);
+  }, [events, searchParams, setSearchParams]);
   const handleSaveEvent = async (
     title: string,
     description: string,
@@ -218,6 +248,26 @@ export const CalendarPage = () => {
   }, []);
   return (
     <div className={styles.page}>
+      <div className={styles.filters}>
+        <label className={styles.filterLabel} htmlFor="calendar-type-filter">
+          Тип события
+        </label>
+        <select
+          id="calendar-type-filter"
+          className={styles.typeFilter}
+          value={selectedTypeId}
+          onChange={(e) => setSelectedTypeId(e.target.value)}
+        >
+          <option value={ALL_EVENT_TYPES}>Все типы</option>
+          <option value={NO_EVENT_TYPE}>Без типа</option>
+          {eventTypes.map((type) => (
+            <option key={type.id} value={type.id}>
+              {type.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <div className={styles.calendarWrapper}>
         <Calendar
           selectable

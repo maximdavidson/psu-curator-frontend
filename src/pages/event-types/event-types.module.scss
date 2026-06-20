@@ -39,7 +39,7 @@
   gap: 14px;
   margin-top: 18px;
 
-  button {
+  button[type="submit"] {
     justify-self: start;
     border: none;
     border-radius: var(--radius-sm);
@@ -105,40 +105,65 @@
   }
 }
 
-.eventsList {
-  display: grid;
-  gap: 12px;
+.tableWrap {
+  overflow-x: auto;
 }
 
-.eventCard {
+.table {
   width: 100%;
-  text-align: left;
-  border: 1px solid var(--color-card-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-feed-surface);
-  color: var(--color-text);
-  padding: 14px 16px;
-  cursor: pointer;
+  border-collapse: collapse;
+  font-size: 14px;
 
-  &:hover {
-    border-color: var(--color-accent);
+  th,
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--color-border-subtle);
+    text-align: left;
+    vertical-align: top;
   }
 
-  strong {
-    display: block;
-    margin-bottom: 4px;
-    font-size: 16px;
-  }
-
-  span {
+  th {
     color: var(--color-text-muted);
+    font-weight: 600;
     font-size: 13px;
   }
 
-  p {
-    margin: 10px 0 0;
-    color: var(--color-text-muted);
-    line-height: 1.45;
+  tbody tr:hover {
+    background: var(--color-tab-hover);
+  }
+}
+
+.actionsCell {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.actionBtn {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-btn-secondary-bg);
+  color: var(--color-text);
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+
+  &:hover:not(:disabled) {
+    background: var(--color-btn-secondary-hover);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.actionBtnDanger {
+  color: var(--color-error, #dc2626);
+  border-color: rgba(220, 38, 38, 0.25);
+
+  &:hover:not(:disabled) {
+    background: var(--color-error-bg, rgba(220, 38, 38, 0.08));
   }
 }
 
@@ -149,5 +174,57 @@
 }
 
 .error {
-  color: var(--color-danger);
+  color: var(--color-error, #dc2626);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--color-modal-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  padding: 24px;
+}
+
+.modal {
+  width: min(100%, 520px);
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-modal);
+  padding: 24px;
+
+  h2 {
+    margin: 0 0 16px;
+    font-size: 20px;
+  }
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+
+  button {
+    border-radius: var(--radius-sm);
+    padding: 10px 16px;
+    cursor: pointer;
+    font-weight: 600;
+    border: 1px solid var(--color-border);
+    background: var(--color-btn-secondary-bg);
+    color: var(--color-text);
+
+    &[type="submit"] {
+      background: var(--color-accent);
+      color: var(--color-btn-primary-text);
+      border-color: var(--color-accent);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
 }

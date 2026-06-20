@@ -5,6 +5,7 @@ import PoolsIcon from "../../assets/polls-icon.svg";
 import DocumentsIcon from "../../assets/documents-icon.svg";
 import ChatIcon from "../../assets/chat.svg";
 import {
+  EVENT_TYPES_PAGE_ROLES,
   STUDENT_REGISTER_PAGE_ROLES,
   SURVEYS_LIST_PAGE_ROLES
 } from "@/shared/lib/jwt-claims";
@@ -23,7 +24,8 @@ export const menuData: IMenuItem[] = [
   {
     to: "/event-types",
     label: "Типы событий",
-    icon: CalendarIcon
+    icon: CalendarIcon,
+    visibleTo: [...EVENT_TYPES_PAGE_ROLES]
   },
   {
     to: "/chat",
