@@ -21,6 +21,19 @@ export function decodeJwtPayload(
     return null;
   }
 }
+
+export function getAccessTokenExpiryMs(
+  accessToken: string | null
+): number | null {
+  if (!accessToken) return null;
+  const payload = decodeJwtPayload(accessToken);
+  const exp = payload?.exp;
+  if (typeof exp !== "number" || !Number.isFinite(exp)) {
+    return null;
+  }
+  return exp * 1000;
+}
+
 export function getRoleStringFromAccessToken(
   accessToken: string | null
 ): string | null {

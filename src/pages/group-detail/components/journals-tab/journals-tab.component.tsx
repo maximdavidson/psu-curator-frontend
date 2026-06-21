@@ -351,7 +351,9 @@ const JournalDetail = ({
             <tr>
               <th>Студент</th>
               {data.dates.map((date) => (
-                <th key={date}>{formatDate(date)}</th>
+                <th key={date} className={styles.dateColumn}>
+                  {formatDate(date)}
+                </th>
               ))}
             </tr>
             <tr className={styles.scheduleRow}>
@@ -362,7 +364,7 @@ const JournalDetail = ({
                 const key = dateKey(date);
                 const value = effectiveDaySchedules[key] ?? "";
                 return (
-                  <th key={`schedule-${date}`}>
+                  <th key={`schedule-${date}`} className={styles.dateColumn}>
                     {data.canEditEntries ? (
                       <input
                         type="number"
@@ -443,7 +445,7 @@ const JournalDetail = ({
                         ? savedMissed
                         : null;
                   return (
-                    <td key={key}>
+                    <td key={key} className={styles.dateColumn}>
                       {required <= 0 ? (
                         <span className={styles.emptyCell}>—</span>
                       ) : cellEditable ? (

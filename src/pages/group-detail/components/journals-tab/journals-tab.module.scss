@@ -140,7 +140,8 @@
 }
 
 .tableWrap {
-  overflow-x: auto;
+  overflow: auto;
+  max-width: 100%;
   border: 1px solid var(--color-card-border);
   border-radius: var(--radius-md);
   background: var(--color-card-bg);
@@ -148,9 +149,9 @@
 }
 
 .journalTable {
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
   border-collapse: collapse;
-  min-width: 760px;
 
   th,
   td {
@@ -177,13 +178,24 @@
   }
 
   .hoursInput {
-    width: 72px;
+    width: 100%;
+    min-width: 72px;
+    max-width: none;
+    box-sizing: border-box;
     padding: 8px;
     border-radius: 8px;
     border: 1px solid var(--color-border);
     background: var(--color-card-bg);
     color: var(--color-text);
   }
+}
+
+.dateColumn {
+  width: 180px;
+  min-width: 180px;
+  box-sizing: border-box;
+  text-align: center;
+  vertical-align: top;
 }
 
 .scheduleRow th {
@@ -217,36 +229,42 @@
 }
 
 .readOnlyHours {
-  display: inline-block;
+  display: block;
+  width: 100%;
   min-width: 72px;
   text-align: center;
+  line-height: 1.35;
+  word-break: break-word;
 }
 
 .attendanceCell {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 4px;
+  align-items: stretch;
+  gap: 6px;
+  width: 100%;
 }
 
-.missedTag {
-  font-size: 11px;
-  font-weight: 600;
-  color: #9a3412;
-  background: #ffedd5;
-  padding: 2px 6px;
-  border-radius: 999px;
-  white-space: nowrap;
-}
-
+.missedTag,
 .excusedTag {
   font-size: 11px;
   font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 999px;
+  line-height: 1.3;
+  text-align: center;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.missedTag {
+  color: #9a3412;
+  background: #ffedd5;
+}
+
+.excusedTag {
   color: #166534;
   background: #dcfce7;
-  padding: 2px 6px;
-  border-radius: 999px;
-  white-space: nowrap;
 }
 
 .participantCell {
