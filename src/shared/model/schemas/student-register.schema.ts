@@ -48,6 +48,12 @@ export const studentRegisterSchema = yup.object({
     .trim()
     .optional()
     .transform((value) => (value === "" ? undefined : value)),
+  faculty: yup
+    .string()
+    .trim()
+    .max(100)
+    .optional()
+    .transform((value) => (value === "" ? undefined : value)),
   fundingType: yup
     .number()
     .oneOf([StudentFundingType.Budget, StudentFundingType.Contract])

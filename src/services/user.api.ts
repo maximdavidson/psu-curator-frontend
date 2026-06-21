@@ -56,6 +56,7 @@ export interface CreateStudentUserRequest {
   courseNumber: number;
   enrollmentYear?: number;
   groupId?: string;
+  faculty?: string;
   fundingType: number;
 }
 

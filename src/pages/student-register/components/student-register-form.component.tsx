@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useSelector } from "react-redux";
 import {
   studentRegisterSchema,
   type TStudentRegisterFormDto
@@ -13,11 +14,16 @@ import {
 import { useGetGroupsQuery } from "@/pages/groups/group.api";
 import { readApiErrorMessage } from "@/shared/lib/read-api-error-message";
 import { StudentFundingType } from "@/shared/constants/student-funding";
+import { getRoleStringFromAccessToken } from "@/shared/lib/jwt-claims";
+import { selectToken } from "@/stores/auth.store";
+import { FacultyPicker } from "@/shared/ui/faculty-picker/faculty-picker";
 import styles from "../student-register.module.scss";
 
 export const StudentRegisterForm = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const token = useSelector(selectToken);
+  const isAdmin = getRoleStringFromAccessToken(token) === "Admin";
   const { data: groups = [] } = useGetGroupsQuery(undefined);
   const [createStudent, { isLoading }] = useCreateStudentUserMutation();
 
@@ -25,6 +31,8 @@ export const StudentRegisterForm = () => {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors }
   } = useForm<TStudentRegisterFormDto>({
     resolver: yupResolver(
@@ -40,9 +48,12 @@ export const StudentRegisterForm = () => {
       courseNumber: 1,
       enrollmentYear: new Date().getFullYear(),
       groupId: "",
+      faculty: "",
       fundingType: StudentFundingType.Budget
     }
   });
+
+  const selectedGroupId = watch("groupId");
 
   const onSubmit = async (data: TStudentRegisterFormDto) => {
     setError(null);
@@ -58,6 +69,10 @@ export const StudentRegisterForm = () => {
       courseNumber: data.courseNumber,
       enrollmentYear: data.enrollmentYear,
       groupId: data.groupId || undefined,
+      faculty:
+        isAdmin && !data.groupId && data.faculty?.trim()
+          ? data.faculty.trim()
+          : undefined,
       fundingType: data.fundingType
     };
 
@@ -78,6 +93,7 @@ export const StudentRegisterForm = () => {
         courseNumber: 1,
         enrollmentYear: new Date().getFullYear(),
         groupId: data.groupId ?? "",
+        faculty: data.faculty ?? "",
         fundingType: StudentFundingType.Budget
       });
     } catch (err) {
@@ -190,7 +206,16 @@ export const StudentRegisterForm = () => {
 
         <label className={`${styles.field} ${styles.fieldWide}`}>
           <span>Группа (необязательно)</span>
-          <select {...register("groupId")} defaultValue="">
+          <select
+            {...register("groupId")}
+            defaultValue=""
+            onChange={(event) => {
+              register("groupId").onChange(event);
+              if (event.target.value) {
+                setValue("faculty", "");
+              }
+            }}
+          >
             <option value="">Без привязки к группе</option>
             {groups.map((group) => (
               <option key={group.id} value={group.id}>
@@ -199,6 +224,17 @@ export const StudentRegisterForm = () => {
             ))}
           </select>
         </label>
+
+        {isAdmin && !selectedGroupId && (
+          <div className={styles.fieldWide}>
+            <FacultyPicker
+              id="student-faculty"
+              label="Факультет (необязательно)"
+              value={watch("faculty") ?? ""}
+              onChange={(value) => setValue("faculty", value)}
+            />
+          </div>
+        )}
       </div>
 
       {error && <p className={styles.formError}>{error}</p>}
