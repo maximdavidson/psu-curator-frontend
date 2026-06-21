@@ -29,7 +29,12 @@
   transition: 0.2s;
   font-weight: 500;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: var(--color-accent-hover);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
   }
 }

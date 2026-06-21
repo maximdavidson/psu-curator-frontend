@@ -38,8 +38,9 @@ export const ChatAttachmentPicker = ({
   onChange
 }: ChatAttachmentPickerProps) => {
   const [tab, setTab] = useState<"device" | "library">("device");
-  const { data: userFiles = [], isLoading: isFilesLoading } =
+  const { data: userFilesData, isLoading: isFilesLoading } =
     useGetUserFilesQuery(undefined, { skip: !isOpen });
+  const userFiles = userFilesData?.files ?? [];
 
   const attachableLibraryFiles = useMemo(
     () =>

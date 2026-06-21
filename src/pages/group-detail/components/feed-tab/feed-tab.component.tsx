@@ -98,7 +98,8 @@ export const FeedTab = ({ groupId, feed, onRefetch, canCreate }: Props) => {
   const currentUserId =
     getUserIdFromAccessToken(localStorage.getItem("token")) ?? "";
   const [downloadFile] = useLazyDownloadFileQuery();
-  const { data: userFiles = [] } = useGetUserFilesQuery();
+  const { data: userFilesData } = useGetUserFilesQuery();
+  const userFiles = userFilesData?.files ?? [];
   const [feedActionError, setFeedActionError] = useState<string | null>(null);
   const [commentTexts, setCommentTexts] = useState<Record<string, string>>({});
   const [commentErrors, setCommentErrors] = useState<Record<string, string>>(

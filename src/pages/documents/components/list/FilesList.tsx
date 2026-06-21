@@ -6,7 +6,8 @@ import {
 import styles from "./FilesList.module.scss";
 import { FilesItem } from "./FilesItem";
 export const FilesList = () => {
-  const { data: files, isLoading } = useGetUserFilesQuery();
+  const { data, isLoading } = useGetUserFilesQuery();
+  const files = data?.files ?? [];
   const [deleteFile] = useDeleteFileMutation();
   const [downloadFile] = useLazyDownloadFileQuery();
   const handleDelete = async (id?: string) => {

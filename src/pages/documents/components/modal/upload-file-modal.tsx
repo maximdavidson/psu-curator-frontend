@@ -6,17 +6,33 @@ import React, {
 } from "react";
 import styles from "./upload-file-modal.module.scss";
 import { useUploadFileMutation } from "../../documents.api";
+import { formatSize } from "../../model/format-size";
+import { readApiErrorMessage } from "@/shared/lib/read-api-error-message";
+
 interface IFileUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
+  usedBytes: number;
+  limitBytes: number;
 }
+
 const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "pdf", "doc", "docx", "txt"];
-export const FileUploadModal = ({ isOpen, onClose }: IFileUploadModalProps) => {
+
+export const FileUploadModal = ({
+  isOpen,
+  onClose,
+  usedBytes,
+  limitBytes
+}: IFileUploadModalProps) => {
   const [isOver, setIsOver] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadFile] = useUploadFileMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
   if (!isOpen) return null;
+
+  const remainingBytes = Math.max(0, limitBytes - usedBytes);
+
   const resetState = () => {
     setError(null);
     setIsOver(false);
@@ -24,35 +40,50 @@ export const FileUploadModal = ({ isOpen, onClose }: IFileUploadModalProps) => {
       fileInputRef.current.value = "";
     }
   };
+
   const handleClose = () => {
     resetState();
     onClose();
   };
+
   const isValidFile = (file: File): boolean => {
     const extension = file.name.split(".").pop()?.toLowerCase();
     return extension ? ALLOWED_EXTENSIONS.includes(extension) : false;
   };
+
   const saveFiles = async (fileList: FileList | null): Promise<void> => {
     if (!fileList) return;
+
     const fileArray = Array.from(fileList);
     const validFiles = fileArray.filter(isValidFile);
     const invalidFiles = fileArray.filter((file) => !isValidFile(file));
+
     if (invalidFiles.length > 0) {
       setError("Такой формат не поддерживается!");
     } else {
       setError(null);
     }
+
     if (validFiles.length === 0) return;
+
+    const totalSize = validFiles.reduce((sum, file) => sum + file.size, 0);
+    if (totalSize > remainingBytes) {
+      setError(
+        `Недостаточно места. Доступно ${formatSize(remainingBytes)}, выбрано ${formatSize(totalSize)}.`
+      );
+      return;
+    }
+
     try {
       await Promise.all(
         validFiles.map((file) => uploadFile({ file }).unwrap())
       );
       handleClose();
-    } catch (error) {
-      console.error("Ошибка при загрузке:", error);
-      setError("Ошибка при загрузке файла");
+    } catch (uploadError) {
+      setError(readApiErrorMessage(uploadError) ?? "Ошибка при загрузке файла");
     }
   };
+
   const handleDrop = (e: DragEvent<HTMLDivElement>): void => {
     e.preventDefault();
     setIsOver(false);
@@ -60,9 +91,11 @@ export const FileUploadModal = ({ isOpen, onClose }: IFileUploadModalProps) => {
       saveFiles(e.dataTransfer.files);
     }
   };
+
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
     saveFiles(e.target.files);
   };
+
   return (
     <div className={styles.overlay} onClick={handleClose}>
       <div
@@ -73,6 +106,9 @@ export const FileUploadModal = ({ isOpen, onClose }: IFileUploadModalProps) => {
 
         <p className={styles.hint}>
           Поддерживаемые форматы: JPG, JPEG, PNG, PDF, DOC, DOCX, TXT
+        </p>
+        <p className={styles.hint}>
+          Свободно: {formatSize(remainingBytes)} из {formatSize(limitBytes)}
         </p>
 
         <div

@@ -1,4 +1,6 @@
 import styles from "./FilesList.module.scss";
+import { formatSize } from "../../model/format-size";
+
 type TProps = {
   id: string;
   name: string;
@@ -18,7 +20,7 @@ export const FilesItem = ({
     <li className={styles.item}>
       <div className={styles.info}>
         <span className={styles.name}>{name}</span>
-        <span className={styles.meta}>{size} bytes</span>
+        <span className={styles.meta}>{formatSize(size)}</span>
       </div>
       <div className={styles.actions}>
         <button className={styles.btnDownload} onClick={handleDownload}>

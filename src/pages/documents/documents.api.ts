@@ -1,5 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { createAppBaseQuery } from "@/shared/api/base-query";
+
 export interface IFileResponse {
   id: string;
   fileName: string;
@@ -9,13 +10,21 @@ export interface IFileResponse {
   downloadUrl: string;
   uploadedByName: string;
 }
+
+export interface IUserFilesResponse {
+  files: IFileResponse[];
+  usedBytes: number;
+  limitBytes: number;
+}
+
 const filesApiBaseUrl = `${((import.meta.env.VITE_API_URL as string | undefined) ?? "/api").replace(/\/$/, "")}/Files`;
+
 export const documentsApi = createApi({
   reducerPath: "documentsApi",
   baseQuery: createAppBaseQuery(filesApiBaseUrl),
   tagTypes: ["Files"],
   endpoints: (builder) => ({
-    getUserFiles: builder.query<IFileResponse[], void>({
+    getUserFiles: builder.query<IUserFilesResponse, void>({
       query: () => "/users/files",
       providesTags: ["Files"]
     }),
@@ -61,6 +70,7 @@ export const documentsApi = createApi({
     })
   })
 });
+
 export const {
   useGetUserFilesQuery,
   useUploadFileMutation,

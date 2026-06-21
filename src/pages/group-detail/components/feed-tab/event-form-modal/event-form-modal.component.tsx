@@ -70,7 +70,7 @@ export const EventFormModal = ({
     return `${count} вопросов`;
   };
   const safeSurveys = surveys || [];
-  const safeFiles = userFiles || [];
+  const safeFiles = userFiles?.files ?? [];
   const handleSubmit = async () => {
     setSubmitError(null);
     if (!title.trim()) {
