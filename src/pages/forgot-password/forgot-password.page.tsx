@@ -117,8 +117,7 @@ export const ForgotPasswordPage = () => {
       <AuthFormLayout
         onSubmit={handleSubmit(onSubmit)}
         footer={<AuthBackToLoginLink />}
-        titl
-        e="Восстановление пароля"
+        title="Восстановление пароля"
       >
         <div
           className={styles.accountTabs}
