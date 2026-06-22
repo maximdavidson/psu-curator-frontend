@@ -166,7 +166,7 @@ export const ForgotPasswordPage = () => {
           placeholder={
             accountKind === "student"
               ? "ivanov@students.psu.by"
-              : "teacher@psu.ru"
+              : "teacher@psu.by"
           }
           type="email"
         />

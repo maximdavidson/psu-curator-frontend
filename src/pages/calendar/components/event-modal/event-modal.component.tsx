@@ -14,6 +14,7 @@ import {
   getRoleStringFromAccessToken,
   roleCanViewEventAttendance
 } from "@/shared/lib/jwt-claims";
+import { useConfirm } from "@/shared/ui/confirm-dialog";
 const MIN_QUERY_LEN = 2;
 interface Props {
   event?: {
@@ -85,6 +86,7 @@ export const EventModal = ({
   >(event?.invitedUsers ?? []);
   const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
   const [searchUsers, searchState] = useLazySearchUsersByNameQuery();
+  const { confirm } = useConfirm();
   const { data: groups = [] } = useGetGroupsQuery(undefined);
   const { data: eventTypes = [] } = useGetEventTypesQuery();
   const token = useSelector(selectToken);
@@ -163,10 +165,14 @@ export const EventModal = ({
       eventTypeId || null
     );
   };
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!event?.id) return;
-    const confirmDelete = confirm("Удалить событие?");
-    if (!confirmDelete) return;
+    const confirmed = await confirm({
+      title: "Удалить событие",
+      message: "Удалить событие из календаря?",
+      variant: "danger"
+    });
+    if (!confirmed) return;
     onDelete(event.id);
   };
   return (
@@ -292,9 +298,16 @@ export const EventModal = ({
                         checked={selectedGroupIds.includes(group.id)}
                         onChange={() => handleToggleGroup(group.id)}
                       />
-                      <span>
-                        {group.name}
-                        <small>{group.faculty}</small>
+                      <span className={styles.groupInviteText}>
+                        <span
+                          className={styles.groupInviteName}
+                          title={group.name}
+                        >
+                          {group.name}
+                        </span>
+                        {group.faculty ? (
+                          <small title={group.faculty}>{group.faculty}</small>
+                        ) : null}
                       </span>
                     </label>
                   ))}
@@ -374,7 +387,11 @@ export const EventModal = ({
           </button>
 
           {event?.id && event.isCreator && (
-            <button onClick={handleDelete} className={styles.deleteButton}>
+            <button
+              type="button"
+              onClick={() => void handleDelete()}
+              className={styles.deleteButton}
+            >
               Удалить
             </button>
           )}

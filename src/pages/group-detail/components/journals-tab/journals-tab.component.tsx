@@ -17,6 +17,7 @@ import {
   useUpdateGroupJournalMutation
 } from "../../groupJournals.api";
 import { readApiErrorMessage } from "@/shared/lib/read-api-error-message";
+import { useConfirm } from "@/shared/ui/confirm-dialog";
 import { JournalFormModal } from "./journal-form-modal.component";
 interface Props {
   groupId: string;
@@ -102,6 +103,7 @@ const JournalDetail = ({
     useDownloadGroupJournalExcelMutation();
   const [removeFormerParticipant, { isLoading: isRemovingParticipant }] =
     useRemoveFormerJournalParticipantMutation();
+  const { confirm } = useConfirm();
   const [daySchedules, setDaySchedules] = useState<Record<string, number | "">>(
     {}
   );
@@ -253,11 +255,12 @@ const JournalDetail = ({
   ) => {
     if (!data) return;
     const name = participant.fullName || "студента";
-    if (
-      !confirm(
-        `Удалить ${name} из журнала? Все записи посещаемости по этому студенту будут удалены без возможности восстановления.`
-      )
-    ) {
+    const confirmed = await confirm({
+      title: "Удалить из журнала",
+      message: `Удалить ${name} из журнала? Все записи посещаемости по этому студенту будут удалены без возможности восстановления.`,
+      variant: "danger"
+    });
+    if (!confirmed) {
       return;
     }
     setError("");
@@ -509,6 +512,7 @@ export const JournalsTab = ({ groupId, canManage }: Props) => {
   const [updateJournal, { isLoading: isUpdating }] =
     useUpdateGroupJournalMutation();
   const [deleteJournal] = useDeleteGroupJournalMutation();
+  const { confirm } = useConfirm();
   const [selectedJournalId, setSelectedJournalId] = useState<string | null>(
     null
   );
@@ -527,7 +531,13 @@ export const JournalsTab = ({ groupId, canManage }: Props) => {
     setIsFormOpen(true);
   };
   const handleDelete = async (journal: GroupJournalListItem) => {
-    if (!confirm("Удалить журнал посещаемости?")) return;
+    const confirmed = await confirm({
+      title: "Удалить журнал",
+      message:
+        "Удалить журнал посещаемости? Все записи в нём будут удалены без возможности восстановления.",
+      variant: "danger"
+    });
+    if (!confirmed) return;
     setError("");
     try {
       await deleteJournal({ journalId: journal.id, groupId }).unwrap();

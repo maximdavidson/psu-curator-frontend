@@ -19,7 +19,7 @@ import {
   getRoleStringFromAccessToken,
   roleIsStudentOrHeadman
 } from "@/shared/lib/jwt-claims";
-import { resolveAvatarUrl } from "@/shared/lib/resolve-avatar-url";
+import { UserAvatar } from "@/shared/ui/user-avatar/user-avatar";
 import styles from "./settings.module.scss";
 
 const getAttendanceLevel = (
@@ -58,7 +58,10 @@ export const SettingsPage = () => {
       : attendanceLevel === "warning"
         ? styles.attendanceValueWarning
         : styles.attendanceValue;
-  const avatarUrl = resolveAvatarUrl(currentUser?.avatarUrl);
+  const displayName =
+    [currentUser?.firstName, currentUser?.lastName].filter(Boolean).join(" ") ||
+    currentUser?.email ||
+    "?";
   const [uploadAvatar, { isLoading: isUploadingAvatar }] =
     useUploadCurrentUserAvatarMutation();
   const [deleteAvatar, { isLoading: isDeletingAvatar }] =
@@ -77,7 +80,7 @@ export const SettingsPage = () => {
     event.target.value = "";
   };
   const handleAvatarDelete = async () => {
-    if (!avatarUrl) {
+    if (!currentUser?.avatarUrl) {
       return;
     }
     await deleteAvatar().unwrap();
@@ -96,17 +99,11 @@ export const SettingsPage = () => {
 
         <div className={styles.avatarRow}>
           <div className={styles.avatarPreview}>
-            {avatarUrl ? (
-              <img src={avatarUrl} alt="Аватар пользователя" />
-            ) : (
-              <span>
-                {(
-                  currentUser?.firstName?.[0] ??
-                  currentUser?.email?.[0] ??
-                  "?"
-                ).toUpperCase()}
-              </span>
-            )}
+            <UserAvatar
+              name={displayName}
+              avatarUrl={currentUser?.avatarUrl}
+              className={styles.avatarPreviewImage}
+            />
           </div>
 
           <div className={styles.avatarInfo}>
@@ -124,7 +121,7 @@ export const SettingsPage = () => {
                   onChange={handleAvatarChange}
                 />
               </label>
-              {avatarUrl && (
+              {currentUser?.avatarUrl && (
                 <button
                   type="button"
                   className={styles.avatarDeleteButton}

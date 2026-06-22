@@ -14,6 +14,7 @@ import {
 } from "@/shared/lib/jwt-claims";
 import { selectToken } from "@/stores/auth.store";
 import { useSelector } from "react-redux";
+import { useConfirm } from "@/shared/ui/confirm-dialog";
 import styles from "./event-types.module.scss";
 
 const ALL_TYPES = "";
@@ -48,6 +49,7 @@ export const EventTypesPage = () => {
     useUpdateEventTypeMutation();
   const [deleteEventType, { isLoading: isDeleting }] =
     useDeleteEventTypeMutation();
+  const { confirm, alert } = useConfirm();
 
   const filteredTypes = useMemo(() => {
     if (!filterTypeId) {
@@ -124,11 +126,14 @@ export const EventTypesPage = () => {
   };
 
   const handleDelete = async (type: CalendarEventType) => {
-    const confirmed = window.confirm(
-      type.eventsCount > 0
-        ? `Удалить тип «${type.name}»? У ${type.eventsCount} событий в календаре тип будет сброшен.`
-        : `Удалить тип «${type.name}»?`
-    );
+    const confirmed = await confirm({
+      title: "Удалить тип события",
+      message:
+        type.eventsCount > 0
+          ? `Удалить тип «${type.name}»? У ${type.eventsCount} событий в календаре тип будет сброшен.`
+          : `Удалить тип «${type.name}»?`,
+      variant: "danger"
+    });
     if (!confirmed) {
       return;
     }
@@ -142,9 +147,10 @@ export const EventTypesPage = () => {
         closeEdit();
       }
     } catch (err) {
-      window.alert(
-        readApiErrorMessage(err) ?? "Не удалось удалить тип события."
-      );
+      await alert({
+        title: "Не удалось удалить",
+        message: readApiErrorMessage(err) ?? "Не удалось удалить тип события."
+      });
     }
   };
 

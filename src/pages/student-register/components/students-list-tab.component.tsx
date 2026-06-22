@@ -7,6 +7,7 @@ import {
 import { StudentFundingBadge } from "@/shared/ui/student-funding-badge/student-funding-badge";
 import { StudentFundingType } from "@/shared/constants/student-funding";
 import { readApiErrorMessage } from "@/shared/lib/read-api-error-message";
+import { useConfirm } from "@/shared/ui/confirm-dialog";
 import styles from "../student-register.module.scss";
 
 const ALL_VALUE = "all";
@@ -38,6 +39,7 @@ function formatMissedHours(
 export const StudentsListTab = () => {
   const { data: students = [], isLoading, isError } = useGetStudentsQuery();
   const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
+  const { confirm } = useConfirm();
   const [deletingStudentId, setDeletingStudentId] = useState<string | null>(
     null
   );
@@ -100,14 +102,16 @@ export const StudentsListTab = () => {
     );
 
     const groupHint = student.groupName
-      ? ` Студент будет удалён из группы «${student.groupName}».`
+      ? `\nСтудент будет удалён из группы «${student.groupName}».`
       : "";
 
-    if (
-      !window.confirm(
-        `Удалить студента ${fullName} (${student.email})?${groupHint} Учётная запись и связанные данные будут удалены без возможности восстановления.`
-      )
-    ) {
+    const confirmed = await confirm({
+      title: "Удалить студента",
+      message: `Удалить студента ${fullName} (${student.email})?${groupHint}\n\nУчётная запись и связанные данные будут удалены без возможности восстановления.`,
+      variant: "danger"
+    });
+
+    if (!confirmed) {
       return;
     }
 

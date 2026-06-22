@@ -35,4 +35,9 @@
   top: 50%;
   transform: translateY(-50%);
   right: $spacing-sm;
+
+  img {
+    display: block;
+    filter: var(--color-icon-filter);
+  }
 }

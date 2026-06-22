@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useEffect, useState } from "react";
 import { resolveAvatarUrl } from "@/shared/lib/resolve-avatar-url";
 import styles from "./user-avatar.module.scss";
 
@@ -15,19 +17,24 @@ export const UserAvatar = ({
   fallback
 }: UserAvatarProps) => {
   const src = resolveAvatarUrl(avatarUrl);
+  const [hasLoadError, setHasLoadError] = useState(false);
   const classNames = [styles.avatar, className].filter(Boolean).join(" ");
 
-  if (src) {
+  useEffect(() => {
+    setHasLoadError(false);
+  }, [src]);
+
+  if (!src || hasLoadError) {
     return (
       <span className={classNames}>
-        <img src={src} alt="" />
+        {(fallback ?? name.trim().slice(0, 1).toUpperCase()) || "?"}
       </span>
     );
   }
 
   return (
     <span className={classNames}>
-      {(fallback ?? name.trim().slice(0, 1).toUpperCase()) || "?"}
+      <img src={src} alt="" onError={() => setHasLoadError(true)} />
     </span>
   );
 };

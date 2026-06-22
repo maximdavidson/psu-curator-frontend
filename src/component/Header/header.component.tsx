@@ -11,7 +11,7 @@ import {
   getUserIdFromAccessToken,
   roleIsStudentOrHeadman
 } from "@/shared/lib/jwt-claims";
-import { resolveAvatarUrl } from "@/shared/lib/resolve-avatar-url";
+import { UserAvatar } from "@/shared/ui/user-avatar/user-avatar";
 import {
   useGetCurrentUserAttendanceSummaryQuery,
   useGetUserByIdQuery
@@ -67,7 +67,9 @@ export const Header = () => {
   const initials = getInitialsFromEmail(email);
   const placeholder = getPlaceholderByPath(location.pathname);
   const showSearch = shouldShowSearch(location.pathname);
-  const avatarUrl = resolveAvatarUrl(currentUser?.avatarUrl);
+  const displayName =
+    [currentUser?.firstName, currentUser?.lastName].filter(Boolean).join(" ") ||
+    email;
 
   useEffect(() => {
     startTransition(() => {
@@ -155,11 +157,12 @@ export const Header = () => {
         <div className={styles.right}>
           <NotificationDropdown />
           <div className={styles.user_icon}>
-            {avatarUrl ? (
-              <img src={avatarUrl} alt="Аватар пользователя" />
-            ) : (
-              initials
-            )}
+            <UserAvatar
+              name={displayName}
+              avatarUrl={currentUser?.avatarUrl}
+              fallback={initials}
+              className={styles.userAvatar}
+            />
           </div>
         </div>
       </header>

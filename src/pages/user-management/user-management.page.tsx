@@ -19,6 +19,7 @@ import { UserRole, UserRoleLabels, type UserRoleType } from "@/shared";
 import { getSearchText, subscribeToSearch } from "@/app/store/searchStore";
 import { FacultyPicker } from "@/shared/ui/faculty-picker/faculty-picker";
 import { DepartmentPicker } from "@/shared/ui/department-picker/department-picker";
+import { useConfirm } from "@/shared/ui/confirm-dialog";
 import { formatLastSeen, isUserOnline } from "@/shared/lib/format-last-seen";
 import styles from "./user-management.module.scss";
 
@@ -73,6 +74,7 @@ export const UserManagementPage = () => {
   const [createStaffUser, { isLoading: isCreating }] =
     useCreateStaffUserMutation();
   const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
+  const { confirm } = useConfirm();
   const currentRole = getRoleStringFromAccessToken(token);
   const isAdmin = currentRole === "Admin";
   const deanFaculty = currentUserProfile?.faculty?.trim() ?? "";
@@ -213,7 +215,12 @@ export const UserManagementPage = () => {
   };
   const handleDeleteSelectedUser = async () => {
     if (!selectedUser) return;
-    if (!confirm(`Удалить пользователя ${selectedUser.email}?`)) return;
+    const confirmed = await confirm({
+      title: "Удалить пользователя",
+      message: `Удалить пользователя ${selectedUser.email}? Это действие нельзя отменить.`,
+      variant: "danger"
+    });
+    if (!confirmed) return;
     try {
       await deleteUser(selectedUser.id).unwrap();
       setSelectedUser(null);
@@ -239,7 +246,7 @@ export const UserManagementPage = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="teacher@psu.ru"
+              placeholder="teacher@psu.by"
             />
           </div>
 

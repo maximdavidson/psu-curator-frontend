@@ -16,6 +16,7 @@ import { useLazyDownloadFileQuery } from "@/pages/documents/documents.api";
 import { useGetUserFilesQuery } from "@/pages/documents/documents.api";
 import type { FeedItem } from "@/pages/groups/group.api";
 import { SurveyViewModal } from "./survey-view-modal/survey-view-modal.component";
+import { useConfirm } from "@/shared/ui/confirm-dialog";
 interface Props {
   groupId: string;
   feed: FeedItem[];
@@ -95,6 +96,7 @@ export const FeedTab = ({ groupId, feed, onRefetch, canCreate }: Props) => {
   const [addFeedItemComment] = useAddFeedItemCommentMutation();
   const [updateFeedItemComment] = useUpdateFeedItemCommentMutation();
   const [deleteFeedItemComment] = useDeleteFeedItemCommentMutation();
+  const { confirm } = useConfirm();
   const currentUserId =
     getUserIdFromAccessToken(localStorage.getItem("token")) ?? "";
   const [downloadFile] = useLazyDownloadFileQuery();
@@ -221,7 +223,12 @@ export const FeedTab = ({ groupId, feed, onRefetch, canCreate }: Props) => {
     }
   };
   const handleDelete = async (feedItemId: string) => {
-    if (!confirm("Удалить запись?")) return;
+    const confirmed = await confirm({
+      title: "Удалить запись",
+      message: "Удалить запись из ленты группы?",
+      variant: "danger"
+    });
+    if (!confirmed) return;
     try {
       await deleteFeedItem({
         id: feedItemId,
@@ -284,7 +291,12 @@ export const FeedTab = ({ groupId, feed, onRefetch, canCreate }: Props) => {
     }
   };
   const handleDeleteComment = async (commentId: string) => {
-    if (!window.confirm("Удалить комментарий?")) {
+    const confirmed = await confirm({
+      title: "Удалить комментарий",
+      message: "Удалить комментарий?",
+      variant: "danger"
+    });
+    if (!confirmed) {
       return;
     }
     setDeletingCommentId(commentId);

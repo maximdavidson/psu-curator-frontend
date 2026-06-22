@@ -1,5 +1,6 @@
 import { useLazyDownloadFileQuery } from "@/pages/documents/documents.api";
 import { formatFileSize, getFileIcon } from "@/shared/lib/file-display";
+import { resolveMediaUrl } from "@/shared/lib/resolve-avatar-url";
 import type { ChatAttachment } from "@/services/chat.api";
 import styles from "../chat.module.scss";
 
@@ -24,7 +25,10 @@ export const ChatMessageAttachments = ({
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch {
-      window.open(attachment.downloadUrl, "_blank", "noopener,noreferrer");
+      const fallbackUrl = resolveMediaUrl(attachment.downloadUrl);
+      if (fallbackUrl) {
+        window.open(fallbackUrl, "_blank", "noopener,noreferrer");
+      }
     }
   };
 

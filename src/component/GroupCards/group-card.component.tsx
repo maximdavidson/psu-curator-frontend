@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useConfirm } from "@/shared/ui/confirm-dialog";
 import styles from "./group-card.module.scss";
 import HatIcon from "../../assets/hat-icon.svg";
 import MoreIcon from "../../assets/more-icon.svg";
@@ -41,6 +42,7 @@ export const GroupCard = ({
   showStaffActions = true
 }: GroupCardProps) => {
   const navigate = useNavigate();
+  const { confirm } = useConfirm();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const curatorLabel = curator.replace(/\s+/g, " ").trim() || "Не назначен";
@@ -61,9 +63,14 @@ export const GroupCard = ({
     e.stopPropagation();
     setIsOpen((prev) => !prev);
   };
-  const handleDelete = (e: React.MouseEvent) => {
+  const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm("Удалить группу?")) return;
+    const confirmed = await confirm({
+      title: "Удалить группу",
+      message: `Удалить группу «${groupName}»? Участники будут откреплены, связанные данные группы будут удалены.`,
+      variant: "danger"
+    });
+    if (!confirmed) return;
     onDelete(groupId);
   };
   const handleEdit = (e: React.MouseEvent) => {

@@ -21,6 +21,7 @@ import { useGetUserByIdQuery } from "@/services/user.api";
 import { UserAvatar } from "@/shared/ui/user-avatar/user-avatar";
 import { formatLastSeen, isUserOnline } from "@/shared/lib/format-last-seen";
 import type { ChatDialog } from "@/services/chat.api";
+import { useConfirm } from "@/shared/ui/confirm-dialog";
 import styles from "./chat.module.scss";
 const MIN_SEARCH_LENGTH = 2;
 const formatTime = (dateString: string): string => {
@@ -132,6 +133,7 @@ export const ChatPage = () => {
   const [updateMessage, { isLoading: isUpdating }] = useUpdateMessageMutation();
   const [deleteMessage] = useDeleteMessageMutation();
   const [deleteDialog] = useDeleteDialogMutation();
+  const { confirm } = useConfirm();
   useEffect(() => {
     const query = search.trim();
     if (query.length < MIN_SEARCH_LENGTH) {
@@ -253,7 +255,12 @@ export const ChatPage = () => {
     }
   };
   const handleDeleteMessage = async (messageId: string) => {
-    if (!window.confirm("Удалить сообщение?")) {
+    const confirmed = await confirm({
+      title: "Удалить сообщение",
+      message: "Удалить сообщение?",
+      variant: "danger"
+    });
+    if (!confirmed) {
       return;
     }
     setError(null);
@@ -273,9 +280,12 @@ export const ChatPage = () => {
     }
   };
   const handleDeleteDialog = async (user: ChatUser) => {
-    if (
-      !window.confirm(`Удалить чат "${getDialogTitle(user, currentUserId)}"?`)
-    ) {
+    const confirmed = await confirm({
+      title: "Удалить чат",
+      message: `Удалить чат «${getDialogTitle(user, currentUserId)}»? Переписка будет удалена без возможности восстановления.`,
+      variant: "danger"
+    });
+    if (!confirmed) {
       return;
     }
     setError(null);

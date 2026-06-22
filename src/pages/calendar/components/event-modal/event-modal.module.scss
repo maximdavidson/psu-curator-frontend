@@ -249,6 +249,7 @@
   color: var(--color-text);
   cursor: pointer;
   max-width: 220px;
+  min-width: 0;
 
   input {
     width: 14px;
@@ -258,10 +259,18 @@
     flex-shrink: 0;
   }
 
-  span {
+  .groupInviteText {
     display: flex;
     flex-direction: column;
     gap: 2px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .groupInviteName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   small {
