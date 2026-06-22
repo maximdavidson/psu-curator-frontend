@@ -1,7 +1,12 @@
 import { useMemo, useState } from "react";
-import { useGetStudentsQuery, type StudentListItem } from "@/services/user.api";
+import {
+  useDeleteUserMutation,
+  useGetStudentsQuery,
+  type StudentListItem
+} from "@/services/user.api";
 import { StudentFundingBadge } from "@/shared/ui/student-funding-badge/student-funding-badge";
 import { StudentFundingType } from "@/shared/constants/student-funding";
+import { readApiErrorMessage } from "@/shared/lib/read-api-error-message";
 import styles from "../student-register.module.scss";
 
 const ALL_VALUE = "all";
@@ -32,6 +37,11 @@ function formatMissedHours(
 
 export const StudentsListTab = () => {
   const { data: students = [], isLoading, isError } = useGetStudentsQuery();
+  const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
+  const [deletingStudentId, setDeletingStudentId] = useState<string | null>(
+    null
+  );
+  const [actionError, setActionError] = useState<string | null>(null);
   const [fundingFilter, setFundingFilter] = useState<FundingFilter>(ALL_VALUE);
   const [facultyFilter, setFacultyFilter] = useState<string>(ALL_VALUE);
   const [missedHoursSort, setMissedHoursSort] =
@@ -82,6 +92,39 @@ export const StudentsListTab = () => {
     });
   }, [students, fundingFilter, facultyFilter, missedHoursSort]);
 
+  const handleDeleteStudent = async (student: StudentListItem) => {
+    const fullName = formatFullName(
+      student.lastName,
+      student.firstName,
+      student.surname
+    );
+
+    const groupHint = student.groupName
+      ? ` Студент будет удалён из группы «${student.groupName}».`
+      : "";
+
+    if (
+      !window.confirm(
+        `Удалить студента ${fullName} (${student.email})?${groupHint} Учётная запись и связанные данные будут удалены без возможности восстановления.`
+      )
+    ) {
+      return;
+    }
+
+    setActionError(null);
+    setDeletingStudentId(student.id);
+
+    try {
+      await deleteUser(student.id).unwrap();
+    } catch (error) {
+      setActionError(
+        readApiErrorMessage(error) ?? "Не удалось удалить студента."
+      );
+    } finally {
+      setDeletingStudentId(null);
+    }
+  };
+
   if (isLoading) {
     return <p className={styles.listMuted}>Загрузка списка студентов…</p>;
   }
@@ -96,6 +139,8 @@ export const StudentsListTab = () => {
 
   return (
     <div className={styles.listWrap}>
+      {actionError && <p className={styles.listError}>{actionError}</p>}
+
       <div className={styles.filters}>
         <label className={styles.filterField}>
           <span>Форма обучения</span>
@@ -154,12 +199,13 @@ export const StudentsListTab = () => {
               <th>Факультет</th>
               <th>Группа</th>
               <th>Часы пропуска</th>
+              <th className={styles.actionsCol}>Действия</th>
             </tr>
           </thead>
           <tbody>
             {visibleStudents.length === 0 ? (
               <tr>
-                <td colSpan={9} className={styles.emptyRow}>
+                <td colSpan={10} className={styles.emptyRow}>
                   Студенты не найдены
                 </td>
               </tr>
@@ -187,6 +233,18 @@ export const StudentsListTab = () => {
                       student.isInGroup,
                       student.totalMissedHours
                     )}
+                  </td>
+                  <td className={styles.actionsCol}>
+                    <button
+                      type="button"
+                      className={styles.deleteBtn}
+                      disabled={isDeleting && deletingStudentId === student.id}
+                      onClick={() => handleDeleteStudent(student)}
+                    >
+                      {isDeleting && deletingStudentId === student.id
+                        ? "Удаление…"
+                        : "Удалить"}
+                    </button>
                   </td>
                 </tr>
               ))

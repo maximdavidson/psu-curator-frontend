@@ -1,34 +1,83 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Controller, useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { AuthPageLayout } from "@/component/AuthPageLayout";
 import { AuthFormLayout } from "@/component/AuthFormLayout";
 import { AuthField } from "@/component/AuthField";
 import { AuthButton } from "@/component/AuthButton";
 import { AuthBackToLoginLink } from "@/component/AuthBackToLoginLink";
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { FacultyPicker } from "@/shared/ui/faculty-picker/faculty-picker";
 import {
-  recoverPasswordSchema,
-  type TRecoverPasswordFormDto
+  recoverPasswordStaffSchema,
+  recoverPasswordStudentSchema,
+  type TRecoverPasswordStaffFormDto,
+  type TRecoverPasswordStudentFormDto
 } from "@/shared/model/schemas/auth.schema";
 import { useRecoverPasswordMutation } from "@/services/auth.api";
 import { readApiErrorMessage } from "@/shared/lib/read-api-error-message";
 import styles from "./forgot-password.module.scss";
 
+type AccountKind = "student" | "staff";
+
+const defaultStudentValues: TRecoverPasswordStudentFormDto = {
+  email: "",
+  firstName: "",
+  lastName: "",
+  surname: "",
+  courseNumber: "",
+  faculty: "",
+  newPassword: "",
+  confirmPassword: ""
+};
+
+const defaultStaffValues: TRecoverPasswordStaffFormDto = {
+  email: "",
+  firstName: "",
+  lastName: "",
+  surname: "",
+  faculty: "",
+  courseNumber: "",
+  newPassword: "",
+  confirmPassword: ""
+};
+
 export const ForgotPasswordPage = () => {
   const navigate = useNavigate();
   const [recoverPassword, { isLoading }] = useRecoverPasswordMutation();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [accountKind, setAccountKind] = useState<AccountKind>("student");
 
+  const studentForm = useForm<TRecoverPasswordStudentFormDto>({
+    resolver: yupResolver(recoverPasswordStudentSchema),
+    defaultValues: defaultStudentValues
+  });
+
+  const staffForm = useForm<TRecoverPasswordStaffFormDto>({
+    resolver: yupResolver(recoverPasswordStaffSchema),
+    defaultValues: defaultStaffValues
+  });
+
+  const activeForm = accountKind === "student" ? studentForm : staffForm;
   const {
     register,
     handleSubmit,
-    formState: { errors }
-  } = useForm<TRecoverPasswordFormDto>({
-    resolver: yupResolver(recoverPasswordSchema)
-  });
+    control,
+    formState: { errors },
+    reset
+  } = activeForm;
 
-  const onSubmit = async (data: TRecoverPasswordFormDto) => {
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setErrorMessage(null);
+    reset(
+      accountKind === "student" ? defaultStudentValues : defaultStaffValues
+    );
+  }, [accountKind, reset]);
+
+  const onSubmit = async (
+    data: TRecoverPasswordStudentFormDto | TRecoverPasswordStaffFormDto
+  ) => {
     setErrorMessage(null);
 
     try {
@@ -37,9 +86,14 @@ export const ForgotPasswordPage = () => {
         firstName: data.firstName.trim(),
         lastName: data.lastName.trim(),
         surname: data.surname?.trim() || undefined,
-        courseNumber: data.courseNumber?.trim()
-          ? Number(data.courseNumber)
-          : undefined,
+        courseNumber:
+          accountKind === "student" && data.courseNumber?.trim()
+            ? Number(data.courseNumber)
+            : undefined,
+        faculty:
+          accountKind === "staff" && data.faculty?.trim()
+            ? data.faculty.trim()
+            : undefined,
         newPassword: data.newPassword,
         confirmPassword: data.confirmPassword
       }).unwrap();
@@ -63,22 +117,61 @@ export const ForgotPasswordPage = () => {
       <AuthFormLayout
         onSubmit={handleSubmit(onSubmit)}
         footer={<AuthBackToLoginLink />}
-        title="Восстановление пароля"
+        titl
+        e="Восстановление пароля"
       >
+        <div
+          className={styles.accountTabs}
+          role="tablist"
+          aria-label="Тип аккаунта"
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={accountKind === "student"}
+            className={
+              accountKind === "student"
+                ? styles.accountTabActive
+                : styles.accountTab
+            }
+            onClick={() => setAccountKind("student")}
+          >
+            Студент
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={accountKind === "staff"}
+            className={
+              accountKind === "staff"
+                ? styles.accountTabActive
+                : styles.accountTab
+            }
+            onClick={() => setAccountKind("staff")}
+          >
+            Сотрудник
+          </button>
+        </div>
+
         <p className={styles.description}>
-          Укажите email и данные аккаунта для подтверждения личности, затем
-          задайте новый пароль. Для студентов также нужен номер курса.
+          {accountKind === "student"
+            ? "Укажите корпоративную почту @students.psu.by, ФИО и номер курса, затем задайте новый пароль."
+            : "Укажите рабочую почту, ФИО и факультет (для кураторов и деканата). Администратору факультет указывать не нужно."}
         </p>
 
-        <AuthField<TRecoverPasswordFormDto>
+        <AuthField
           label="Почта"
           name="email"
           register={register}
           error={errors.email?.message || ""}
-          placeholder="email"
+          placeholder={
+            accountKind === "student"
+              ? "ivanov@students.psu.by"
+              : "teacher@psu.ru"
+          }
           type="email"
         />
-        <AuthField<TRecoverPasswordFormDto>
+        <AuthField
           label="Имя"
           name="firstName"
           register={register}
@@ -86,7 +179,7 @@ export const ForgotPasswordPage = () => {
           placeholder="Имя"
           type="text"
         />
-        <AuthField<TRecoverPasswordFormDto>
+        <AuthField
           label="Фамилия"
           name="lastName"
           register={register}
@@ -94,7 +187,7 @@ export const ForgotPasswordPage = () => {
           placeholder="Фамилия"
           type="text"
         />
-        <AuthField<TRecoverPasswordFormDto>
+        <AuthField
           label="Отчество"
           name="surname"
           register={register}
@@ -103,24 +196,46 @@ export const ForgotPasswordPage = () => {
           type="text"
         />
 
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="recover-course">
-            Курс (для студентов)
-          </label>
-          <input
-            id="recover-course"
-            className={styles.input}
-            type="text"
-            inputMode="numeric"
-            placeholder="1–6"
-            {...register("courseNumber")}
-          />
-          {errors.courseNumber && (
-            <p className={styles.error}>{errors.courseNumber.message}</p>
-          )}
-        </div>
+        {accountKind === "student" ? (
+          <div className={styles.field}>
+            <label className={styles.label} htmlFor="recover-course">
+              Курс
+            </label>
+            <input
+              id="recover-course"
+              className={styles.input}
+              type="text"
+              inputMode="numeric"
+              placeholder="1–6"
+              {...register("courseNumber")}
+            />
+            {"courseNumber" in errors && errors.courseNumber && (
+              <p className={styles.error}>{errors.courseNumber.message}</p>
+            )}
+          </div>
+        ) : (
+          <div className={styles.field}>
+            <Controller
+              name="faculty"
+              control={control}
+              render={({ field }) => (
+                <FacultyPicker
+                  id="recover-faculty"
+                  label="Факультет"
+                  value={field.value ?? ""}
+                  placeholder="Выберите факультет"
+                  hint="Для администратора можно оставить пустым"
+                  error={
+                    "faculty" in errors ? errors.faculty?.message : undefined
+                  }
+                  onChange={field.onChange}
+                />
+              )}
+            />
+          </div>
+        )}
 
-        <AuthField<TRecoverPasswordFormDto>
+        <AuthField
           label="Новый пароль"
           name="newPassword"
           register={register}
@@ -128,7 +243,7 @@ export const ForgotPasswordPage = () => {
           placeholder="Введите новый пароль"
           type="password"
         />
-        <AuthField<TRecoverPasswordFormDto>
+        <AuthField
           label="Подтвердите пароль"
           name="confirmPassword"
           register={register}

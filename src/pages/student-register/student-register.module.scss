@@ -214,6 +214,31 @@
   }
 }
 
+.actionsCol {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.deleteBtn {
+  padding: 6px 12px;
+  border: 1px solid var(--color-error, #dc2626);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-error, #dc2626);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: rgb(220 38 38 / 8%);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
 .emptyRow {
   text-align: center;
   color: var(--color-text-muted);

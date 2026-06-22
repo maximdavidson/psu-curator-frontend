@@ -125,7 +125,7 @@ export const userApi = createApi({
         url: `/User/${userId}`,
         method: "DELETE"
       }),
-      invalidatesTags: ["User"]
+      invalidatesTags: ["User", "Students", "Group"]
     }),
     uploadCurrentUserAvatar: builder.mutation<UserFullInformation, File>({
       query: (file) => {

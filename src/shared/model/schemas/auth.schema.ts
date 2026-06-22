@@ -55,7 +55,7 @@ const passwordFieldSchema = yup
     "Пароль должен содержать хотя бы один спецсимвол"
   );
 
-export const recoverPasswordSchema = yup.object({
+const recoverPasswordBaseSchema = {
   email: yup
     .string()
     .email("Введите корректный email")
@@ -75,21 +75,35 @@ export const recoverPasswordSchema = yup.object({
     .trim()
     .max(50, "Отчество не может быть длиннее 50 символов")
     .default(""),
-  courseNumber: yup
-    .string()
-    .trim()
-    .test(
-      "course-range",
-      "Курс должен быть от 1 до 6",
-      (value) => !value || /^[1-6]$/.test(value)
-    )
-    .default(""),
   newPassword: passwordFieldSchema.required("Новый пароль обязателен"),
   confirmPassword: yup
     .string()
     .required("Подтверждение пароля обязательно")
     .oneOf([yup.ref("newPassword")], "Пароли не совпадают")
+};
+
+export const recoverPasswordStudentSchema = yup.object({
+  ...recoverPasswordBaseSchema,
+  courseNumber: yup
+    .string()
+    .trim()
+    .required("Укажите курс")
+    .matches(/^[1-6]$/, "Курс должен быть от 1 до 6"),
+  faculty: yup.string().trim().default("")
 });
+
+export const recoverPasswordStaffSchema = yup.object({
+  ...recoverPasswordBaseSchema,
+  faculty: yup
+    .string()
+    .trim()
+    .max(200, "Название факультета слишком длинное")
+    .default(""),
+  courseNumber: yup.string().trim().default("")
+});
+
+/** @deprecated Используйте recoverPasswordStudentSchema или recoverPasswordStaffSchema */
+export const recoverPasswordSchema = recoverPasswordStudentSchema;
 
 export const changePasswordSchema = yup
   .object({
@@ -105,7 +119,11 @@ export const changePasswordSchema = yup
 export type TLoginFormDto = yup.InferType<typeof loginSchema>;
 export type TRegisterFormDto = yup.InferType<typeof registerSchema>;
 export type TChangePasswordFormDto = yup.InferType<typeof changePasswordSchema>;
-export type TRecoverPasswordFormDto = yup.InferType<
-  typeof recoverPasswordSchema
+export type TRecoverPasswordStudentFormDto = yup.InferType<
+  typeof recoverPasswordStudentSchema
 >;
+export type TRecoverPasswordStaffFormDto = yup.InferType<
+  typeof recoverPasswordStaffSchema
+>;
+export type TRecoverPasswordFormDto = TRecoverPasswordStudentFormDto;
 export type TAuthFormDto = TRegisterFormDto;

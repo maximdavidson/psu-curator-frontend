@@ -12,6 +12,7 @@ export interface RecoverPasswordRequest {
   lastName: string;
   surname?: string;
   courseNumber?: number;
+  faculty?: string;
   newPassword: string;
   confirmPassword: string;
 }
